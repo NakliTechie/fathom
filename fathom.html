@@ -50,7 +50,7 @@ header h1 { font-size: var(--fs-3); font-weight: var(--w-bold); margin: 0; lette
 header .meta { color: var(--fg-2); font-size: var(--fs-0); }
 header .meta b { color: var(--fg-1); font-weight: var(--w-regular); }
 main { display: grid; grid-template-columns: 1fr; overflow: hidden; }
-#layers { display: grid; grid-auto-rows: minmax(0, 1fr); overflow: hidden; }
+#layers { display: grid; grid-template-rows: repeat(4, minmax(0, 1fr)) auto; overflow: hidden; }
 .layer { display: grid; grid-template-rows: auto 1fr; min-height: 0; border-bottom: 1px solid var(--line); }
 .layer > .head { display: flex; gap: var(--sp-3); align-items: baseline; padding: var(--sp-1) var(--sp-4);
   background: var(--bg-1); color: var(--fg-1); font-size: var(--fs-0); text-transform: uppercase; letter-spacing: .08em; }
@@ -68,6 +68,22 @@ footer { display: flex; gap: var(--sp-4); align-items: center; padding: var(--sp
 footer input[type=range] { flex: 1; accent-color: var(--acc-now); }
 footer .cyc { color: var(--fg-0); font-weight: var(--w-bold); min-width: 12ch; }
 kbd { color: var(--fg-1); border: 1px solid var(--line); border-radius: var(--r); padding: 0 var(--sp-1); font-size: var(--fs-0); }
+
+/* ---- pipeline layer: one column per cycle, one row per stage ------------------- */
+#L-pipe .body { overflow-x: auto; overflow-y: hidden; padding: var(--sp-2) var(--sp-4); }
+.pipe { display: grid; grid-auto-flow: column; grid-auto-columns: 14px; gap: 1px; align-items: start; }
+.pipe .col { display: grid; grid-template-rows: repeat(3, 12px) 6px; gap: 1px; cursor: pointer; }
+.pipe .col > i { display: block; background: var(--bg-2); border-radius: 1px; }
+.pipe .col > i.occ { background: var(--fg-3); }
+.pipe .col > i.anchor { background: var(--acc-pipe); }
+.pipe .col > i.held { background: color-mix(in srgb, var(--acc-pipe) 45%, var(--bg-2)); }
+.pipe .col > i.stall { background: var(--acc-gate); }
+.pipe .col > i.ret { background: var(--acc-arch); }
+.pipe .col.now > i { outline: 1px solid var(--acc-now); }
+.pipe-legend { display: flex; gap: var(--sp-4); color: var(--fg-2); font-size: var(--fs-0); margin-top: var(--sp-2); }
+.pipe-legend i { display: inline-block; width: 10px; height: 10px; vertical-align: -1px; margin-right: var(--sp-1); border-radius: 1px; }
+.pipe-rows { display: grid; grid-template-rows: repeat(3, 12px) 6px; gap: 1px; color: var(--fg-3); font-size: var(--fs-0); margin-right: var(--sp-2); line-height: 12px; }
+#L-pipe .body > div { display: flex; }
 
 /* ---- states ------------------------------------------------------------------ */
 #status { padding: var(--sp-4); color: var(--fg-1); }
@@ -157,6 +173,8 @@ function render() {
     ? `xid ${e.xid} · ${hex(e.pc)} · in ${a.core.anchor_stage}${p.held ? ' · held: ' + p.held : ''}`
     : `no anchor · ${p.stall}`;
   renderArch(c);
+  for (const col of document.querySelectorAll('#L-pipe .col')) col.classList.toggle('now', +col.dataset.cycle === c);
+  const pc = document.querySelector('#L-pipe .col.now'); if (pc) pc.scrollIntoView({ block: 'nearest', inline: 'center' });
   const now = document.querySelector('#L-asm .row.now'); if (now) now.scrollIntoView({ block: 'nearest' });
   const src = document.querySelector('#L-source .row.now'); if (src) src.scrollIntoView({ block: 'nearest' });
 }
@@ -201,7 +219,23 @@ function build() {
   asm.querySelector('.body').innerHTML = a.code.map(c => `<div class="row" data-pc="${c.pc}"><span class="n">${c.func === '_start' ? 'stub' : ''}</span><span>${hex(c.pc)}  ${c.bytes.padEnd(8)}  ${esc(c.asm)}</span></div>`).join('');
   // L3 architectural state
   const arch = layerEl('arch', 'architectural state', 'var(--acc-arch)', 'x0–x31 · last stores · delta-decoded from RVFI');
-  L.append(src, ir, asm, arch);
+  // L4 pipeline: one column per cycle; rows IF · ID/EX · WB; a retire tick below
+  const held = a.pipe.filter(p => p.held).length, stalls = a.pipe.filter(p => p.stall).length;
+  const pipe = layerEl('pipe', 'pipeline', 'var(--acc-pipe)',
+    `${a.core.stages.join(' · ')} · IPC ${(a.exec.length / a.cycles).toFixed(2)} · ${held} held · ${stalls} stall`);
+  const retireAt = new Map(a.exec.map(e => [e.cycle_retire, e.xid]));
+  const cols = a.pipe.map(p => {
+    const cl = (v, extra) => `<i class="${v === null ? '' : 'occ'}${extra || ''}" title="${v === null ? '' : hex(v)}"></i>`;
+    const idcls = p.anchor === null ? (p.stall ? ' stall' : '') : (p.held ? ' held' : ' anchor');
+    return `<div class="col" data-cycle="${p.cycle}" title="cycle ${p.cycle}${p.stall ? ' · ' + p.stall : ''}${p.held ? ' · held: ' + p.held : ''}">`
+      + cl(p.stages.IF) + cl(p.stages.ID_EX, idcls) + cl(p.stages.WB)
+      + `<i class="${retireAt.has(p.cycle) ? 'ret' : ''}"></i></div>`;
+  }).join('');
+  pipe.querySelector('.body').innerHTML =
+    `<div><div class="pipe-rows"><span>IF</span><span>ID/EX</span><span>WB</span><span></span></div><div class="pipe">${cols}</div></div>`
+    + `<div class="pipe-legend"><span><i style="background:var(--acc-pipe)"></i>anchor</span><span><i style="background:color-mix(in srgb, var(--acc-pipe) 45%, var(--bg-2))"></i>held</span><span><i style="background:var(--acc-gate)"></i>stall</span><span><i style="background:var(--fg-3)"></i>occupied</span><span><i style="background:var(--acc-arch)"></i>retire</span></div>`;
+  pipe.querySelector('.pipe').addEventListener('click', ev => { const col = ev.target.closest('.col'); if (col) seek(+col.dataset.cycle); });
+  L.append(src, ir, asm, arch, pipe);
   $('scrub').max = a.cycles - 1;
   $('meta').innerHTML = `${a.core.name} · ${a.core.shape} RV32I · ${a.core.stages.join('→')} · anchor ${a.core.anchor_stage} · <b>${a.program.name}</b> · ${a.cycles} cycles · ${a.exec.length} retires · ${a.artifact_id.slice(0, 19)}`;
   render();
