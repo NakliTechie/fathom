@@ -1,0 +1,277 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="fathom-version" content="0.1.0-c2">
+<title>Fathom</title>
+<style>
+/* ---- tokens: Dense direction (DIRECTIONS.md), one family, two weights ---------
+   Every colour below is either a true neutral (equal channels) or a named accent.
+   The design checks (forge/design/check.py) assert: no tinted neutral (channel
+   spread >= 8 on a value meant to be neutral), <= 6 type styles per screenful,
+   every line traceable to a token. */
+@font-face { font-family: "JetBrains Mono"; font-weight: 400; font-style: normal; font-display: swap;
+  src: url("vendor/fonts/jetbrains-mono/jetbrains-mono-latin-400-normal.woff2") format("woff2"); }
+@font-face { font-family: "JetBrains Mono"; font-weight: 700; font-style: normal; font-display: swap;
+  src: url("vendor/fonts/jetbrains-mono/jetbrains-mono-latin-700-normal.woff2") format("woff2"); }
+
+:root {
+  --font: "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  --fs-0: 11px;  --fs-1: 12px;  --fs-2: 13px;  --fs-3: 15px;   /* four sizes */
+  --lh: 1.45;
+  --w-regular: 400; --w-bold: 700;
+
+  --bg-0: #101010; --bg-1: #161616; --bg-2: #1e1e1e; --bg-3: #262626;  /* neutrals */
+  --fg-0: #e6e6e6; --fg-1: #b4b4b4; --fg-2: #7a7a7a; --fg-3: #4a4a4a;
+  --line: #2c2c2c;
+
+  --acc-now:   #f2c14e;   /* the current cycle / selection */
+  --acc-src:   #7cc4ff;   /* source layer */
+  --acc-ir:    #c58cff;   /* IR */
+  --acc-asm:   #8fe388;   /* assembly */
+  --acc-arch:  #ff9a6b;   /* architectural state */
+  --acc-pipe:  #ffd166;   /* pipeline */
+  --acc-gate:  #ff6b6b;   /* gates */
+  --acc-cell:  #e07bd1;   /* cells */
+
+  --sp-1: 4px; --sp-2: 8px; --sp-3: 12px; --sp-4: 16px; --sp-5: 24px;
+  --r: 2px;
+}
+html, body { margin: 0; height: 100%; background: var(--bg-0); color: var(--fg-0);
+  font: var(--w-regular) var(--fs-1)/var(--lh) var(--font); -webkit-font-smoothing: antialiased; }
+* { box-sizing: border-box; }
+
+/* ---- shell ------------------------------------------------------------------ */
+#app { display: grid; grid-template-rows: auto 1fr auto; height: 100%; }
+header { display: flex; gap: var(--sp-4); align-items: baseline; padding: var(--sp-2) var(--sp-4);
+  border-bottom: 1px solid var(--line); background: var(--bg-1); }
+header h1 { font-size: var(--fs-3); font-weight: var(--w-bold); margin: 0; letter-spacing: .02em; }
+header .meta { color: var(--fg-2); font-size: var(--fs-0); }
+header .meta b { color: var(--fg-1); font-weight: var(--w-regular); }
+main { display: grid; grid-template-columns: 1fr; overflow: hidden; }
+#layers { display: grid; grid-auto-rows: minmax(0, 1fr); overflow: hidden; }
+.layer { display: grid; grid-template-rows: auto 1fr; min-height: 0; border-bottom: 1px solid var(--line); }
+.layer > .head { display: flex; gap: var(--sp-3); align-items: baseline; padding: var(--sp-1) var(--sp-4);
+  background: var(--bg-1); color: var(--fg-1); font-size: var(--fs-0); text-transform: uppercase; letter-spacing: .08em; }
+.layer > .head .dot { width: 8px; height: 8px; border-radius: 50%; background: var(--acc); display: inline-block; }
+.layer > .head .note { color: var(--fg-2); text-transform: none; letter-spacing: 0; margin-left: auto; }
+.layer > .body { overflow: auto; padding: var(--sp-2) 0; min-height: 0; }
+.row { display: grid; grid-template-columns: 5ch 1fr; gap: var(--sp-3); padding: 0 var(--sp-4); white-space: pre; }
+.row .n { color: var(--fg-3); text-align: right; }
+.row.hot { background: var(--bg-3); }
+.row.hot .n { color: var(--acc-now); }
+.row.now { background: color-mix(in srgb, var(--acc-now) 18%, var(--bg-0)); }
+.row[data-count]::after { content: attr(data-count); color: var(--fg-3); font-size: var(--fs-0); }
+footer { display: flex; gap: var(--sp-4); align-items: center; padding: var(--sp-2) var(--sp-4);
+  border-top: 1px solid var(--line); background: var(--bg-1); font-size: var(--fs-0); color: var(--fg-2); }
+footer input[type=range] { flex: 1; accent-color: var(--acc-now); }
+footer .cyc { color: var(--fg-0); font-weight: var(--w-bold); min-width: 12ch; }
+kbd { color: var(--fg-1); border: 1px solid var(--line); border-radius: var(--r); padding: 0 var(--sp-1); font-size: var(--fs-0); }
+
+/* ---- states ------------------------------------------------------------------ */
+#status { padding: var(--sp-4); color: var(--fg-1); }
+#status.err { color: var(--acc-gate); }
+#status code { color: var(--fg-0); }
+</style>
+</head>
+<body>
+<div id="app">
+  <header>
+    <h1>FATHOM</h1>
+    <span class="meta" id="meta">a three-stage RV32I core, synthesised to gates and mapped to Sky130 cells — <b>loading</b></span>
+  </header>
+  <main><div id="layers"><div id="status">Loading artifact…</div></div></main>
+  <footer>
+    <span class="cyc" id="cyc">cycle —</span>
+    <input type="range" id="scrub" min="0" max="0" value="0" step="1" aria-label="cycle">
+    <span><kbd>←</kbd><kbd>→</kbd> cycle · <kbd>⇧←</kbd><kbd>⇧→</kbd> ×10 · <kbd>?</kbd> help</span>
+  </footer>
+</div>
+
+<script>
+'use strict';
+/* =============================================================================
+   Fathom — one event, followed down every layer of the machine, on one clock.
+   C2: the shell and the upper layers. No compilation, no synthesis, no network
+   beyond same-origin static files. The artifact is read-only truth.
+   ============================================================================= */
+
+// ---- the schema ingress: nothing renders unless this passes (SPEC §0.8) -------
+const STALLS = new Set(['reset','fetch','load-use','branch-flush','mem-wait','halt']);
+const HELD   = new Set(['mem-wait','branch','wb-stall','load-use','multi-cycle']);
+function validate(a) {
+  const need = ['schema','artifact_id','program','core','cycles','source','ir','code','exec','arch','pipe','gates','cells'];
+  const miss = need.filter(k => !(k in a));
+  if (miss.length) return `SCHEMA: missing ${miss.join(', ')}`;
+  if (a.schema !== 'fathom.descent/1') return `SCHEMA: schema is ${a.schema}`;
+  if (!Number.isInteger(a.cycles) || a.cycles <= 0) return 'SCHEMA: cycles';
+  if (!a.core.stages.includes(a.core.anchor_stage)) return 'SCHEMA: anchor_stage';
+  if (a.pipe.length !== a.cycles) return `SCHEMA: pipe has ${a.pipe.length} rows for ${a.cycles} cycles`;
+  const xids = new Set(a.exec.map(e => e.xid));
+  for (const p of a.pipe) {
+    if (p.stall !== null && !STALLS.has(p.stall)) return `SCHEMA: stall ${p.stall} at ${p.cycle}`;
+    if (p.held  !== null && !HELD.has(p.held))    return `SCHEMA: held ${p.held} at ${p.cycle}`;
+    if (p.anchor === null && p.stall === null)    return `SCHEMA: cycle ${p.cycle} has neither anchor nor stall`;
+    if (p.anchor !== null && !xids.has(p.anchor)) return `ORPHAN: cycle ${p.cycle} anchors xid ${p.anchor}`;
+  }
+  for (const c of a.code) for (const ref of c.lines) {
+    const [src, line] = [ref.slice(0, ref.lastIndexOf(':', ref.lastIndexOf(':') - 1)), +ref.split(':').at(-2)];
+    if (!a.source[src] || line < 1 || line > a.source[src].length) return `ORPHAN: pc ${c.pc.toString(16)} -> ${ref}`;
+  }
+  return null;
+}
+
+// ---- state --------------------------------------------------------------------
+const S = { art: null, cycle: 0, byXid: null, codeByPc: null, hist: [] };
+const $ = (id) => document.getElementById(id);
+const hex = (n) => '0x' + (n >>> 0).toString(16).padStart(8, '0');
+
+// ---- layers (C2: source · IR · assembly · architectural state) -----------------
+function layerEl(id, title, acc, note) {
+  const el = document.createElement('section');
+  el.className = 'layer'; el.id = 'L-' + id; el.style.setProperty('--acc', acc);
+  el.innerHTML = `<div class="head"><span class="dot"></span><span>${title}</span><span class="note">${note}</span></div><div class="body"></div>`;
+  return el;
+}
+function anchorOf(cycle) {
+  const p = S.art.pipe[cycle];
+  return p.anchor === null ? null : S.byXid.get(p.anchor);
+}
+function render() {
+  const a = S.art, c = S.cycle, p = a.pipe[c], e = anchorOf(c);
+  $('cyc').textContent = `cycle ${c} / ${a.cycles - 1}`;
+  $('scrub').value = c;
+  // the source line(s) the anchor came from
+  const code = e ? S.codeByPc.get(e.pc) : null;
+  const hotLines = new Set((code ? code.lines : []).map(r => r.slice(0, r.lastIndexOf(':', r.lastIndexOf(':') - 1)) + ':' + r.split(':').at(-2)));
+  for (const row of document.querySelectorAll('#L-source .row')) row.classList.toggle('now', hotLines.has(row.dataset.key));
+  const hotIr = new Set(code ? code.ir : []);
+  for (const row of document.querySelectorAll('#L-ir .row')) row.classList.toggle('now', hotIr.has(row.dataset.key));
+  for (const row of document.querySelectorAll('#L-asm .row')) {
+    const pc = +row.dataset.pc;
+    row.classList.toggle('now', !!e && pc === e.pc);
+    row.classList.toggle('hot', pc === p.stages.IF || pc === p.stages.WB);
+  }
+  $('L-asm').querySelector('.note').textContent = e
+    ? `xid ${e.xid} · ${hex(e.pc)} · in ${a.core.anchor_stage}${p.held ? ' · held: ' + p.held : ''}`
+    : `no anchor · ${p.stall}`;
+  renderArch(c);
+  const now = document.querySelector('#L-asm .row.now'); if (now) now.scrollIntoView({ block: 'nearest' });
+  const src = document.querySelector('#L-source .row.now'); if (src) src.scrollIntoView({ block: 'nearest' });
+}
+function stateAt(cycle) {
+  // delta decode: regs at 0, then every frame with frame.cycle <= cycle
+  const regs = { ...S.art.arch.regs_at_0 }; const mem = new Map();
+  for (const f of S.art.arch.frames) { if (f.cycle > cycle) break; Object.assign(regs, f.regs); for (const m of f.mem) mem.set(m.addr, m.val); }
+  return { regs, mem };
+}
+const ABI = ['zero','ra','sp','gp','tp','t0','t1','t2','s0','s1','a0','a1','a2','a3','a4','a5','a6','a7','s2','s3','s4','s5','s6','s7','s8','s9','s10','s11','t3','t4','t5','t6'];
+function renderArch(cycle) {
+  const { regs, mem } = stateAt(cycle);
+  const prev = cycle > 0 ? stateAt(cycle - 1).regs : regs;
+  const body = $('L-arch').querySelector('.body');
+  const cells = [];
+  for (let i = 0; i < 32; i++) {
+    const k = 'x' + i, changed = prev[k] !== regs[k];
+    cells.push(`<div class="row${changed ? ' now' : ''}" data-key="${k}"><span class="n">${ABI[i]}</span><span>${hex(regs[k])}</span></div>`);
+  }
+  const ms = [...mem.entries()].sort((a, b) => a[0] - b[0]).slice(-8)
+    .map(([addr, val]) => `<div class="row"><span class="n">mem</span><span>${hex(addr)} ← ${hex(val)}</span></div>`);
+  body.innerHTML = cells.join('') + (ms.length ? `<div class="row"><span class="n"></span><span style="color:var(--fg-3)">— last ${ms.length} stores —</span></div>` + ms.join('') : '');
+}
+function build() {
+  const a = S.art;
+  S.byXid = new Map(a.exec.map(e => [e.xid, e]));
+  S.codeByPc = new Map(a.code.map(c => [c.pc, c]));
+  const L = $('layers'); L.innerHTML = '';
+  // L0 source: every file in the artifact, line-numbered; retire counts per line
+  const src = layerEl('source', 'source', 'var(--acc-src)', a.program.source_files.join(' · '));
+  const perLine = new Map();
+  for (const e of a.exec) { const c = S.codeByPc.get(e.pc); if (!c) continue; for (const r of c.lines) { const k = r.slice(0, r.lastIndexOf(':', r.lastIndexOf(':') - 1)) + ':' + r.split(':').at(-2); perLine.set(k, (perLine.get(k) || 0) + 1); } }
+  src.querySelector('.body').innerHTML = a.program.source_files.map(f =>
+    `<div class="row"><span class="n"></span><span style="color:var(--fg-2)">${f}</span></div>` +
+    a.source[f].map((t, i) => { const k = `${f}:${i + 1}`, n = perLine.get(k); return `<div class="row" data-key="${k}"${n ? ` data-count=" ×${n}"` : ''}><span class="n">${i + 1}</span><span>${esc(t)}</span></div>`; }).join('')
+  ).join('');
+  // L1 IR
+  const ir = layerEl('ir', 'IR', 'var(--acc-ir)', `${a.ir.length} instructions · clang -O0`);
+  ir.querySelector('.body').innerHTML = a.ir.map(e => `<div class="row" data-key="${e.id}"><span class="n">${e.line ?? ''}</span><span>${esc(e.text)}</span></div>`).join('');
+  // L2 assembly
+  const asm = layerEl('asm', 'assembly', 'var(--acc-asm)', '');
+  asm.querySelector('.body').innerHTML = a.code.map(c => `<div class="row" data-pc="${c.pc}"><span class="n">${c.func === '_start' ? 'stub' : ''}</span><span>${hex(c.pc)}  ${c.bytes.padEnd(8)}  ${esc(c.asm)}</span></div>`).join('');
+  // L3 architectural state
+  const arch = layerEl('arch', 'architectural state', 'var(--acc-arch)', 'x0–x31 · last stores · delta-decoded from RVFI');
+  L.append(src, ir, asm, arch);
+  $('scrub').max = a.cycles - 1;
+  $('meta').innerHTML = `${a.core.name} · ${a.core.shape} RV32I · ${a.core.stages.join('→')} · anchor ${a.core.anchor_stage} · <b>${a.program.name}</b> · ${a.cycles} cycles · ${a.exec.length} retires · ${a.artifact_id.slice(0, 19)}`;
+  render();
+}
+function esc(s) { return s.replace(/[&<>]/g, ch => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;' }[ch])); }
+
+// ---- the agent face (SPEC §0, FATHOM.md §7): every call recorded with its door --
+function rec(door, op, args) { S.hist.push({ t: Date.now(), door, op, args }); if (S.hist.length > 500) S.hist.shift(); }
+function seek(cycle, door = 'ui') {
+  if (!S.art) throw new Error('no descent loaded');
+  const c = Math.max(0, Math.min(S.art.cycles - 1, cycle | 0));
+  S.cycle = c; rec(door, 'seek', [c]); render(); return c;
+}
+window.fathom = {
+  version: document.querySelector('meta[name=fathom-version]').content,
+  async loadDescent(url) {
+    rec('agent', 'loadDescent', [url]);
+    const r = await fetch(url); if (!r.ok) throw new Error(`fetch ${url}: ${r.status}`);
+    const a = await r.json(); const err = validate(a); if (err) throw new Error(err);
+    S.art = a; S.cycle = 0; build(); return this.describe();
+  },
+  describe() {
+    if (!S.art) return { loaded: false };
+    const a = S.art;
+    return { loaded: true, program: a.program.name, artifact_id: a.artifact_id, cycles: a.cycles,
+      cycle: S.cycle, layers: ['source', 'ir', 'asm', 'arch', 'pipe', 'gates', 'cells'],
+      core: { name: a.core.name, shape: a.core.shape, stages: a.core.stages, anchor_stage: a.core.anchor_stage },
+      version: this.version };
+  },
+  layers() { return ['source', 'ir', 'asm', 'arch', 'pipe', 'gates', 'cells']; },
+  seek(cycle) { return seek(cycle, 'agent'); },
+  stateAt(layer, cycle = S.cycle) {
+    rec('agent', 'stateAt', [layer, cycle]);
+    const a = S.art, p = a.pipe[cycle], e = anchorOf(cycle);
+    switch (layer) {
+      case 'source': { const c = e && S.codeByPc.get(e.pc); return c ? c.lines : []; }
+      case 'ir':     { const c = e && S.codeByPc.get(e.pc); return c ? c.ir : []; }
+      case 'asm':    return e ? { xid: e.xid, pc: e.pc, asm: S.codeByPc.get(e.pc).asm, held: p.held } : { stall: p.stall };
+      case 'arch':   { const s = stateAt(cycle); return { regs: s.regs, mem: Object.fromEntries(s.mem) }; }
+      case 'pipe':   return p;
+      default:       throw new Error(`layer ${layer}: not loaded in C2 (gates, cells arrive at C3)`);
+    }
+  },
+  trace(xid) {
+    rec('agent', 'trace', [xid]);
+    const e = S.byXid.get(xid); if (!e) return null;
+    const cycles = S.art.pipe.filter(p => p.anchor === xid).map(p => p.cycle);
+    const c = S.codeByPc.get(e.pc);
+    return { xid, pc: e.pc, asm: c.asm, lines: c.lines, ir: c.ir, cycles, cycle_first: e.cycle_first, cycle_retire: e.cycle_retire };
+  },
+  history() { return S.hist.slice(); },
+};
+
+// ---- keyboard: keyboard-first (FATHOM.md §7 C4) ---------------------------------
+document.addEventListener('keydown', (ev) => {
+  if (!S.art) return;
+  const step = ev.shiftKey ? 10 : 1;
+  if (ev.key === 'ArrowRight') { seek(S.cycle + step); ev.preventDefault(); }
+  else if (ev.key === 'ArrowLeft') { seek(S.cycle - step); ev.preventDefault(); }
+  else if (ev.key === 'Home') { seek(0); ev.preventDefault(); }
+  else if (ev.key === 'End') { seek(S.art.cycles - 1); ev.preventDefault(); }
+});
+$('scrub').addEventListener('input', (ev) => seek(+ev.target.value));
+
+// ---- boot: the artifact named in the URL, else the first program ----------------
+(async () => {
+  const prog = new URLSearchParams(location.search).get('p') || 'uart_puts';
+  try { await window.fathom.loadDescent(`artifacts/${prog}/descent.json`); }
+  catch (e) { const s = $('status') || $('layers'); s.className = 'err'; s.innerHTML = `Could not load <code>artifacts/${prog}/descent.json</code>: ${esc(String(e.message))}`; $('meta').innerHTML = '<b>failed</b>'; }
+})();
+</script>
+</body>
+</html>
