@@ -14,6 +14,8 @@ export async function run(fathom, document) {
   const fail = (m) => { log.push('FAIL ' + m); };
   if (!fathom.describe().loaded) return { ok: false, log: ['no descent loaded'] };
   await fathom.loadBottom();
+  while (fathom.trail().length) fathom.ascend();        // start from all layers open
+  const h0 = fathom.history().length;                   // count only this run's calls
 
   const stopState = (c) => {
     const p = fathom.stateAt('pipe', c), g = fathom.stateAt('gates', c), cl = fathom.stateAt('cells', c);
@@ -58,7 +60,7 @@ export async function run(fathom, document) {
   }
   if (fathom.focus() !== null || fathom.trail().length !== 0) fail('did not return to all layers');
 
-  const agentCalls = fathom.history().filter(h => h.door === 'agent' && (h.op === 'descend' || h.op === 'ascend')).length;
+  const agentCalls = fathom.history().slice(h0).filter(h => h.door === 'agent' && (h.op === 'descend' || h.op === 'ascend')).length;
   if (agentCalls !== plan.length * 2) fail(`agent-door calls ${agentCalls} != ${plan.length * 2}`);
 
   const ok = log.length === 0;

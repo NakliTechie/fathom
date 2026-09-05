@@ -722,3 +722,32 @@ toggles in `uart_puts`; the rest are placed and dark for this program and are dr
 Fill, decap and tap cells are not drawn: they are the die's background, not the machine.
 The cell footprint is drawn at a fixed four-site width; real per-cell widths are a later
 refinement, not a truth issue — the position is the DEF's.
+
+
+---
+
+## 12. C4 — descent and time-travel, 2026-09-05
+
+**`descend(layer, selector)`** puts a layer in focus and resolves a selector on it to the
+cycle the descent follows — a source line to the first cycle it ran, an IR id or a pc
+likewise, a register to the first cycle it was written, a cycle number as itself — and
+pushes the stop on a **trail**; **`ascend()`** pops it. The focused layer opens, its two
+neighbours stay open as context, the rest fold to their headers; `Esc` opens everything.
+`↓`/`↑`, clicking a layer's header, a source line, or an assembly row do the same through
+the `ui` door. `describe()` reports `focus` and `depth`; `trail()` the stops.
+
+**Checkpoint — `forge/test/descent.test.js`.** Drives a full descent and a full ascent
+**through `window.fathom` only**; the DOM is read for assertions, never driven. At every
+stop it asserts the pipe, gate and cell cycles equal the scrub, the bar and the column;
+that focus and depth are what the face reports; on the way up, that each stop returns
+to its recorded cycle; and that exactly `2 × stops` agent-door calls were recorded.
+
+Observed in the browser pane on `uart_puts`: `ok: true` — seven stops
+(`source@35 → ir@35 → asm@35 → arch@6 → pipe@6 → gates@6 → cells@6`), seven ascents
+back to all layers, 14 agent-door calls, zero console errors. The cycle moves as
+selectors resolve — line 5 first ran at 35; `sp` was first written at 6 — and the trail
+carries each stop's cycle so the ascent lands where the descent was.
+
+**Harness.** The test needs a browser (canvas, wasm). The repo has no Playwright harness;
+today the script runs from the browser pane. One `forge/test/` Playwright harness that
+C5's guide capture also uses satisfies FATHOM.md's "no second harness". Pending a word.
