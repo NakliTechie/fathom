@@ -102,6 +102,15 @@ probe: $(P)/gates/toggles.json
 verify:
 	@for p in $(PROGRAMS); do ./.venv/bin/python forge/verify.py artifacts/$$p/descent.json || exit 1; done
 
+## test — the C4 checkpoint headless (the one Playwright harness)
+test:
+	cd forge/test && npx playwright test --grep-invert @guide
+
+## guide — reproducible captures, then one HTML file
+guide:
+	cd forge/test && npx playwright test --grep @guide
+	python3 forge/guide/build.py
+
 ## status — the single perception act
 status:
 	@echo "fathom / forge"

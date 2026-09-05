@@ -18,3 +18,4 @@ wrangler.jsonc
 .assetsignore
 package.json
 package-lock.json
+guide/captures
