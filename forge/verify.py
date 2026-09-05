@@ -178,6 +178,9 @@ class Verify:
                 self.fail("ORPHAN", f"cell {cell['name']} has no placement")
             elif not (x0 <= cell["x"] <= x1 and y0 <= cell["y"] <= y1):
                 self.fail("ORPHAN", f"cell {cell['name']} placed at ({cell['x']},{cell['y']}) outside the die")
+        for cell in cl["cells"]:
+            if "net" in cell and not (0 <= cell["net"] < len(cl["nets"])):
+                self.fail("ORPHAN", f"cell {cell['name']} drives net index {cell['net']} outside the net table")
         if len(cl["placed_not_in_netlist"]) > 1:
             self.fail("AMBIGUOUS", f"{len(cl['placed_not_in_netlist'])} placed components are not in the netlist")
         # arch: every delta cycle within range and names an xid

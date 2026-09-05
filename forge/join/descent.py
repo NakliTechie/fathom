@@ -250,31 +250,49 @@ def main():
     tc = json.loads(cells_js.read_text())
     if tc["cycles"] != N:
         die("AMBIGUOUS", f"sky130 run {tc['cycles']} cycles vs RTL {N}", "make sky130")
-    # every instance in the pinned netlist, with its type and placed position
-    inst = re.findall(r"^\s+(sky130_\w+)\s+(\S+)\s*\(", cells_net.read_text(), re.M)
-    # Verilog escaped identifiers (`\name `) are plain names in the DEF
-    inst = [(t, n.lstrip("\\")) for t, n in inst]
+    # every instance in the pinned netlist, with its type, placed position, and
+    # the net its output pin drives -- so a net toggle resolves to a cell.
+    nl_text = cells_net.read_text()
+    blocks = re.findall(r"^\s+(sky130_\w+)\s+(\S+)\s*\((.*?)\);", nl_text, re.M | re.S)
+    OUT_PINS = {"X", "Y", "Q", "Q_N", "GCLK", "HI", "LO", "COUT", "SUM", "Z"}
+    net_idx = {n: i for i, n in enumerate(tc["nets"])}
+    alias = tc.get("aliases", {})
+    def net_of(ports):
+        for pin, net in re.findall(r"\.(\w+)\(([^)]*)\)", ports):
+            if pin in OUT_PINS and net.strip():
+                n = re.sub(r"\s*\[\d+\]$", "", net.strip().lstrip("\\").strip())
+                k = "u_gates." + n                       # the harness scope the VCD recorded under
+                k = alias.get(k, k)
+                if k in net_idx:
+                    return net_idx[k]
+        return None
+    inst = [(t, n.lstrip("\\"), net_of(ports)) for t, n, ports in blocks]
     co = json.loads(coords_js.read_text())
-    cell_types = sorted({t for t, _ in inst})
+    cell_types = sorted({t for t, _, _ in inst})
     ctype_idx = {t: i for i, t in enumerate(cell_types)}
     # Fill, decap and tap cells carry no signal: they are the floorplan's
     # background, not the machine. They stay out of the artifact's cell list
     # (their count is kept) so the layer is the logic that can toggle.
     PASSIVE = ("fill", "decap", "tapvpwrvgnd", "tap_")
-    passive = sum(1 for t, _ in inst if any(k in t for k in PASSIVE))
-    cells, unplaced = [], []
-    for t, name in sorted(inst, key=lambda x: x[1]):
+    passive = sum(1 for t, _, _ in inst if any(k in t for k in PASSIVE))
+    cells, unplaced, unmapped = [], [], 0
+    for t, name, net in sorted(inst, key=lambda x: x[1]):
         if any(k in t for k in PASSIVE):
             continue
         c = co["cells"].get(name)
         if c is None:
             unplaced.append(name)
             continue
-        cells.append({"name": name, "type": ctype_idx[t], "x": c[0], "y": c[1], "o": c[2]})
+        cell = {"name": name, "type": ctype_idx[t], "x": c[0], "y": c[1], "o": c[2]}
+        if net is not None:
+            cell["net"] = net                     # index into cells.nets: what this cell drives
+        else:
+            unmapped += 1
+        cells.append(cell)
     if unplaced:
         die("ORPHAN", f"{len(unplaced)} netlist instances have no placement (e.g. {unplaced[:3]})",
             "regenerate forge/pnr/out/ together: ./forge/pnr/run.sh then forge/pnr/def_coords.py")
-    extra = set(co["cells"]) - {n for _, n in inst}
+    extra = set(co["cells"]) - {n for _, n, _ in inst}
     metrics = json.loads(pnr_metrics.read_text())
 
     core = {"name": "ibex", "upstream": "lowRISC/ibex", "pin": "34b0705760ef3dfa00e99637432473d2be8f22f3",
@@ -292,12 +310,14 @@ def main():
            "arch": {"encoding": "delta", "regs_at_0": {f"x{i}": 0 for i in range(32)},
                     "frames": frames},
            "pipe": pipe,
-           "gates": {"nets": tg["nets"], "toggles": tg["toggles"]},
+           "gates": {"nets": tg["nets"], "static_nets_omitted": tg.get("static_nets", 0), "toggles": tg["toggles"]},
            "cells": {"pdk": "sky130A", "library": "sky130_fd_sc_hd",
                      "corner": "tt_025C_1v80", "types": cell_types, "cells": cells,
                      "die_um": co["die_um"], "units": "um",
                      "placed_not_in_netlist": sorted(extra),
                      "passive_cells_omitted": passive,
+                     "cells_without_active_net": unmapped,
+                     "static_nets_omitted": tc.get("static_nets", 0),
                      "pnr": {"tool": "OpenLane " + metrics.get("_openlane", "?"),
                              "run": metrics.get("_run"), "flow_reached_step": metrics.get("_flow_reached_step"),
                              "die_area_um2": metrics.get("design__die__area"),

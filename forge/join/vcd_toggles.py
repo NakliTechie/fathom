@@ -25,6 +25,14 @@ import sys
 ROOT = pathlib.Path(__file__).resolve().parents[2]
 
 
+_cache = {}
+def remap_names(active_names):
+    k = id(active_names)
+    if k not in _cache:
+        _cache[k] = set(active_names)
+    return _cache[k]
+
+
 def parse_clock(cycle_log):
     t0 = tclk = halt = None
     for ln in cycle_log.read_text().splitlines():
@@ -59,8 +67,8 @@ def main():
     unit = {"s": 1e12, "ms": 1e9, "us": 1e6, "ns": 1e3, "ps": 1, "fs": 1e-3}[m.group(2)]
     scale = int(m.group(1)) * unit                 # ps per VCD tick
 
-    # symbol table: id -> (scope path, name, width)
-    ids, scope = {}, []
+    # symbol table: id -> (scope path, name, width); aliases: id -> other names
+    ids, scope, aliases = {}, [], {}
     header, body = text.split("$enddefinitions", 1)
     for ln in header.splitlines():
         t = ln.split()
@@ -73,7 +81,10 @@ def main():
         elif t[0] == "$var":
             width, vid, name = int(t[2]), t[3], t[4]
             full = ".".join(scope[1:] + [name]) if len(scope) > 1 else name
-            ids.setdefault(vid, (full, width))     # first name wins for aliases
+            if vid in ids:
+                aliases.setdefault(vid, []).append(full)   # same value, another name
+            else:
+                ids[vid] = (full, width)
 
     names = sorted({v[0] for v in ids.values()})
     index = {n: i for i, n in enumerate(names)}
@@ -112,11 +123,24 @@ def main():
             continue
         counts[(cyc, index[ids[vid][0]])] += 1
 
-    toggles = sorted([c, n, k] for (c, n), k in counts.items())
+    # Only nets that toggle at least once are in the artifact's table (the rest
+    # are mostly fill-cell power pins). Re-index densely; keep the static count.
+    active = sorted({n for (_, n) in counts})
+    remap = {old: new for new, old in enumerate(active)}
+    active_names = [names[i] for i in active]
+    toggles = sorted([c, remap[n], k] for (c, n), k in counts.items())
     per_cycle = collections.Counter(c for c, _, _ in toggles)
+    canon = {}                                     # alias name -> canonical (active) name
+    for vid, others in aliases.items():
+        main = ids[vid][0]
+        if main in remap_names(active_names):
+            for o in others:
+                canon[o] = main
     out = {
         "t0_ps": t0, "t_clk_ps": tclk, "cycles": ncycles,
-        "nets": names, "dropped_pre_t0": dropped_pre, "dropped_post_end": dropped_post,
+        "nets": active_names, "static_nets": len(names) - len(active_names),
+        "aliases": canon,
+        "dropped_pre_t0": dropped_pre, "dropped_post_end": dropped_post,
         "toggles": toggles,
     }
     (P / net / "toggles.json").write_text(json.dumps(out, separators=(",", ":")))
@@ -124,7 +148,7 @@ def main():
     print(f"vcd timescale   : {m.group(1)} {m.group(2)}")
     print(f"t0 / t_clk      : {t0} ps / {tclk} ps")
     print(f"cycles          : {ncycles}")
-    print(f"nets            : {len(names)}")
+    print(f"nets            : {len(active_names)} active of {len(names)} ({len(canon)} aliases kept)")
     print(f"toggle events   : {sum(counts.values())} raw, {len(toggles)} (cycle,net) pairs")
     print(f"pre-t0 dropped  : {dropped_pre}   (reset activity, expected)")
     print(f"post-end dropped: {dropped_post}   (the extra edge after halt, expected small)")
