@@ -786,3 +786,17 @@ Run in fresh context by a subagent over `fathom.html`, `forge/`, `Makefile`, `SP
 | F12 | "not x86" in the help (the word is banned even negated); "silicon plan" in a guide title | reworded |
 
 After: `make verify` 4 × 9/9; Playwright 8/8; design checks 4/4.
+
+
+## 14. The rubric pass, 2026-09-05 — worst-first, fixed in order
+
+| step | finding | action |
+|---|---|---|
+| flow | opens on all seven layers at cycle 0; a descent narrows to one layer with its neighbours as context; `Esc` returns. The first act is reading, never configuring. | kept |
+| structure | seven bands in the machine's order, top to bottom, fixed; the scrub bar and the trail in one footer; help in one overlay | kept |
+| ornament | none: no gradients, shadows or icons beyond the layer dot; the dot's focus ring is the one flourish | kept |
+| spacing | folded layers still took a fifth of the height each | folded to headers; focus takes the rest (`157a428`) |
+| type | 3 sizes × 2 weights, 4 in use; the range slider's UA default was a fifth size | tokenised (`ef93a95`) |
+| tokens | 31 on `:root`, 0 stray literals, 9 neutrals with spread < 8 | `forge/design/check.py` 4/4 |
+| states | clickable rows had no hover; no focus ring | hover lift on every click target, `:focus-visible` ring, asserted by computed style in Playwright |
+| motion | none, on purpose: an instrument operated for hours should not animate | asserted: zero elements with a transition or animation |

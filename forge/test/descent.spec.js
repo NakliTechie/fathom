@@ -64,3 +64,20 @@ test('?p= is a name, never a path or markup', async ({ page }) => {
   expect(d.program).toBe('uart_puts');
   expect(await page.locator('img').count()).toBe(0);
 });
+
+test('interaction states by computed style — hover lifts, focus rings, nothing moves', async ({ page }) => {
+  await page.goto('/fathom.html?p=uart_puts');
+  await page.waitForFunction(() => window.fathom && window.fathom.describe().loaded);
+  const row = page.locator('#L-asm .row[data-pc]').first();
+  await row.scrollIntoViewIfNeeded();
+  const before = await row.evaluate(el => getComputedStyle(el).backgroundColor);
+  await row.hover();
+  const hover = await row.evaluate(el => getComputedStyle(el).backgroundColor);
+  expect(hover).not.toBe(before);
+  expect(await row.evaluate(el => getComputedStyle(el).cursor)).toBe('pointer');
+  await page.keyboard.press('Tab');
+  const ring = await page.evaluate(() => { const el = document.activeElement; const cs = getComputedStyle(el); return { tag: el.tagName, outline: cs.outlineStyle, width: cs.outlineWidth }; });
+  expect(ring.outline).not.toBe('none');
+  const animated = await page.evaluate(() => [...document.querySelectorAll('body *')].filter(el => { const cs = getComputedStyle(el); return cs.transitionDuration !== '0s' || cs.animationName !== 'none'; }).length);
+  expect(animated).toBe(0);
+});
