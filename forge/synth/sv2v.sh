@@ -38,4 +38,12 @@ for f in "$IBEX"/rtl/*.sv; do
     "$f" > "$OUT/$m.v"
   fixup "$OUT/$m.v"
 done
-echo "sv2v: $(ls "$OUT"/*.v | wc -l | tr -d ' ') modules -> $OUT"
+# ResetAll: Ibex resets only the flops that need it for function; the rest start
+# X in a gate-level sim and the PDK's cell primitives propagate that X into the
+# fetch address. Ibex's own answer is ResetAll, but ibex_top pins it to Lockstep
+# as a localparam. Set it on the GENERATED Verilog -- a forge configuration knob,
+# not an edit to vendored source (PERMISSIONS.md).
+perl -pi -e "s/localparam \[0:0\] ResetAll = Lockstep;/localparam [0:0] ResetAll = 1'b1; \/\/ fathom: was Lockstep/" "$OUT/ibex_top.v"
+grep -q "ResetAll = 1'b1" "$OUT/ibex_top.v" || { echo "ResetAll patch did not apply"; exit 1; }
+
+echo "sv2v: $(ls "$OUT"/*.v | wc -l | tr -d ' ') modules -> $OUT  (ResetAll=1)"

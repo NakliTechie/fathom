@@ -38,7 +38,10 @@ module fathom_gates_tb;
     .f_uart (f_uart), .f_bus (f_bus)
   );
 
-  ibex_top_gates u_gates (
+`ifndef FATHOM_NETLIST
+`define FATHOM_NETLIST ibex_top_gates
+`endif
+  `FATHOM_NETLIST u_gates (
     .clk_i (clk), .rst_ni (rst_n), .test_en_i (1'b0), .scan_rst_ni (1'b1),
     .ram_cfg_icache_tag_i (24'h0), .ram_cfg_icache_data_i (24'h0),
     .ram_cfg_icache_tag_o (), .ram_cfg_icache_data_o (),

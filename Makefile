@@ -55,6 +55,7 @@ $(GATES): forge/synth/synth.ys forge/synth/sv2v.sh
 ## gates — the same program on the netlist (Icarus), to VCD
 gates: $(P)/gates/bus.log
 $(P)/gates/bus.log: $(GATES) $(P)/sim/retire.log forge/sim/fathom_gates_tb.sv forge/sim/fathom_mem.sv forge/sim/build_gates.sh
+	@mkdir -p $(P)/gates
 	./forge/sim/build_gates.sh
 	vvp $(B)/gates/fathom_gates_sim +hex=$(P)/$(PROGRAM).hex +outdir=$(P)/gates +vcd=$(P)/gates/gates.vcd \
 	       +halt_cycle=$$(grep '^# halt' $(P)/sim/cycle.log | sed -E 's/.*cycle ([0-9]+).*/\1/') \
