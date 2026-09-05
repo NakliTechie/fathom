@@ -116,7 +116,23 @@ def main():
     print(f"  bubbles        : {n - occupied} ({100 * (n - occupied) / n:.0f}%)")
     print(f"  retires        : {len(retires)}  IPC = {len(retires) / n:.2f}")
     print()
-    print("JOIN 3  cycle -> gate toggle: NOT PROBED — no gate-level sim yet.")
+    tj = BUILD / "gates" / "toggles.json"
+    if tj.exists():
+        import json
+        d = json.loads(tj.read_text())
+        outside = [t for t in d["toggles"] if not (0 <= t[0] < d["cycles"])]
+        print("JOIN 3  cycle -> gate toggle")
+        print(f"  cycles   : {d['cycles']}   nets: {len(d['nets'])}")
+        print(f"  events   : {len(d['toggles'])} (cycle,net) pairs")
+        print(f"  orphans  : {len(outside)}")
+        if d["cycles"] != n:
+            die("AMBIGUOUS", f"gate run has {d['cycles']} cycles, RTL run has {n}",
+                "make gates   (the gate run takes its halt cycle from the RTL run)")
+        if outside:
+            die("ORPHAN", f"{len(outside)} toggle events outside the cycle range",
+                "python3 forge/join/vcd_toggles.py  (check t0 / timescale)")
+    else:
+        print("JOIN 3  cycle -> gate toggle: NOT PROBED -- run `make toggles`")
 
     if orphans:
         print()

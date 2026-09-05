@@ -1,4 +1,6 @@
 # forge stage: Ibex RV32I -> gate netlist.
+# Top is ibex_top, not ibex_core: the register file lives in ibex_top, and the
+# gate netlist has to run the program standalone (decision 2026-09-05).
 # Config: BaseIsaRV32I, RV32MNone, RV32BNone, minimal Zc, 3-stage (WritebackStage=1),
 # flip-flop regfile, no PMP / ICache / branch predictor / SecureIbex.
 # ibex_top_tracing / ibex_tracer are simulation-only (they $finish at elaboration
@@ -33,6 +35,7 @@ read_verilog -sv build/synth/generated/ibex_trvk.v
 read_verilog -sv build/synth/generated/ibex_wb_stage.v
 read_verilog -sv build/synth/generated/prim_and2.v
 read_verilog -sv build/synth/generated/prim_buf.v
+read_verilog -sv build/synth/generated/prim_clock_gating.v
 read_verilog -sv build/synth/generated/prim_clock_mux2.v
 read_verilog -sv build/synth/generated/prim_count.v
 read_verilog -sv build/synth/generated/prim_flop.v
@@ -40,24 +43,28 @@ read_verilog -sv build/synth/generated/prim_lfsr.v
 read_verilog -sv build/synth/generated/prim_secded_inv_39_32_dec.v
 read_verilog -sv build/synth/generated/prim_secded_inv_39_32_enc.v
 
-chparam -set BaseIsa 0        ibex_core
-chparam -set RV32M 0          ibex_core
-chparam -set RV32B 0          ibex_core
-chparam -set RV32ZC 0         ibex_core
-chparam -set WritebackStage 1 ibex_core
-chparam -set BranchTargetALU 0 ibex_core
-chparam -set ICache 0         ibex_core
-chparam -set BranchPredictor 0 ibex_core
-chparam -set SecureIbex 0     ibex_core
-chparam -set PMPEnable 0      ibex_core
+chparam -set BaseIsa 0 ibex_top
+chparam -set RV32M 0 ibex_top
+chparam -set RV32B 0 ibex_top
+chparam -set RV32ZC 0 ibex_top
+chparam -set WritebackStage 1 ibex_top
+chparam -set BranchTargetALU 0 ibex_top
+chparam -set ICache 0 ibex_top
+chparam -set BranchPredictor 0 ibex_top
+chparam -set SecureIbex 0 ibex_top
+chparam -set PMPEnable 0 ibex_top
+chparam -set RegFile 0 ibex_top
+chparam -set DbgTriggerEn 0 ibex_top
 
-hierarchy -check -top ibex_core
+hierarchy -check -top ibex_top
 # hierarchy has already set the top (a $paramod derived from our chparam values),
 # so synth must not re-resolve it by name.
 synth -flatten
 # Map to a small, nameable gate set. The gate layer renders these.
 abc -g AND,OR,XOR,NAND,NOR,XNOR,MUX
 opt_clean -purge
-write_verilog -noattr build/synth/ibex_core_gates.v
-write_json build/synth/ibex_core_gates.json
+# A stable module name for the harness; the $paramod name is not one.
+rename -top ibex_top_gates
+write_verilog -noattr build/synth/ibex_top_gates.v
+write_json build/synth/ibex_top_gates.json
 stat

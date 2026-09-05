@@ -15,9 +15,10 @@ DEPS=(
   "$PRIM/prim_secded_inv_39_32_enc.sv" "$PRIM/prim_lfsr.sv"
   "$PRIMG/prim_and2.sv" "$PRIMG/prim_buf.sv"
   "$PRIMG/prim_clock_mux2.sv" "$PRIMG/prim_flop.sv"
+  "$PRIMG/prim_clock_gating.sv"
 )
 
-fixup() { perl -pi -e 's/\bprim_(and2|buf|clock_mux2|flop)\b/prim_generic_$1/g' "$1"; }
+fixup() { perl -pi -e 's/\bprim_(and2|buf|clock_mux2|flop|clock_gating)\b/prim_generic_$1/g' "$1"; }
 
 for f in "${DEPS[@]}"; do
   m=$(basename "$f" .sv)

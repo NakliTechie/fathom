@@ -1,3 +1,4 @@
+`timescale 1ns/1ps
 // fathom_tb.sv — the C0 simulation harness.
 //
 // Ibex + one flat memory + a memory-mapped UART, run to the traced region's end.
@@ -23,68 +24,23 @@ module fathom_tb;
   int unsigned cycle_q = 0;                              // the spine's cycle index
   int unsigned t0_set  = 0;
 
-  // ---- memory -------------------------------------------------------------
-  logic [31:0] mem [MemWords];
-
+  // ---- memory (shared with the gate-level harness) -------------------------
   logic        instr_req, instr_gnt, instr_rvalid;
   logic [31:0] instr_addr, instr_rdata;
   logic        data_req, data_gnt, data_rvalid, data_we;
   logic [3:0]  data_be;
   logic [31:0] data_addr, data_wdata, data_rdata;
+  integer      f_retire, f_cycle, f_uart, f_bus;
 
-  function automatic bit in_mem(input logic [31:0] a);
-    return (a >= MemBase) && (a < MemBase + (MemWords * 4));
-  endfunction
-
-  function automatic int unsigned widx(input logic [31:0] a);
-    return (a - MemBase) >> 2;
-  endfunction
-
-  // Fail closed (SPEC §0.8): an access outside the modelled memory is a harness
-  // bug, not something to silently wrap into a valid index.
-  task automatic bad_access(input string kind, input logic [31:0] a);
-    $display("[fathom_tb] %s access out of range: %08x at cycle %0d", kind, a, cycle_q);
-    $fatal(1, "address out of range");
-  endtask
-
-  // Zero-latency grant, one-cycle response — the simplest protocol-legal memory.
-  assign instr_gnt = instr_req;
-  assign data_gnt  = data_req;
-
-  always_ff @(posedge clk or negedge rst_n) begin
-    if (!rst_n) begin
-      instr_rvalid <= 1'b0;
-      data_rvalid  <= 1'b0;
-    end else begin
-      instr_rvalid <= instr_req;
-      data_rvalid  <= data_req;
-      if (instr_req) begin
-        if (!in_mem(instr_addr)) bad_access("instr", instr_addr);
-        instr_rdata <= mem[widx(instr_addr)];
-      end
-
-      if (data_req) begin
-        if (data_we) begin
-          if (data_addr[31:28] == UartAddr[31:28]) begin
-            // the memory-mapped write: the bottom of the descent
-            $write("%c", data_wdata[7:0]);
-            $fdisplay(f_uart, "%0d %02x", cycle_q, data_wdata[7:0]);
-          end else begin
-            if (!in_mem(data_addr)) bad_access("store", data_addr);
-            if (data_be[0]) mem[widx(data_addr)][ 7: 0] <= data_wdata[ 7: 0];
-            if (data_be[1]) mem[widx(data_addr)][15: 8] <= data_wdata[15: 8];
-            if (data_be[2]) mem[widx(data_addr)][23:16] <= data_wdata[23:16];
-            if (data_be[3]) mem[widx(data_addr)][31:24] <= data_wdata[31:24];
-          end
-        end else begin
-          if (data_addr[31:28] != UartAddr[31:28] && !in_mem(data_addr))
-            bad_access("load", data_addr);
-          data_rdata <= (data_addr[31:28] == UartAddr[31:28]) ? 32'h0
-                                                             : mem[widx(data_addr)];
-        end
-      end
-    end
-  end
+  fathom_mem #(.MemWords(MemWords), .MemBase(MemBase), .UartAddr(UartAddr)) u_mem (
+    .clk (clk), .rst_n (rst_n), .cycle (cycle_q),
+    .instr_req (instr_req), .instr_gnt (instr_gnt), .instr_rvalid (instr_rvalid),
+    .instr_addr (instr_addr), .instr_rdata (instr_rdata),
+    .data_req (data_req), .data_gnt (data_gnt), .data_rvalid (data_rvalid),
+    .data_we (data_we), .data_be (data_be), .data_addr (data_addr),
+    .data_wdata (data_wdata), .data_rdata (data_rdata),
+    .f_uart (f_uart), .f_bus (f_bus)
+  );
 
   // ---- RVFI ---------------------------------------------------------------
   logic        rvfi_valid;
@@ -181,7 +137,6 @@ module fathom_tb;
   wire        tap_st_out   = u_top.u_ibex_core.wb_stage_i.outstanding_store_wb_o;
 
   // ---- logs ---------------------------------------------------------------
-  integer f_retire, f_cycle, f_uart;
   string  hexfile, vcdfile, outdir;
 
   initial begin
@@ -189,12 +144,13 @@ module fathom_tb;
     if (!$value$plusargs("hex=%s", hexfile))   hexfile = "build/uart_puts.hex";
     if (!$value$plusargs("vcd=%s", vcdfile))   vcdfile = "build/sim/rtl.vcd";
 
-    foreach (mem[i]) mem[i] = 32'h0;
-    $readmemh(hexfile, mem);
+    u_mem.load(hexfile);
 
     f_retire = $fopen({outdir, "/retire.log"}, "w");
     f_cycle  = $fopen({outdir, "/cycle.log"},  "w");
     f_uart   = $fopen({outdir, "/uart.log"},   "w");
+    f_bus    = $fopen({outdir, "/bus.log"},    "w");
+    $fdisplay(f_bus, "cycle instr_req instr_addr data_req data_we data_be data_addr data_wdata");
     // Column headers are part of the contract forge parses against.
     $fdisplay(f_retire,
       "cycle order pc insn rd rd_wdata rs1 rs1_rdata rs2 rs2_rdata mem_addr mem_rmask mem_wmask mem_rdata mem_wdata trap");
@@ -204,23 +160,23 @@ module fathom_tb;
     $dumpvars(0, fathom_tb);
 
     repeat (8) @(posedge clk);
-    rst_n = 1'b1;
+    @(negedge clk);                                    // release between edges:
+    rst_n = 1'b1;                                      // no race with the samplers
   end
 
   // cycle 0 is the first rising edge after reset deassert (SPEC §1)
   always_ff @(posedge clk) begin
     if (rst_n) begin
       if (t0_set == 0) begin
-        t0_set  <= 1;
-        cycle_q <= 0;
-      end else begin
-        cycle_q <= cycle_q + 1;
+        t0_set <= 1;
+        $fdisplay(f_cycle, "# t0_ps %0d  t_clk_ps 10000", $time * 1000);
       end
+      cycle_q <= cycle_q + 1;
     end
   end
 
   always_ff @(posedge clk) begin
-    if (rst_n && t0_set != 0) begin
+    if (rst_n) begin
       $fdisplay(f_cycle, "%0d %08x %08x %08x %0d %0d %0d %0d %0d %0d",
                 cycle_q, tap_pc_if, tap_pc_id, tap_pc_wb,
                 tap_id_valid, tap_id_new, tap_id_ready, tap_wb_done,
@@ -247,13 +203,13 @@ module fathom_tb;
     if (rst_n && rvfi_valid && rvfi_pc_rdata == pc_end) halt_hits <= halt_hits + 1;
     if (halt_hits >= 2) begin
       $fdisplay(f_cycle, "# halt at cycle %0d, %0d retires", cycle_q, rvfi_order);
-      $fclose(f_retire); $fclose(f_cycle); $fclose(f_uart);
+      $fclose(f_retire); $fclose(f_cycle); $fclose(f_uart); $fclose(f_bus);
       $display("\n[fathom_tb] halt: cycle=%0d retires=%0d", cycle_q, rvfi_order);
       $finish;
     end
     if (cycle_q > MaxCycles) begin
       $display("[fathom_tb] TIMEOUT at cycle %0d", cycle_q);
-      $fclose(f_retire); $fclose(f_cycle); $fclose(f_uart);
+      $fclose(f_retire); $fclose(f_cycle); $fclose(f_uart); $fclose(f_bus);
       $fatal(1, "timeout");
     end
   end

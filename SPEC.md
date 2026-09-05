@@ -424,7 +424,7 @@ construction (§1.2) — without it `_start` ran with `sp` uninitialised.
 |---|---|
 | 1 — `pc -> file:line:col` | **45/45 distinct executed pcs resolve. Zero orphans.** |
 | 2 — `cycle -> anchor` | 136 cycles, ID/EX occupied 132, **4 bubbles (3%)** |
-| 3 — `cycle -> gate toggle` | **NOT PROBED** — no gate-level simulation yet |
+| 3 — `cycle -> gate toggle` | **131,172 events, 11,149 nets, 137 cycles. Zero silent cycles, zero orphans.** |
 
 FATHOM.md §8.1's risk is retired for join 1 **on this program class** (freestanding C,
 `-O0`, one translation unit plus an assembly stub). It is not retired in general, and
@@ -446,3 +446,44 @@ was `crt0.S:7` 2 and `uart_puts.c:7` 5.
 via that CU's own file table. This is an `AMBIGUOUS`, not an `ORPHAN`: the ids resolved,
 they resolved to the wrong thing, and a totality count alone would never have caught it.
 Verifier assertion 7 (§1.3) is extended: two distinct sources must not share a key.
+
+### 6.5 The gate leg and join 3 — 2026-09-05, later
+
+**Top is `ibex_top`, not `ibex_core`** (decision recorded in `plan/history.md`): the
+register file lives in `ibex_top`, and the netlist has to run the program standalone.
+**13,213 cells** — 1,876 flip-flops, one latch (the clock gate), 11,336 combinational —
+in 5.17 s.
+
+**Two simulators, deliberately.** RTL runs under Verilator; the netlist runs under Icarus.
+Yosys emits the clock-gate latch as `always @*`, which Verilator settles as combinational
+feedback and gets wrong — the core never fetched. Icarus has event semantics for latches,
+and its VCD dumps every net in the netlist. Verilator's `--binary` trace produced a VCD
+with zero variables besides. The split is recorded in `forge/sim/build_gates.sh`.
+
+**RTL == gates, asserted** (`forge/join/check_equiv.py`, `make equiv`): 137/137 cycles,
+0 mismatches, 48 data requests each, 131 instruction fetches each, UART bytes on identical
+cycles. Comparison follows the bus protocol — `instr_addr` under `instr_req`, data columns
+under `data_req` — because outside a request Verilator reads 0 and Icarus reads `x`, and
+neither is a core difference. That masking is the only leniency and it is stated in the
+script.
+
+**Join 3** (`forge/join/vcd_toggles.py`, `make toggles`): `t₀ = 85,000 ps` on both sides
+by construction, `T_clk = 10,000 ps`. 131,172 raw toggle events collapse to 130,899
+`(cycle, net)` pairs — 273 intra-cycle glitches. Toggles per cycle: min 246, median 875,
+max 2,691 (cycle 3, the first post-reset fetch). 7,764 events before `t₀` dropped and
+counted (reset); 383 after the halt dropped and counted (the one extra edge). Every net
+in the netlist toggles at least once across the run.
+
+Three harness faults found and fixed on the way, all simulator-portability bugs in *my*
+code, none in the core:
+- **Reset-release race** — `rst_n = 1` as a blocking assignment on a `posedge` is resolved
+  differently by Verilator and Icarus. Released on the `negedge` now.
+- **Icarus's default timescale is 1 s.** With no `` `timescale ``, `#5` meant five seconds
+  and every VCD event landed 10¹² past `t₀` — and my parser **dropped them silently**. The
+  parser now counts post-end drops and fails `TOOLCHAIN` when the VCD range cannot contain
+  `t₀`. A silent drop is a §0.8 violation in its own right.
+- **`$finish` on the halt edge raced the logger** for that edge's row. The gate run now
+  runs one edge past the halt and the RTL run is the reference length.
+
+`toggles.json` is 2.4 MB for 137 cycles — the gate layer's size is the events, not the
+names, and `.parquet` at C3 remains the plan for longer traces.

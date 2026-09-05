@@ -11,7 +11,7 @@ OUT="$ROOT/build/sim/obj"
 verilator --binary --timing -j 0 \
   -DRVFI -DSYNTHESIS=0 \
   --top-module fathom_tb \
-  -Wno-fatal \
+  -Wno-fatal -Wno-TIMESCALEMOD \
   --trace \
   -y "$IBEX/rtl" -y "$PRIM" -y "$PRIMG" \
   +incdir+"$PRIM" +incdir+"$DVU" +incdir+"$IBEX/rtl" \
@@ -20,5 +20,6 @@ verilator --binary --timing -j 0 \
   "$PRIM/prim_count_pkg.sv" "$PRIM/prim_cipher_pkg.sv" \
   "$PRIMG/prim_ram_1p_pkg.sv" \
   "$IBEX/rtl/ibex_pkg.sv" "$IBEX/rtl/ibex_cheriot_pkg.sv" \
+  "$ROOT/forge/sim/fathom_mem.sv" \
   "$ROOT/forge/sim/fathom_tb.sv"
 echo "built: $OUT/fathom_sim"
