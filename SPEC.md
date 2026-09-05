@@ -451,7 +451,7 @@ Verifier assertion 7 (§1.3) is extended: two distinct sources must not share a 
 
 **Top is `ibex_top`, not `ibex_core`** (decision recorded in `plan/history.md`): the
 register file lives in `ibex_top`, and the netlist has to run the program standalone.
-**13,213 cells** — 1,876 flip-flops, one latch (the clock gate), 11,336 combinational —
+**13,213 cells** — 1,877 flip-flops, one latch (the clock gate), 11,335 combinational —
 in 5.17 s.
 
 **Two simulators, deliberately.** RTL runs under Verilator; the netlist runs under Icarus.
@@ -469,10 +469,12 @@ script.
 
 **Join 3** (`forge/join/vcd_toggles.py`, `make toggles`): `t₀ = 85,000 ps` on both sides
 by construction, `T_clk = 10,000 ps`. 131,172 raw toggle events collapse to 130,899
-`(cycle, net)` pairs — 273 intra-cycle glitches. Toggles per cycle: min 246, median 875,
+`(cycle, net)` pairs — 273 intra-cycle glitches. Toggles per cycle: min 6, median 904,
 max 2,691 (cycle 3, the first post-reset fetch). 7,764 events before `t₀` dropped and
-counted (reset); 383 after the halt dropped and counted (the one extra edge). Every net
-in the netlist toggles at least once across the run.
+counted (reset); 383 after the halt dropped and counted (the one extra edge). **4,822 of
+11,149 nets toggle at least once** across the run; the other 6,327 are static for this
+program — CSR, PMP-adjacent and debug logic the program never reaches. That static
+majority is itself a fact the gate layer should show, not hide.
 
 Three harness faults found and fixed on the way, all simulator-portability bugs in *my*
 code, none in the core:
@@ -485,5 +487,5 @@ code, none in the core:
 - **`$finish` on the halt edge raced the logger** for that edge's row. The gate run now
   runs one edge past the halt and the RTL run is the reference length.
 
-`toggles.json` is 2.4 MB for 137 cycles — the gate layer's size is the events, not the
+`toggles.json` is 1.7 MB for 137 cycles — the gate layer's size is the events, not the
 names, and `.parquet` at C3 remains the plan for longer traces.
