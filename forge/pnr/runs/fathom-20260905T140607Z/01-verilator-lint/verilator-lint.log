@@ -1,0 +1,915 @@
+%Warning-PINCONNECTEMPTY: /work/src/ibex_core.v:1038:6: Cell pin connected by name with empty reference: 'data_o'
+ 1038 |     .data_o(),
+      |      ^~~~~~
+                          ... For warning description see https://verilator.org/warn/PINCONNECTEMPTY?v=5.018
+                          ... Use "/* verilator lint_off PINCONNECTEMPTY */" and lint_on around source to disable this message.
+%Warning-PINCONNECTEMPTY: /work/src/ibex_core.v:1039:6: Cell pin connected by name with empty reference: 'syndrome_o'
+ 1039 |     .syndrome_o(),
+      |      ^~~~~~~~~~
+%Warning-PINCONNECTEMPTY: /work/src/ibex_core.v:1044:6: Cell pin connected by name with empty reference: 'data_o'
+ 1044 |     .data_o(),
+      |      ^~~~~~
+%Warning-PINCONNECTEMPTY: /work/src/ibex_core.v:1045:6: Cell pin connected by name with empty reference: 'syndrome_o'
+ 1045 |     .syndrome_o(),
+      |      ^~~~~~~~~~
+%Warning-PINCONNECTEMPTY: /work/src/ibex_core.v:1063:7: Cell pin connected by name with empty reference: 'data_o'
+ 1063 |      .data_o(),
+      |       ^~~~~~
+%Warning-PINCONNECTEMPTY: /work/src/ibex_core.v:1064:7: Cell pin connected by name with empty reference: 'syndrome_o'
+ 1064 |      .syndrome_o(),
+      |       ^~~~~~~~~~
+%Warning-PINCONNECTEMPTY: /work/src/ibex_core.v:1069:7: Cell pin connected by name with empty reference: 'data_o'
+ 1069 |      .data_o(),
+      |       ^~~~~~
+%Warning-PINCONNECTEMPTY: /work/src/ibex_core.v:1070:7: Cell pin connected by name with empty reference: 'syndrome_o'
+ 1070 |      .syndrome_o(),
+      |       ^~~~~~~~~~
+%Warning-PINCONNECTEMPTY: /work/src/ibex_cs_registers.v:793:4: Cell pin connected by name with empty reference: 'rd_error_o'
+  793 |   .rd_error_o()
+      |    ^~~~~~~~~~
+%Warning-PINCONNECTEMPTY: /work/src/ibex_cs_registers.v:809:4: Cell pin connected by name with empty reference: 'rd_error_o'
+  809 |   .rd_error_o()
+      |    ^~~~~~~~~~
+%Warning-PINCONNECTEMPTY: /work/src/ibex_cs_registers.v:821:4: Cell pin connected by name with empty reference: 'rd_error_o'
+  821 |   .rd_error_o()
+      |    ^~~~~~~~~~
+%Warning-PINCONNECTEMPTY: /work/src/ibex_cs_registers.v:833:4: Cell pin connected by name with empty reference: 'rd_error_o'
+  833 |   .rd_error_o()
+      |    ^~~~~~~~~~
+%Warning-PINCONNECTEMPTY: /work/src/ibex_cs_registers.v:845:4: Cell pin connected by name with empty reference: 'rd_error_o'
+  845 |   .rd_error_o()
+      |    ^~~~~~~~~~
+%Warning-PINCONNECTEMPTY: /work/src/ibex_cs_registers.v:872:4: Cell pin connected by name with empty reference: 'rd_error_o'
+  872 |   .rd_error_o()
+      |    ^~~~~~~~~~
+%Warning-PINCONNECTEMPTY: /work/src/ibex_cs_registers.v:886:4: Cell pin connected by name with empty reference: 'rd_error_o'
+  886 |   .rd_error_o()
+      |    ^~~~~~~~~~
+%Warning-PINCONNECTEMPTY: /work/src/ibex_cs_registers.v:900:4: Cell pin connected by name with empty reference: 'rd_error_o'
+  900 |   .rd_error_o()
+      |    ^~~~~~~~~~
+%Warning-PINCONNECTEMPTY: /work/src/ibex_cs_registers.v:914:4: Cell pin connected by name with empty reference: 'rd_error_o'
+  914 |   .rd_error_o()
+      |    ^~~~~~~~~~
+%Warning-PINCONNECTEMPTY: /work/src/ibex_cs_registers.v:927:4: Cell pin connected by name with empty reference: 'rd_error_o'
+  927 |   .rd_error_o()
+      |    ^~~~~~~~~~
+%Warning-PINCONNECTEMPTY: /work/src/ibex_cs_registers.v:939:4: Cell pin connected by name with empty reference: 'rd_error_o'
+  939 |   .rd_error_o()
+      |    ^~~~~~~~~~
+%Warning-PINCONNECTEMPTY: /work/src/ibex_cs_registers.v:951:4: Cell pin connected by name with empty reference: 'rd_error_o'
+  951 |   .rd_error_o()
+      |    ^~~~~~~~~~
+%Warning-PINCONNECTEMPTY: /work/src/ibex_cs_registers.v:968:6: Cell pin connected by name with empty reference: 'rd_error_o'
+  968 |     .rd_error_o()
+      |      ^~~~~~~~~~
+%Warning-PINCONNECTEMPTY: /work/src/ibex_cs_registers.v:980:6: Cell pin connected by name with empty reference: 'rd_error_o'
+  980 |     .rd_error_o()
+      |      ^~~~~~~~~~
+%Warning-PINCONNECTEMPTY: /work/src/ibex_cs_registers.v:992:6: Cell pin connected by name with empty reference: 'rd_error_o'
+  992 |     .rd_error_o()
+      |      ^~~~~~~~~~
+%Warning-PINCONNECTEMPTY: /work/src/ibex_cs_registers.v:1235:4: Cell pin connected by name with empty reference: 'counter_val_upd_o'
+ 1235 |   .counter_val_upd_o()
+      |    ^~~~~~~~~~~~~~~~~
+%Warning-PINCONNECTEMPTY: /work/src/ibex_cs_registers.v:1329:4: Cell pin connected by name with empty reference: 'rd_error_o'
+ 1329 |   .rd_error_o()
+      |    ^~~~~~~~~~
+%Warning-PINCONNECTEMPTY: /work/src/ibex_cs_registers.v:1367:6: Cell pin connected by name with empty reference: 'rd_error_o'
+ 1367 |     .rd_error_o()
+      |      ^~~~~~~~~~
+%Warning-PINCONNECTEMPTY: /work/src/ibex_cs_registers.v:1382:7: Cell pin connected by name with empty reference: 'rd_error_o'
+ 1382 |      .rd_error_o()
+      |       ^~~~~~~~~~
+%Warning-PINCONNECTEMPTY: /work/src/ibex_cs_registers.v:1394:7: Cell pin connected by name with empty reference: 'rd_error_o'
+ 1394 |      .rd_error_o()
+      |       ^~~~~~~~~~
+%Warning-PINCONNECTEMPTY: /work/src/ibex_icache.v:540:7: Cell pin connected by name with empty reference: 'data_o'
+  540 |      .data_o(),
+      |       ^~~~~~
+%Warning-PINCONNECTEMPTY: /work/src/ibex_icache.v:541:7: Cell pin connected by name with empty reference: 'syndrome_o'
+  541 |      .syndrome_o(),
+      |       ^~~~~~~~~~
+%Warning-PINCONNECTEMPTY: /work/src/ibex_icache.v:551:7: Cell pin connected by name with empty reference: 'data_o'
+  551 |      .data_o(),
+      |       ^~~~~~
+%Warning-PINCONNECTEMPTY: /work/src/ibex_icache.v:552:7: Cell pin connected by name with empty reference: 'syndrome_o'
+  552 |      .syndrome_o(),
+      |       ^~~~~~~~~~
+%Warning-PINCONNECTEMPTY: /work/src/ibex_if_stage.v:279:6: Cell pin connected by name with empty reference: 'data_o'
+  279 |     .data_o(),
+      |      ^~~~~~
+%Warning-PINCONNECTEMPTY: /work/src/ibex_if_stage.v:280:6: Cell pin connected by name with empty reference: 'syndrome_o'
+  280 |     .syndrome_o(),
+      |      ^~~~~~~~~~
+%Warning-PINCONNECTEMPTY: /work/src/ibex_load_store_unit.v:343:6: Cell pin connected by name with empty reference: 'data_o'
+  343 |     .data_o(),
+      |      ^~~~~~
+%Warning-PINCONNECTEMPTY: /work/src/ibex_load_store_unit.v:344:6: Cell pin connected by name with empty reference: 'syndrome_o'
+  344 |     .syndrome_o(),
+      |      ^~~~~~~~~~
+%Warning-PINCONNECTEMPTY: /work/src/ibex_lockstep.v:235:6: Cell pin connected by name with empty reference: 'cnt_after_commit_o'
+  235 |     .cnt_after_commit_o(),
+      |      ^~~~~~~~~~~~~~~~~~
+%Warning-PINCONNECTEMPTY: /work/src/ibex_top.v:595:8: Cell pin connected by name with empty reference: 'gnt_o'
+  595 |       .gnt_o(),
+      |        ^~~~~
+%Warning-PINCONNECTEMPTY: /work/src/ibex_top.v:602:8: Cell pin connected by name with empty reference: 'rvalid_o'
+  602 |       .rvalid_o(),
+      |        ^~~~~~~~
+%Warning-PINCONNECTEMPTY: /work/src/ibex_top.v:603:8: Cell pin connected by name with empty reference: 'raddr_o'
+  603 |       .raddr_o(),
+      |        ^~~~~~~
+%Warning-PINCONNECTEMPTY: /work/src/ibex_top.v:604:8: Cell pin connected by name with empty reference: 'rerror_o'
+  604 |       .rerror_o(),
+      |        ^~~~~~~~
+%Warning-PINCONNECTEMPTY: /work/src/ibex_top.v:607:8: Cell pin connected by name with empty reference: 'wr_collision_o'
+  607 |       .wr_collision_o(),
+      |        ^~~~~~~~~~~~~~
+%Warning-PINCONNECTEMPTY: /work/src/ibex_top.v:608:8: Cell pin connected by name with empty reference: 'write_pending_o'
+  608 |       .write_pending_o(),
+      |        ^~~~~~~~~~~~~~~
+%Warning-PINCONNECTEMPTY: /work/src/ibex_top.v:626:8: Cell pin connected by name with empty reference: 'gnt_o'
+  626 |       .gnt_o(),
+      |        ^~~~~
+%Warning-PINCONNECTEMPTY: /work/src/ibex_top.v:633:8: Cell pin connected by name with empty reference: 'rvalid_o'
+  633 |       .rvalid_o(),
+      |        ^~~~~~~~
+%Warning-PINCONNECTEMPTY: /work/src/ibex_top.v:634:8: Cell pin connected by name with empty reference: 'raddr_o'
+  634 |       .raddr_o(),
+      |        ^~~~~~~
+%Warning-PINCONNECTEMPTY: /work/src/ibex_top.v:635:8: Cell pin connected by name with empty reference: 'rerror_o'
+  635 |       .rerror_o(),
+      |        ^~~~~~~~
+%Warning-PINCONNECTEMPTY: /work/src/ibex_top.v:638:8: Cell pin connected by name with empty reference: 'wr_collision_o'
+  638 |       .wr_collision_o(),
+      |        ^~~~~~~~~~~~~~
+%Warning-PINCONNECTEMPTY: /work/src/ibex_top.v:639:8: Cell pin connected by name with empty reference: 'write_pending_o'
+  639 |       .write_pending_o(),
+      |        ^~~~~~~~~~~~~~~
+%Warning-PINCONNECTEMPTY: /work/src/ibex_trvk.v:162:4: Cell pin connected by name with empty reference: 'full_o'
+  162 |   .full_o(),
+      |    ^~~~~~
+%Warning-PINCONNECTEMPTY: /work/src/ibex_trvk.v:163:4: Cell pin connected by name with empty reference: 'depth_o'
+  163 |   .depth_o(),
+      |    ^~~~~~~
+%Warning-PINCONNECTEMPTY: /work/src/ibex_trvk.v:164:4: Cell pin connected by name with empty reference: 'err_o'
+  164 |   .err_o()
+      |    ^~~~~
+%Warning-PINCONNECTEMPTY: /work/src/ibex_trvk.v:197:4: Cell pin connected by name with empty reference: 'full_o'
+  197 |   .full_o(),
+      |    ^~~~~~
+%Warning-PINCONNECTEMPTY: /work/src/ibex_trvk.v:198:4: Cell pin connected by name with empty reference: 'depth_o'
+  198 |   .depth_o(),
+      |    ^~~~~~~
+%Warning-PINCONNECTEMPTY: /work/src/ibex_trvk.v:199:4: Cell pin connected by name with empty reference: 'err_o'
+  199 |   .err_o()
+      |    ^~~~~
+%Warning-PINCONNECTEMPTY: /work/src/ibex_trvk.v:296:6: Cell pin connected by name with empty reference: 'data_o'
+  296 |     .data_o(),
+      |      ^~~~~~
+%Warning-PINCONNECTEMPTY: /work/src/ibex_trvk.v:297:6: Cell pin connected by name with empty reference: 'syndrome_o'
+  297 |     .syndrome_o(),
+      |      ^~~~~~~~~~
+%Warning-PINMISSING: /work/src/prim_clock_gating.v:14:29: Cell has missing pin: 'VPWR'
+   14 |   sky130_fd_sc_hd__dlclkp_1 u_icg (
+      |                             ^~~~~
+%Warning-PINMISSING: /work/src/prim_clock_gating.v:14:29: Cell has missing pin: 'VGND'
+   14 |   sky130_fd_sc_hd__dlclkp_1 u_icg (
+      |                             ^~~~~
+%Warning-PINMISSING: /work/src/prim_clock_gating.v:14:29: Cell has missing pin: 'VPB'
+   14 |   sky130_fd_sc_hd__dlclkp_1 u_icg (
+      |                             ^~~~~
+%Warning-PINMISSING: /work/src/prim_clock_gating.v:14:29: Cell has missing pin: 'VNB'
+   14 |   sky130_fd_sc_hd__dlclkp_1 u_icg (
+      |                             ^~~~~
+%Warning-VARHIDDEN: /work/src/ibex_cheriot_ex.v:1089:20: Declaration of signal hides declaration in upper scope: 'bound_req'
+ 1089 |   input reg [55:0] bound_req;
+      |                    ^~~~~~~~~
+                    /work/src/ibex_cheriot_ex.v:1001:13: ... Location of original declaration
+ 1001 |  reg [55:0] bound_req;
+      |             ^~~~~~~~~
+%Warning-VARHIDDEN: /work/src/ibex_cheriot_ex.v:1090:13: Declaration of signal hides declaration in upper scope: 'req_exact'
+ 1090 |   input reg req_exact;
+      |             ^~~~~~~~~
+                    /work/src/ibex_cheriot_ex.v:256:6: ... Location of original declaration
+  256 |  reg req_exact;
+      |      ^~~~~~~~~
+%Warning-VARHIDDEN: /work/src/ibex_cheriot_ex.v:1172:20: Declaration of signal hides declaration in upper scope: 'bound_req'
+ 1172 |   input reg [55:0] bound_req;
+      |                    ^~~~~~~~~
+                    /work/src/ibex_cheriot_ex.v:1001:13: ... Location of original declaration
+ 1001 |  reg [55:0] bound_req;
+      |             ^~~~~~~~~
+%Warning-VARHIDDEN: /work/src/ibex_cheriot_ex.v:1381:19: Declaration of signal hides declaration in upper scope: 'perm_vio_vec'
+ 1381 |   input reg [7:0] perm_vio_vec;
+      |                   ^~~~~~~~~~~~
+                    /work/src/ibex_cheriot_ex.v:205:12: ... Location of original declaration
+  205 |  reg [7:0] perm_vio_vec;
+      |            ^~~~~~~~~~~~
+%Warning-WIDTHTRUNC: /work/src/ibex_top.v:446:18: Operator FUNCREF 'sv2v_cast_C9EDF' expects 32 bits on the Function Argument, but Function Argument's VARREF 'prim_secded_pkg_SecdedInv3932ZeroWord' generates 39 bits.
+                                                : ... note: In instance 'ibex_top'
+  446 |     .WordZeroVal(sv2v_cast_C9EDF(prim_secded_pkg_SecdedInv3932ZeroWord))
+      |                  ^~~~~~~~~~~~~~~
+%Warning-WIDTHEXPAND: /work/src/ibex_core.v:771:58: Operator FUNCREF 'sv2v_cast_ADFD4' expects 6 bits on the Function Argument, but Function Argument's CONST '1'sh0' generates 1 bits.
+                                                  : ... note: In instance 'ibex_top.u_ibex_core'
+  771 |  localparam [34:0] ibex_cheriot_pkg_NULL_CAP = {4'b0000, sv2v_cast_ADFD4(1'sb0), sv2v_cast_AB532(1'sb0), sv2v_cast_AF5D3(1'sb0), sv2v_cast_E9444(1'sb0), sv2v_cast_E9444(1'sb0)};
+      |                                                          ^~~~~~~~~~~~~~~
+%Warning-WIDTHEXPAND: /work/src/ibex_core.v:771:82: Operator FUNCREF 'sv2v_cast_AB532' expects 3 bits on the Function Argument, but Function Argument's CONST '1'sh0' generates 1 bits.
+                                                  : ... note: In instance 'ibex_top.u_ibex_core'
+  771 |  localparam [34:0] ibex_cheriot_pkg_NULL_CAP = {4'b0000, sv2v_cast_ADFD4(1'sb0), sv2v_cast_AB532(1'sb0), sv2v_cast_AF5D3(1'sb0), sv2v_cast_E9444(1'sb0), sv2v_cast_E9444(1'sb0)};
+      |                                                                                  ^~~~~~~~~~~~~~~
+%Warning-WIDTHEXPAND: /work/src/ibex_core.v:771:106: Operator FUNCREF 'sv2v_cast_AF5D3' expects 4 bits on the Function Argument, but Function Argument's CONST '1'sh0' generates 1 bits.
+                                                   : ... note: In instance 'ibex_top.u_ibex_core'
+  771 |  localparam [34:0] ibex_cheriot_pkg_NULL_CAP = {4'b0000, sv2v_cast_ADFD4(1'sb0), sv2v_cast_AB532(1'sb0), sv2v_cast_AF5D3(1'sb0), sv2v_cast_E9444(1'sb0), sv2v_cast_E9444(1'sb0)};
+      |                                                                                                          ^~~~~~~~~~~~~~~
+%Warning-WIDTHEXPAND: /work/src/ibex_core.v:771:130: Operator FUNCREF 'sv2v_cast_E9444' expects 9 bits on the Function Argument, but Function Argument's CONST '1'sh0' generates 1 bits.
+                                                   : ... note: In instance 'ibex_top.u_ibex_core'
+  771 |  localparam [34:0] ibex_cheriot_pkg_NULL_CAP = {4'b0000, sv2v_cast_ADFD4(1'sb0), sv2v_cast_AB532(1'sb0), sv2v_cast_AF5D3(1'sb0), sv2v_cast_E9444(1'sb0), sv2v_cast_E9444(1'sb0)};
+      |                                                                                                                                  ^~~~~~~~~~~~~~~
+%Warning-WIDTHEXPAND: /work/src/ibex_core.v:771:154: Operator FUNCREF 'sv2v_cast_E9444' expects 9 bits on the Function Argument, but Function Argument's CONST '1'sh0' generates 1 bits.
+                                                   : ... note: In instance 'ibex_top.u_ibex_core'
+  771 |  localparam [34:0] ibex_cheriot_pkg_NULL_CAP = {4'b0000, sv2v_cast_ADFD4(1'sb0), sv2v_cast_AB532(1'sb0), sv2v_cast_AF5D3(1'sb0), sv2v_cast_E9444(1'sb0), sv2v_cast_E9444(1'sb0)};
+      |                                                                                                                                                          ^~~~~~~~~~~~~~~
+%Warning-WIDTHEXPAND: /work/src/ibex_register_file_ff.v:27:29: Operator VAR 'CapWordZeroVal' expects 35 bits on the Initial value, but Initial value's CONST '1'sh0' generates 1 bits.
+                                                             : ... note: In instance 'ibex_top.gen_regfile_ff.register_file_i'
+   27 |  parameter [CapWidth - 1:0] CapWordZeroVal = 1'sb0;
+      |                             ^~~~~~~~~~~~~~
+%Warning-WIDTHEXPAND: /work/src/ibex_load_store_unit.v:580:58: Operator FUNCREF 'sv2v_cast_B8199' expects 6 bits on the Function Argument, but Function Argument's CONST '1'sh0' generates 1 bits.
+                                                             : ... note: In instance 'ibex_top.u_ibex_core.load_store_unit_i'
+  580 |  localparam [34:0] ibex_cheriot_pkg_NULL_CAP = {4'b0000, sv2v_cast_B8199(1'sb0), sv2v_cast_AFEA1(1'sb0), sv2v_cast_EAC0E(1'sb0), sv2v_cast_2E4C7(1'sb0), sv2v_cast_2E4C7(1'sb0)};
+      |                                                          ^~~~~~~~~~~~~~~
+%Warning-WIDTHEXPAND: /work/src/ibex_load_store_unit.v:580:82: Operator FUNCREF 'sv2v_cast_AFEA1' expects 3 bits on the Function Argument, but Function Argument's CONST '1'sh0' generates 1 bits.
+                                                             : ... note: In instance 'ibex_top.u_ibex_core.load_store_unit_i'
+  580 |  localparam [34:0] ibex_cheriot_pkg_NULL_CAP = {4'b0000, sv2v_cast_B8199(1'sb0), sv2v_cast_AFEA1(1'sb0), sv2v_cast_EAC0E(1'sb0), sv2v_cast_2E4C7(1'sb0), sv2v_cast_2E4C7(1'sb0)};
+      |                                                                                  ^~~~~~~~~~~~~~~
+%Warning-WIDTHEXPAND: /work/src/ibex_load_store_unit.v:580:106: Operator FUNCREF 'sv2v_cast_EAC0E' expects 4 bits on the Function Argument, but Function Argument's CONST '1'sh0' generates 1 bits.
+                                                              : ... note: In instance 'ibex_top.u_ibex_core.load_store_unit_i'
+  580 |  localparam [34:0] ibex_cheriot_pkg_NULL_CAP = {4'b0000, sv2v_cast_B8199(1'sb0), sv2v_cast_AFEA1(1'sb0), sv2v_cast_EAC0E(1'sb0), sv2v_cast_2E4C7(1'sb0), sv2v_cast_2E4C7(1'sb0)};
+      |                                                                                                          ^~~~~~~~~~~~~~~
+%Warning-WIDTHEXPAND: /work/src/ibex_load_store_unit.v:580:130: Operator FUNCREF 'sv2v_cast_2E4C7' expects 9 bits on the Function Argument, but Function Argument's CONST '1'sh0' generates 1 bits.
+                                                              : ... note: In instance 'ibex_top.u_ibex_core.load_store_unit_i'
+  580 |  localparam [34:0] ibex_cheriot_pkg_NULL_CAP = {4'b0000, sv2v_cast_B8199(1'sb0), sv2v_cast_AFEA1(1'sb0), sv2v_cast_EAC0E(1'sb0), sv2v_cast_2E4C7(1'sb0), sv2v_cast_2E4C7(1'sb0)};
+      |                                                                                                                                  ^~~~~~~~~~~~~~~
+%Warning-WIDTHEXPAND: /work/src/ibex_load_store_unit.v:580:154: Operator FUNCREF 'sv2v_cast_2E4C7' expects 9 bits on the Function Argument, but Function Argument's CONST '1'sh0' generates 1 bits.
+                                                              : ... note: In instance 'ibex_top.u_ibex_core.load_store_unit_i'
+  580 |  localparam [34:0] ibex_cheriot_pkg_NULL_CAP = {4'b0000, sv2v_cast_B8199(1'sb0), sv2v_cast_AFEA1(1'sb0), sv2v_cast_EAC0E(1'sb0), sv2v_cast_2E4C7(1'sb0), sv2v_cast_2E4C7(1'sb0)};
+      |                                                                                                                                                          ^~~~~~~~~~~~~~~
+%Warning-WIDTHEXPAND: /work/src/ibex_wb_stage.v:107:58: Operator FUNCREF 'sv2v_cast_67FCC' expects 6 bits on the Function Argument, but Function Argument's CONST '1'sh0' generates 1 bits.
+                                                      : ... note: In instance 'ibex_top.u_ibex_core.wb_stage_i'
+  107 |  localparam [34:0] ibex_cheriot_pkg_NULL_CAP = {4'b0000, sv2v_cast_67FCC(1'sb0), sv2v_cast_D855E(1'sb0), sv2v_cast_A455A(1'sb0), sv2v_cast_52713(1'sb0), sv2v_cast_52713(1'sb0)};
+      |                                                          ^~~~~~~~~~~~~~~
+%Warning-WIDTHEXPAND: /work/src/ibex_wb_stage.v:107:82: Operator FUNCREF 'sv2v_cast_D855E' expects 3 bits on the Function Argument, but Function Argument's CONST '1'sh0' generates 1 bits.
+                                                      : ... note: In instance 'ibex_top.u_ibex_core.wb_stage_i'
+  107 |  localparam [34:0] ibex_cheriot_pkg_NULL_CAP = {4'b0000, sv2v_cast_67FCC(1'sb0), sv2v_cast_D855E(1'sb0), sv2v_cast_A455A(1'sb0), sv2v_cast_52713(1'sb0), sv2v_cast_52713(1'sb0)};
+      |                                                                                  ^~~~~~~~~~~~~~~
+%Warning-WIDTHEXPAND: /work/src/ibex_wb_stage.v:107:106: Operator FUNCREF 'sv2v_cast_A455A' expects 4 bits on the Function Argument, but Function Argument's CONST '1'sh0' generates 1 bits.
+                                                       : ... note: In instance 'ibex_top.u_ibex_core.wb_stage_i'
+  107 |  localparam [34:0] ibex_cheriot_pkg_NULL_CAP = {4'b0000, sv2v_cast_67FCC(1'sb0), sv2v_cast_D855E(1'sb0), sv2v_cast_A455A(1'sb0), sv2v_cast_52713(1'sb0), sv2v_cast_52713(1'sb0)};
+      |                                                                                                          ^~~~~~~~~~~~~~~
+%Warning-WIDTHEXPAND: /work/src/ibex_wb_stage.v:107:130: Operator FUNCREF 'sv2v_cast_52713' expects 9 bits on the Function Argument, but Function Argument's CONST '1'sh0' generates 1 bits.
+                                                       : ... note: In instance 'ibex_top.u_ibex_core.wb_stage_i'
+  107 |  localparam [34:0] ibex_cheriot_pkg_NULL_CAP = {4'b0000, sv2v_cast_67FCC(1'sb0), sv2v_cast_D855E(1'sb0), sv2v_cast_A455A(1'sb0), sv2v_cast_52713(1'sb0), sv2v_cast_52713(1'sb0)};
+      |                                                                                                                                  ^~~~~~~~~~~~~~~
+%Warning-WIDTHEXPAND: /work/src/ibex_wb_stage.v:107:154: Operator FUNCREF 'sv2v_cast_52713' expects 9 bits on the Function Argument, but Function Argument's CONST '1'sh0' generates 1 bits.
+                                                       : ... note: In instance 'ibex_top.u_ibex_core.wb_stage_i'
+  107 |  localparam [34:0] ibex_cheriot_pkg_NULL_CAP = {4'b0000, sv2v_cast_67FCC(1'sb0), sv2v_cast_D855E(1'sb0), sv2v_cast_A455A(1'sb0), sv2v_cast_52713(1'sb0), sv2v_cast_52713(1'sb0)};
+      |                                                                                                                                                          ^~~~~~~~~~~~~~~
+%Warning-WIDTHEXPAND: /work/src/ibex_cs_registers.v:245:44: Operator FUNCREF 'sv2v_cast_32' expects 32 bits on the Function Argument, but Function Argument's EQ generates 1 bits.
+                                                          : ... note: In instance 'ibex_top.u_ibex_core.cs_registers_i'
+  245 |  localparam [31:0] MisaXBit = RV32BExtra | sv2v_cast_32(BaseIsa == 32'sd1);
+      |                                            ^~~~~~~~~~~~
+%Warning-WIDTHEXPAND: /work/src/ibex_cs_registers.v:249:46: Operator FUNCREF 'sv2v_cast_32' expects 32 bits on the Function Argument, but Function Argument's VARREF 'RV32E' generates 1 bits.
+                                                          : ... note: In instance 'ibex_top.u_ibex_core.cs_registers_i'
+  249 |  localparam [31:0] MISA_VALUE = ((((((((4 | (sv2v_cast_32(RV32E) << 4)) | 0) | (sv2v_cast_32(!RV32E) << 8)) | (RV32MEnabled << 12)) | 0) | 0) | 1048576) | (MisaXBit << 23)) | (sv2v_cast_32(ibex_pkg_CSR_MISA_MXL) << 30);
+      |                                              ^~~~~~~~~~~~
+%Warning-WIDTHEXPAND: /work/src/ibex_cs_registers.v:249:81: Operator FUNCREF 'sv2v_cast_32' expects 32 bits on the Function Argument, but Function Argument's LOGNOT generates 1 bits.
+                                                          : ... note: In instance 'ibex_top.u_ibex_core.cs_registers_i'
+  249 |  localparam [31:0] MISA_VALUE = ((((((((4 | (sv2v_cast_32(RV32E) << 4)) | 0) | (sv2v_cast_32(!RV32E) << 8)) | (RV32MEnabled << 12)) | 0) | 0) | 1048576) | (MisaXBit << 23)) | (sv2v_cast_32(ibex_pkg_CSR_MISA_MXL) << 30);
+      |                                                                                 ^~~~~~~~~~~~
+%Warning-WIDTHEXPAND: /work/src/ibex_cs_registers.v:249:177: Operator FUNCREF 'sv2v_cast_32' expects 32 bits on the Function Argument, but Function Argument's VARREF 'ibex_pkg_CSR_MISA_MXL' generates 2 bits.
+                                                           : ... note: In instance 'ibex_top.u_ibex_core.cs_registers_i'
+  249 |  localparam [31:0] MISA_VALUE = ((((((((4 | (sv2v_cast_32(RV32E) << 4)) | 0) | (sv2v_cast_32(!RV32E) << 8)) | (RV32MEnabled << 12)) | 0) | 0) | 1048576) | (MisaXBit << 23)) | (sv2v_cast_32(ibex_pkg_CSR_MISA_MXL) << 30);
+      |                                                                                                                                                                                 ^~~~~~~~~~~~
+%Warning-WIDTHEXPAND: /work/src/ibex_cs_registers.v:1520:58: Operator FUNCREF 'sv2v_cast_EDD05' expects 6 bits on the Function Argument, but Function Argument's CONST '1'sh0' generates 1 bits.
+                                                           : ... note: In instance 'ibex_top.u_ibex_core.cs_registers_i'
+ 1520 |  localparam [34:0] ibex_cheriot_pkg_NULL_CAP = {4'b0000, sv2v_cast_EDD05(1'sb0), sv2v_cast_1D696(1'sb0), sv2v_cast_3B83B(1'sb0), sv2v_cast_7EF6C(1'sb0), sv2v_cast_7EF6C(1'sb0)};
+      |                                                          ^~~~~~~~~~~~~~~
+%Warning-WIDTHEXPAND: /work/src/ibex_cs_registers.v:1520:82: Operator FUNCREF 'sv2v_cast_1D696' expects 3 bits on the Function Argument, but Function Argument's CONST '1'sh0' generates 1 bits.
+                                                           : ... note: In instance 'ibex_top.u_ibex_core.cs_registers_i'
+ 1520 |  localparam [34:0] ibex_cheriot_pkg_NULL_CAP = {4'b0000, sv2v_cast_EDD05(1'sb0), sv2v_cast_1D696(1'sb0), sv2v_cast_3B83B(1'sb0), sv2v_cast_7EF6C(1'sb0), sv2v_cast_7EF6C(1'sb0)};
+      |                                                                                  ^~~~~~~~~~~~~~~
+%Warning-WIDTHEXPAND: /work/src/ibex_cs_registers.v:1520:106: Operator FUNCREF 'sv2v_cast_3B83B' expects 4 bits on the Function Argument, but Function Argument's CONST '1'sh0' generates 1 bits.
+                                                            : ... note: In instance 'ibex_top.u_ibex_core.cs_registers_i'
+ 1520 |  localparam [34:0] ibex_cheriot_pkg_NULL_CAP = {4'b0000, sv2v_cast_EDD05(1'sb0), sv2v_cast_1D696(1'sb0), sv2v_cast_3B83B(1'sb0), sv2v_cast_7EF6C(1'sb0), sv2v_cast_7EF6C(1'sb0)};
+      |                                                                                                          ^~~~~~~~~~~~~~~
+%Warning-WIDTHEXPAND: /work/src/ibex_cs_registers.v:1520:130: Operator FUNCREF 'sv2v_cast_7EF6C' expects 9 bits on the Function Argument, but Function Argument's CONST '1'sh0' generates 1 bits.
+                                                            : ... note: In instance 'ibex_top.u_ibex_core.cs_registers_i'
+ 1520 |  localparam [34:0] ibex_cheriot_pkg_NULL_CAP = {4'b0000, sv2v_cast_EDD05(1'sb0), sv2v_cast_1D696(1'sb0), sv2v_cast_3B83B(1'sb0), sv2v_cast_7EF6C(1'sb0), sv2v_cast_7EF6C(1'sb0)};
+      |                                                                                                                                  ^~~~~~~~~~~~~~~
+%Warning-WIDTHEXPAND: /work/src/ibex_cs_registers.v:1520:154: Operator FUNCREF 'sv2v_cast_7EF6C' expects 9 bits on the Function Argument, but Function Argument's CONST '1'sh0' generates 1 bits.
+                                                            : ... note: In instance 'ibex_top.u_ibex_core.cs_registers_i'
+ 1520 |  localparam [34:0] ibex_cheriot_pkg_NULL_CAP = {4'b0000, sv2v_cast_EDD05(1'sb0), sv2v_cast_1D696(1'sb0), sv2v_cast_3B83B(1'sb0), sv2v_cast_7EF6C(1'sb0), sv2v_cast_7EF6C(1'sb0)};
+      |                                                                                                                                                          ^~~~~~~~~~~~~~~
+%Warning-WIDTHEXPAND: /work/src/ibex_cs_registers.v:1541:224: Operator FUNCREF 'sv2v_cast_7EF6C' expects 9 bits on the Function Argument, but Function Argument's CONST '1'sh0' generates 1 bits.
+                                                            : ... note: In instance 'ibex_top.u_ibex_core.cs_registers_i'
+ 1541 |  localparam [34:0] ibex_cheriot_pkg_ROOT_CAP_TM = {4'b0010, sv2v_cast_31206(ibex_cheriot_pkg_CPERMS_TM), sv2v_cast_CF4F5(ibex_cheriot_pkg_OTYPE_UNSEALED), sv2v_cast_9C1BC(ibex_cheriot_pkg_MAXCEXP), sv2v_cast_E4E4A(9'h100), sv2v_cast_7EF6C(1'sb0)};
+      |                                                                                                                                                                                                                                ^~~~~~~~~~~~~~~
+%Warning-WIDTHEXPAND: /work/src/ibex_cs_registers.v:1543:224: Operator FUNCREF 'sv2v_cast_7EF6C' expects 9 bits on the Function Argument, but Function Argument's CONST '1'sh0' generates 1 bits.
+                                                            : ... note: In instance 'ibex_top.u_ibex_core.cs_registers_i'
+ 1543 |  localparam [34:0] ibex_cheriot_pkg_ROOT_CAP_TS = {4'b0010, sv2v_cast_31206(ibex_cheriot_pkg_CPERMS_TS), sv2v_cast_CF4F5(ibex_cheriot_pkg_OTYPE_UNSEALED), sv2v_cast_9C1BC(ibex_cheriot_pkg_MAXCEXP), sv2v_cast_E4E4A(9'h100), sv2v_cast_7EF6C(1'sb0)};
+      |                                                                                                                                                                                                                                ^~~~~~~~~~~~~~~
+%Warning-WIDTHTRUNC: /work/src/ibex_cs_registers.v:1562:51: Operator FUNCREF 'sv2v_cast_89126' expects 35 bits on the Function Argument, but Function Argument's VARREF 'ibex_cheriot_pkg_ROOT_DECODED_CAP_TX' generates 112 bits.
+                                                          : ... note: In instance 'ibex_top.u_ibex_core.cs_registers_i'
+ 1562 |  localparam [34:0] ibex_cheriot_pkg_ROOT_CAP_TX = sv2v_cast_89126(ibex_cheriot_pkg_ROOT_DECODED_CAP_TX);
+      |                                                   ^~~~~~~~~~~~~~~
+%Warning-WIDTHEXPAND: /work/src/ibex_csr.v:11:26: Operator VAR 'ResetValue' expects 32 bits on the Initial value, but Initial value's CONST '1'sh0' generates 1 bits.
+                                                : ... note: In instance 'ibex_top.u_ibex_core.cs_registers_i.u_cpuctrlsts_part_csr'
+   11 |  parameter [Width - 1:0] ResetValue = 1'sb0;
+      |                          ^~~~~~~~~~
+%Warning-WIDTHEXPAND: /work/src/ibex_csr.v:11:26: Operator VAR 'ResetValue' expects 18 bits on the Initial value, but Initial value's CONST '1'sh0' generates 1 bits.
+                                                : ... note: In instance 'ibex_top.u_ibex_core.cs_registers_i.u_mie_csr'
+   11 |  parameter [Width - 1:0] ResetValue = 1'sb0;
+      |                          ^~~~~~~~~~
+%Warning-WIDTHEXPAND: /work/src/ibex_csr.v:11:26: Operator VAR 'ResetValue' expects 7 bits on the Initial value, but Initial value's CONST '1'sh0' generates 1 bits.
+                                                : ... note: In instance 'ibex_top.u_ibex_core.cs_registers_i.u_mcause_csr'
+   11 |  parameter [Width - 1:0] ResetValue = 1'sb0;
+      |                          ^~~~~~~~~~
+%Warning-WIDTHEXPAND: /work/src/ibex_csr.v:11:26: Operator VAR 'ResetValue' expects 3 bits on the Initial value, but Initial value's CONST '1'sh0' generates 1 bits.
+                                                : ... note: In instance 'ibex_top.u_ibex_core.cs_registers_i.u_mcounteren_csr'
+   11 |  parameter [Width - 1:0] ResetValue = 1'sb0;
+      |                          ^~~~~~~~~~
+%Warning-WIDTHEXPAND: /work/src/ibex_csr.v:11:26: Operator VAR 'ResetValue' expects 8 bits on the Initial value, but Initial value's CONST '1'sh0' generates 1 bits.
+                                                : ... note: In instance 'ibex_top.u_ibex_core.cs_registers_i.u_cpuctrlsts_part_csr'
+   11 |  parameter [Width - 1:0] ResetValue = 1'sb0;
+      |                          ^~~~~~~~~~
+%Warning-WIDTHEXPAND: /work/src/ibex_fetch_fifo.v:99:19: Operator ASSIGNDLY expects 31 bits on the Assign RHS, but Assign RHS's CONST '1'sh0' generates 1 bits.
+                                                       : ... note: In instance 'ibex_top.u_ibex_core.if_stage_i.gen_prefetch_buffer.prefetch_buffer_i.fifo_i'
+   99 |      instr_addr_q <= 1'sb0;
+      |                   ^~
+%Warning-WIDTHEXPAND: /work/src/ibex_fetch_fifo.v:140:12: Operator ASSIGNDLY expects 3 bits on the Assign RHS, but Assign RHS's CONST '1'sh0' generates 1 bits.
+                                                        : ... note: In instance 'ibex_top.u_ibex_core.if_stage_i.gen_prefetch_buffer.prefetch_buffer_i.fifo_i'
+  140 |    valid_q <= 1'sb0;
+      |            ^~
+%Warning-WIDTHEXPAND: /work/src/ibex_fetch_fifo.v:150:27: Operator ASSIGNDLY expects 32 bits on the Assign RHS, but Assign RHS's CONST '1'sh0' generates 1 bits.
+                                                        : ... note: In instance 'ibex_top.u_ibex_core.if_stage_i.gen_prefetch_buffer.prefetch_buffer_i.fifo_i'
+  150 |       rdata_q[i * 32+:32] <= 1'sb0;
+      |                           ^~
+%Warning-WIDTHEXPAND: /work/src/ibex_counter.v:58:16: Operator ASSIGNDLY expects 64 bits on the Assign RHS, but Assign RHS's CONST '1'sh0' generates 1 bits.
+                                                    : ... note: In instance 'ibex_top.u_ibex_core.cs_registers_i.minstret_counter_i'
+   58 |      counter_q <= 1'sb0;
+      |                ^~
+%Warning-WIDTHEXPAND: /work/src/ibex_counter.v:81:30: Operator ASSIGNW expects 64 bits on the Assign RHS, but Assign RHS's CONST '1'sh0' generates 1 bits.
+                                                    : ... note: In instance 'ibex_top.u_ibex_core.cs_registers_i.mcycle_counter_i'
+   81 |     assign counter_val_upd_o = 1'sb0;
+      |                              ^
+%Warning-WIDTHEXPAND: /work/src/ibex_multdiv_fast.v:93:18: Operator ASSIGNDLY expects 5 bits on the Assign RHS, but Assign RHS's CONST '1'sh0' generates 1 bits.
+                                                         : ... note: In instance 'ibex_top.u_ibex_core.ex_block_i..gen_multdiv_fast.multdiv_i'
+   93 |    div_counter_q <= 1'sb0;
+      |                  ^~
+%Warning-WIDTHEXPAND: /work/src/ibex_multdiv_fast.v:95:19: Operator ASSIGNDLY expects 32 bits on the Assign RHS, but Assign RHS's CONST '1'sh0' generates 1 bits.
+                                                         : ... note: In instance 'ibex_top.u_ibex_core.ex_block_i..gen_multdiv_fast.multdiv_i'
+   95 |    op_numerator_q <= 1'sb0;
+      |                   ^~
+%Warning-WIDTHEXPAND: /work/src/ibex_multdiv_fast.v:96:18: Operator ASSIGNDLY expects 32 bits on the Assign RHS, but Assign RHS's CONST '1'sh0' generates 1 bits.
+                                                         : ... note: In instance 'ibex_top.u_ibex_core.ex_block_i..gen_multdiv_fast.multdiv_i'
+   96 |    op_quotient_q <= 1'sb0;
+      |                  ^~
+%Warning-WIDTHEXPAND: /work/src/ibex_multdiv_fast.v:244:13: Operator ASSIGN expects 34 bits on the Assign RHS, but Assign RHS's CONST '1'sh0' generates 1 bits.
+                                                          : ... note: In instance 'ibex_top.u_ibex_core.ex_block_i..gen_multdiv_fast.multdiv_i'
+  244 |       accum = 1'sb0;
+      |             ^
+%Warning-WIDTHEXPAND: /work/src/ibex_multdiv_fast.v:337:21: Operator ASSIGN expects 34 bits on the Assign RHS, but Assign RHS's CONST '1'sh1' generates 1 bits.
+                                                          : ... note: In instance 'ibex_top.u_ibex_core.ex_block_i..gen_multdiv_fast.multdiv_i'
+  337 |      op_remainder_d = 1'sb1;
+      |                     ^
+%Warning-WIDTHEXPAND: /work/src/ibex_multdiv_fast.v:350:19: Operator ASSIGN expects 32 bits on the Assign RHS, but Assign RHS's CONST '1'sh0' generates 1 bits.
+                                                          : ... note: In instance 'ibex_top.u_ibex_core.ex_block_i..gen_multdiv_fast.multdiv_i'
+  350 |     op_quotient_d = 1'sb0;
+      |                   ^
+%Warning-WIDTHEXPAND: /work/src/ibex_alu.v:825:25: Operator ASSIGNW expects 6 bits on the Assign RHS, but Assign RHS's CONST '1'sh0' generates 1 bits.
+                                                 : ... note: In instance 'ibex_top.u_ibex_core.ex_block_i.alu_i'
+  825 |    assign bitcnt_result = 1'sb0;
+      |                         ^
+%Warning-WIDTHEXPAND: /work/src/ibex_alu.v:826:25: Operator ASSIGNW expects 32 bits on the Assign RHS, but Assign RHS's CONST '1'sh0' generates 1 bits.
+                                                 : ... note: In instance 'ibex_top.u_ibex_core.ex_block_i.alu_i'
+  826 |    assign minmax_result = 1'sb0;
+      |                         ^
+%Warning-WIDTHEXPAND: /work/src/ibex_alu.v:828:26: Operator ASSIGNW expects 32 bits on the Assign RHS, but Assign RHS's CONST '1'sh0' generates 1 bits.
+                                                 : ... note: In instance 'ibex_top.u_ibex_core.ex_block_i.alu_i'
+  828 |    assign sv2v_tmp_A9313 = 1'sb0;
+      |                          ^
+%Warning-WIDTHEXPAND: /work/src/ibex_alu.v:830:23: Operator ASSIGNW expects 32 bits on the Assign RHS, but Assign RHS's CONST '1'sh0' generates 1 bits.
+                                                 : ... note: In instance 'ibex_top.u_ibex_core.ex_block_i.alu_i'
+  830 |    assign sext_result = 1'sb0;
+      |                       ^
+%Warning-WIDTHEXPAND: /work/src/ibex_alu.v:832:26: Operator ASSIGNW expects 32 bits on the Assign RHS, but Assign RHS's CONST '1'sh0' generates 1 bits.
+                                                 : ... note: In instance 'ibex_top.u_ibex_core.ex_block_i.alu_i'
+  832 |    assign sv2v_tmp_E7021 = 1'sb0;
+      |                          ^
+%Warning-WIDTHEXPAND: /work/src/ibex_alu.v:835:26: Operator ASSIGNW expects 32 bits on the Assign RHS, but Assign RHS's CONST '1'sh0' generates 1 bits.
+                                                 : ... note: In instance 'ibex_top.u_ibex_core.ex_block_i.alu_i'
+  835 |    assign sv2v_tmp_BDAE9 = 1'sb0;
+      |                          ^
+%Warning-WIDTHEXPAND: /work/src/ibex_alu.v:838:26: Operator ASSIGNW expects 32 bits on the Assign RHS, but Assign RHS's CONST '1'sh0' generates 1 bits.
+                                                 : ... note: In instance 'ibex_top.u_ibex_core.ex_block_i.alu_i'
+  838 |    assign sv2v_tmp_74548 = 1'sb0;
+      |                          ^
+%Warning-WIDTHEXPAND: /work/src/ibex_alu.v:840:24: Operator ASSIGNW expects 32 bits on the Assign RHS, but Assign RHS's CONST '1'sh0' generates 1 bits.
+                                                 : ... note: In instance 'ibex_top.u_ibex_core.ex_block_i.alu_i'
+  840 |    assign xperm_result = 1'sb0;
+      |                        ^
+%Warning-WIDTHEXPAND: /work/src/ibex_alu.v:842:26: Operator ASSIGNW expects 32 bits on the Assign RHS, but Assign RHS's CONST '1'sh0' generates 1 bits.
+                                                 : ... note: In instance 'ibex_top.u_ibex_core.ex_block_i.alu_i'
+  842 |    assign sv2v_tmp_F5CF4 = 1'sb0;
+      |                          ^
+%Warning-WIDTHEXPAND: /work/src/ibex_alu.v:845:26: Operator ASSIGNW expects 32 bits on the Assign RHS, but Assign RHS's CONST '1'sh0' generates 1 bits.
+                                                 : ... note: In instance 'ibex_top.u_ibex_core.ex_block_i.alu_i'
+  845 |    assign sv2v_tmp_3A426 = 1'sb0;
+      |                          ^
+%Warning-WIDTHEXPAND: /work/src/ibex_alu.v:848:26: Operator ASSIGNW expects 32 bits on the Assign RHS, but Assign RHS's CONST '1'sh0' generates 1 bits.
+                                                 : ... note: In instance 'ibex_top.u_ibex_core.ex_block_i.alu_i'
+  848 |    assign sv2v_tmp_22F8E = 1'sb0;
+      |                          ^
+%Warning-WIDTHEXPAND: /work/src/ibex_alu.v:851:26: Operator ASSIGNW expects 32 bits on the Assign RHS, but Assign RHS's CONST '1'sh0' generates 1 bits.
+                                                 : ... note: In instance 'ibex_top.u_ibex_core.ex_block_i.alu_i'
+  851 |    assign sv2v_tmp_34C61 = 1'sb0;
+      |                          ^
+%Warning-WIDTHEXPAND: /work/src/ibex_alu.v:864:12: Operator ASSIGN expects 32 bits on the Assign RHS, but Assign RHS's CONST '1'sh0' generates 1 bits.
+                                                 : ... note: In instance 'ibex_top.u_ibex_core.ex_block_i.alu_i'
+  864 |   result_o = 1'sb0;
+      |            ^
+%Warning-WIDTHEXPAND: /work/src/ibex_controller.v:389:28: Operator ASSIGNW expects 32 bits on the Assign RHS, but Assign RHS's CONST '1'sh0' generates 1 bits.
+                                                        : ... note: In instance 'ibex_top.u_ibex_core.id_stage_i.controller_i'
+  389 |    assign irq_nm_int_mtval = 1'sb0;
+      |                            ^
+%Warning-WIDTHEXPAND: /work/src/ibex_controller.v:448:15: Operator ASSIGN expects 32 bits on the Assign RHS, but Assign RHS's CONST '1'sh0' generates 1 bits.
+                                                        : ... note: In instance 'ibex_top.u_ibex_core.id_stage_i.controller_i'
+  448 |   csr_mtval_o = 1'sb0;
+      |               ^
+%Warning-WIDTHEXPAND: /work/src/ibex_decoder.v:256:22: Operator ASSIGN expects 26 bits on the Assign RHS, but Assign RHS's CONST '1'sh0' generates 1 bits.
+                                                     : ... note: In instance 'ibex_top.u_ibex_core.id_stage_i.decoder_i'
+  256 |   cheriot_operator_o = 1'sb0;
+      |                      ^
+%Warning-WIDTHEXPAND: /work/src/ibex_compressed_decoder.v:115:14: Operator ASSIGN expects 5 bits on the Assign RHS, but Assign RHS's CONST '1'sh0' generates 1 bits.
+                                                                : ... note: In instance 'ibex_top.u_ibex_core.if_stage_i.compressed_decoder_i'
+  115 |    imm[11:7] = 1'sb0;
+      |              ^
+%Warning-WIDTHEXPAND: /work/src/ibex_compressed_decoder.v:555:17: Operator ASSIGNDLY expects 5 bits on the Assign RHS, but Assign RHS's CONST '1'sh0' generates 1 bits.
+                                                                : ... note: In instance 'ibex_top.u_ibex_core.if_stage_i.compressed_decoder_i'
+  555 |      cm_rlist_q <= 1'sb0;
+      |                 ^~
+%Warning-WIDTHEXPAND: /work/src/ibex_compressed_decoder.v:556:21: Operator ASSIGNDLY expects 5 bits on the Assign RHS, but Assign RHS's CONST '1'sh0' generates 1 bits.
+                                                                : ... note: In instance 'ibex_top.u_ibex_core.if_stage_i.compressed_decoder_i'
+  556 |      cm_sp_offset_q <= 1'sb0;
+      |                     ^~
+%Warning-WIDTHEXPAND: /work/src/ibex_prefetch_buffer.v:109:20: Operator ASSIGNDLY expects 32 bits on the Assign RHS, but Assign RHS's CONST '1'sh0' generates 1 bits.
+                                                             : ... note: In instance 'ibex_top.u_ibex_core.if_stage_i.gen_prefetch_buffer.prefetch_buffer_i'
+  109 |      stored_addr_q <= 1'sb0;
+      |                    ^~
+%Warning-WIDTHEXPAND: /work/src/ibex_prefetch_buffer.v:125:19: Operator ASSIGNDLY expects 32 bits on the Assign RHS, but Assign RHS's CONST '1'sh0' generates 1 bits.
+                                                             : ... note: In instance 'ibex_top.u_ibex_core.if_stage_i.gen_prefetch_buffer.prefetch_buffer_i'
+  125 |      fetch_addr_q <= 1'sb0;
+      |                   ^~
+%Warning-WIDTHEXPAND: /work/src/ibex_cs_registers.v:404:17: Operator ASSIGN expects 32 bits on the Assign RHS, but Assign RHS's CONST '1'sh0' generates 1 bits.
+                                                          : ... note: In instance 'ibex_top.u_ibex_core.cs_registers_i'
+  404 |   csr_rdata_int = 1'sb0;
+      |                 ^
+%Warning-WIDTHEXPAND: /work/src/ibex_cs_registers.v:415:19: Operator ASSIGN expects 32 bits on the Assign RHS, but Assign RHS's CONST '1'sh0' generates 1 bits.
+                                                          : ... note: In instance 'ibex_top.u_ibex_core.cs_registers_i'
+  415 |     csr_rdata_int = 1'sb0;
+      |                   ^
+%Warning-WIDTHEXPAND: /work/src/ibex_cs_registers.v:422:27: Operator ASSIGN expects 32 bits on the Assign RHS, but Assign RHS's CONST '1'sh0' generates 1 bits.
+                                                          : ... note: In instance 'ibex_top.u_ibex_core.cs_registers_i'
+  422 |    12'h310: csr_rdata_int = 1'sb0;
+      |                           ^
+%Warning-WIDTHEXPAND: /work/src/ibex_cs_registers.v:423:36: Operator ASSIGN expects 32 bits on the Assign RHS, but Assign RHS's CONST '1'sh0' generates 1 bits.
+                                                          : ... note: In instance 'ibex_top.u_ibex_core.cs_registers_i'
+  423 |    12'h30a, 12'h31a: csr_rdata_int = 1'sb0;
+      |                                    ^
+%Warning-WIDTHEXPAND: /work/src/ibex_cs_registers.v:426:19: Operator ASSIGN expects 32 bits on the Assign RHS, but Assign RHS's CONST '1'sh0' generates 1 bits.
+                                                          : ... note: In instance 'ibex_top.u_ibex_core.cs_registers_i'
+  426 |     csr_rdata_int = 1'sb0;
+      |                   ^
+%Warning-WIDTHEXPAND: /work/src/ibex_cs_registers.v:447:19: Operator ASSIGN expects 32 bits on the Assign RHS, but Assign RHS's CONST '1'sh0' generates 1 bits.
+                                                          : ... note: In instance 'ibex_top.u_ibex_core.cs_registers_i'
+  447 |     csr_rdata_int = 1'sb0;
+      |                   ^
+%Warning-WIDTHEXPAND: /work/src/ibex_cs_registers.v:455:20: Operator ASSIGN expects 32 bits on the Assign RHS, but Assign RHS's CONST '1'sh0' generates 1 bits.
+                                                          : ... note: In instance 'ibex_top.u_ibex_core.cs_registers_i'
+  455 |      csr_rdata_int = 1'sb0;
+      |                    ^
+%Warning-WIDTHEXPAND: /work/src/ibex_cs_registers.v:464:20: Operator ASSIGN expects 32 bits on the Assign RHS, but Assign RHS's CONST '1'sh0' generates 1 bits.
+                                                          : ... note: In instance 'ibex_top.u_ibex_core.cs_registers_i'
+  464 |      csr_rdata_int = 1'sb0;
+      |                    ^
+%Warning-WIDTHEXPAND: /work/src/ibex_cs_registers.v:528:19: Operator ASSIGN expects 32 bits on the Assign RHS, but Assign RHS's CONST '1'sh0' generates 1 bits.
+                                                          : ... note: In instance 'ibex_top.u_ibex_core.cs_registers_i'
+  528 |     csr_rdata_int = 1'sb0;
+      |                   ^
+%Warning-WIDTHEXPAND: /work/src/ibex_cs_registers.v:532:19: Operator ASSIGN expects 32 bits on the Assign RHS, but Assign RHS's CONST '1'sh0' generates 1 bits.
+                                                          : ... note: In instance 'ibex_top.u_ibex_core.cs_registers_i'
+  532 |     csr_rdata_int = 1'sb0;
+      |                   ^
+%Warning-WIDTHEXPAND: /work/src/ibex_cs_registers.v:536:19: Operator ASSIGN expects 32 bits on the Assign RHS, but Assign RHS's CONST '1'sh0' generates 1 bits.
+                                                          : ... note: In instance 'ibex_top.u_ibex_core.cs_registers_i'
+  536 |     csr_rdata_int = 1'sb0;
+      |                   ^
+%Warning-WIDTHEXPAND: /work/src/ibex_cs_registers.v:540:19: Operator ASSIGN expects 32 bits on the Assign RHS, but Assign RHS's CONST '1'sh0' generates 1 bits.
+                                                          : ... note: In instance 'ibex_top.u_ibex_core.cs_registers_i'
+  540 |     csr_rdata_int = 1'sb0;
+      |                   ^
+%Warning-WIDTHEXPAND: /work/src/ibex_cs_registers.v:544:27: Operator ASSIGN expects 32 bits on the Assign RHS, but Assign RHS's CONST '1'sh0' generates 1 bits.
+                                                          : ... note: In instance 'ibex_top.u_ibex_core.cs_registers_i'
+  544 |    12'h7c1: csr_rdata_int = 1'sb0;
+      |                           ^
+%Warning-WIDTHEXPAND: /work/src/ibex_cs_registers.v:601:18: Operator ASSIGN expects 32 bits on the Assign RHS, but Assign RHS's CONST '1'sh0' generates 1 bits.
+                                                          : ... note: In instance 'ibex_top.u_ibex_core.cs_registers_i'
+  601 |   mhpmcounter_we = 1'sb0;
+      |                  ^
+%Warning-WIDTHEXPAND: /work/src/ibex_cs_registers.v:602:19: Operator ASSIGN expects 32 bits on the Assign RHS, but Assign RHS's CONST '1'sh0' generates 1 bits.
+                                                          : ... note: In instance 'ibex_top.u_ibex_core.cs_registers_i'
+  602 |   mhpmcounterh_we = 1'sb0;
+      |                   ^
+%Warning-WIDTHEXPAND: /work/src/ibex_cs_registers.v:997:19: Operator ASSIGNW expects 32 bits on the Assign RHS, but Assign RHS's CONST '1'sh0' generates 1 bits.
+                                                          : ... note: In instance 'ibex_top.u_ibex_core.cs_registers_i'
+  997 |    assign mshwm_q = 1'sb0;
+      |                   ^
+%Warning-WIDTHEXPAND: /work/src/ibex_cs_registers.v:998:20: Operator ASSIGNW expects 32 bits on the Assign RHS, but Assign RHS's CONST '1'sh0' generates 1 bits.
+                                                          : ... note: In instance 'ibex_top.u_ibex_core.cs_registers_i'
+  998 |    assign mshwmb_q = 1'sb0;
+      |                    ^
+%Warning-WIDTHEXPAND: /work/src/ibex_cs_registers.v:999:23: Operator ASSIGNW expects 32 bits on the Assign RHS, but Assign RHS's CONST '1'sh0' generates 1 bits.
+                                                          : ... note: In instance 'ibex_top.u_ibex_core.cs_registers_i'
+  999 |    assign cdbg_ctrl_q = 1'sb0;
+      |                       ^
+%Warning-WIDTHEXPAND: /work/src/ibex_cs_registers.v:1147:27: Operator ASSIGNW expects 32 bits on the Assign RHS, but Assign RHS's CONST '1'sh0' generates 1 bits.
+                                                           : ... note: In instance 'ibex_top.u_ibex_core.cs_registers_i'
+ 1147 |     assign sv2v_tmp_8D4C0 = 1'sb0;
+      |                           ^
+%Warning-WIDTHEXPAND: /work/src/ibex_cs_registers.v:1149:29: Operator ASSIGNW expects 8 bits on the Assign RHS, but Assign RHS's CONST '1'sh0' generates 1 bits.
+                                                           : ... note: In instance 'ibex_top.u_ibex_core.cs_registers_i'
+ 1149 |     assign pmp_cfg_rdata[i] = 1'sb0;
+      |                             ^
+%Warning-WIDTHEXPAND: /work/src/ibex_cs_registers.v:1155:69: Operator ASSIGNW expects 34 bits on the Assign RHS, but Assign RHS's CONST '1'sh0' generates 1 bits.
+                                                           : ... note: In instance 'ibex_top.u_ibex_core.cs_registers_i'
+ 1155 |     assign csr_pmp_addr_o[0 + (((PMPNumRegions - 1) - i) * 34)+:34] = 1'sb0;
+      |                                                                     ^
+%Warning-WIDTHEXPAND: /work/src/ibex_cs_registers.v:1158:23: Operator ASSIGNW expects 3 bits on the Assign RHS, but Assign RHS's CONST '1'sh0' generates 1 bits.
+                                                           : ... note: In instance 'ibex_top.u_ibex_core.cs_registers_i'
+ 1158 |    assign pmp_mseccfg = 1'sb0;
+      |                       ^
+%Warning-WIDTHEXPAND: /work/src/ibex_cs_registers.v:1213:19: Operator ASSIGN expects 32 bits on the Assign RHS, but Assign RHS's CONST '1'sh0' generates 1 bits.
+                                                           : ... note: In instance 'ibex_top.u_ibex_core.cs_registers_i'
+ 1213 |      mhpmevent[i] = 1'sb0;
+      |                   ^
+%Warning-WIDTHEXPAND: /work/src/ibex_cs_registers.v:1218:16: Operator ASSIGN expects 32 bits on the Assign RHS, but Assign RHS's CONST '1'sh0' generates 1 bits.
+                                                           : ... note: In instance 'ibex_top.u_ibex_core.cs_registers_i'
+ 1218 |   mhpmevent[1] = 1'sb0;
+      |                ^
+%Warning-WIDTHEXPAND: /work/src/ibex_cs_registers.v:1223:19: Operator ASSIGN expects 32 bits on the Assign RHS, but Assign RHS's CONST '1'sh0' generates 1 bits.
+                                                           : ... note: In instance 'ibex_top.u_ibex_core.cs_registers_i'
+ 1223 |      mhpmevent[i] = 1'sb0;
+      |                   ^
+%Warning-WIDTHEXPAND: /work/src/ibex_cs_registers.v:1251:24: Operator ASSIGNW expects 64 bits on the Assign RHS, but Assign RHS's CONST '1'sh0' generates 1 bits.
+                                                           : ... note: In instance 'ibex_top.u_ibex_core.cs_registers_i'
+ 1251 |  assign mhpmcounter[1] = 1'sb0;
+      |                        ^
+%Warning-WIDTHEXPAND: /work/src/ibex_cs_registers.v:1286:29: Operator ASSIGNW expects 64 bits on the Assign RHS, but Assign RHS's CONST '1'sh0' generates 1 bits.
+                                                           : ... note: In instance 'ibex_top.u_ibex_core.cs_registers_i'
+ 1286 |     assign mhpmcounter[Cnt] = 1'sb0;
+      |                             ^
+%Warning-WIDTHEXPAND: /work/src/ibex_cs_registers.v:1308:20: Operator ASSIGNDLY expects 3 bits on the Assign RHS, but Assign RHS's CONST '1'sh0' generates 1 bits.
+                                                           : ... note: In instance 'ibex_top.u_ibex_core.cs_registers_i'
+ 1308 |    mcountinhibit_q <= 1'sb0;
+      |                    ^~
+%Warning-WIDTHEXPAND: /work/src/ibex_cs_registers.v:1450:30: Operator ASSIGNW expects 32 bits on the Assign RHS, but Assign RHS's CONST '1'sh0' generates 1 bits.
+                                                           : ... note: In instance 'ibex_top.u_ibex_core.cs_registers_i'
+ 1450 |    assign dummy_instr_seed_o = 1'sb0;
+      |                              ^
+%Warning-WIDTHEXPAND: /work/src/ibex_cs_registers.v:1601:10: Operator ASSIGN expects 12 bits on the Assign RHS, but Assign RHS's CONST '1'sh0' generates 1 bits.
+                                                           : ... note: In instance 'ibex_top.u_ibex_core.cs_registers_i'
+ 1601 |    perms = 1'sb0;
+      |          ^
+%Warning-WIDTHTRUNC: /work/src/ibex_cs_registers.v:1665:16: Operator FUNCREF 'sv2v_cast_32' expects 32 bits on the Function Argument, but Function Argument's FUNCREF 'ibex_cheriot_pkg_cheriot_expand_bound33' generates 33 bits.
+                                                          : ... note: In instance 'ibex_top.u_ibex_core.cs_registers_i'
+ 1665 |    d[78-:32] = sv2v_cast_32(ibex_cheriot_pkg_cheriot_expand_bound33(cap[8-:ibex_cheriot_pkg_CBOUND_W], ibex_cheriot_pkg_cheriot_get_base_correction(cap[34-:2]), exp5, addr));
+      |                ^~~~~~~~~~~~
+%Warning-WIDTHTRUNC: /work/src/ibex_cs_registers.v:1674:42: Operator FUNCREF 'sv2v_cast_89126' expects 35 bits on the Function Argument, but Function Argument's VARREF 'd' generates 112 bits.
+                                                          : ... note: In instance 'ibex_top.u_ibex_core.cs_registers_i'
+ 1674 |    ibex_cheriot_pkg_cheriot_encode_cap = sv2v_cast_89126(d);
+      |                                          ^~~~~~~~~~~~~~~
+%Warning-WIDTHTRUNC: /work/src/ibex_cs_registers.v:1708:19: Operator FUNCREF 'sv2v_cast_E4E4A' expects 9 bits on the Function Argument, but Function Argument's SHIFTR generates 32 bits.
+                                                          : ... note: In instance 'ibex_top.u_ibex_core.cs_registers_i'
+ 1708 |    ptr_mantissa = sv2v_cast_E4E4A(newptr >> exp5);
+      |                   ^~~~~~~~~~~~~~~
+%Warning-WIDTHEXPAND: /work/src/ibex_wb_stage.v:249:19: Operator ASSIGNW expects 32 bits on the Assign RHS, but Assign RHS's CONST '1'sh0' generates 1 bits.
+                                                      : ... note: In instance 'ibex_top.u_ibex_core.wb_stage_i'
+  249 |    assign pc_wb_o = 1'sb0;
+      |                   ^
+%Warning-WIDTHEXPAND: /work/src/ibex_load_store_unit.v:232:12: Operator ASSIGNDLY expects 24 bits on the Assign RHS, but Assign RHS's CONST '1'sh0' generates 1 bits.
+                                                             : ... note: In instance 'ibex_top.u_ibex_core.load_store_unit_i'
+  232 |    rdata_q <= 1'sb0;
+      |            ^~
+%Warning-WIDTHEXPAND: /work/src/ibex_load_store_unit.v:251:16: Operator ASSIGNDLY expects 32 bits on the Assign RHS, but Assign RHS's CONST '1'sh0' generates 1 bits.
+                                                             : ... note: In instance 'ibex_top.u_ibex_core.load_store_unit_i'
+  251 |    addr_last_q <= 1'sb0;
+      |                ^~
+%Warning-WIDTHEXPAND: /work/src/ibex_load_store_unit.v:534:22: Operator ASSIGNDLY expects 3 bits on the Assign RHS, but Assign RHS's CONST '1'sh0' generates 1 bits.
+                                                             : ... note: In instance 'ibex_top.u_ibex_core.load_store_unit_i'
+  534 |    resp_lc_clrperm_q <= 1'sb0;
+      |                      ^~
+%Warning-WIDTHEXPAND: /work/src/ibex_load_store_unit.v:538:19: Operator ASSIGNDLY expects 32 bits on the Assign RHS, but Assign RHS's CONST '1'sh0' generates 1 bits.
+                                                             : ... note: In instance 'ibex_top.u_ibex_core.load_store_unit_i'
+  538 |    cap_lsw_data_q <= 1'sb0;
+      |                   ^~
+%Warning-WIDTHTRUNC: /work/src/ibex_load_store_unit.v:671:14: Operator FUNCREF 'sv2v_cast_E4E4A' expects 9 bits on the Function Argument, but Function Argument's SHIFTR generates 32 bits.
+                                                            : ... note: In instance 'ibex_top.u_ibex_core.load_store_unit_i'
+  671 |    addrmi9 = sv2v_cast_E4E4A(addr33[31:0] >> exp5);
+      |              ^~~~~~~~~~~~~~~
+%Warning-WIDTHEXPAND: /work/src/ibex_id_stage.v:462:26: Operator ASSIGNW expects 32 bits on the Assign RHS, but Assign RHS's CONST '1'sh0' generates 1 bits.
+                                                      : ... note: In instance 'ibex_top.u_ibex_core.id_stage_i'
+  462 |    assign sv2v_tmp_E5FAA = 1'sb0;
+      |                          ^
+%Warning-WIDTHEXPAND: /work/src/ibex_id_stage.v:465:26: Operator ASSIGNW expects 32 bits on the Assign RHS, but Assign RHS's CONST '1'sh0' generates 1 bits.
+                                                      : ... note: In instance 'ibex_top.u_ibex_core.id_stage_i'
+  465 |    assign sv2v_tmp_54893 = 1'sb0;
+      |                          ^
+%Warning-WIDTHEXPAND: /work/src/ibex_id_stage.v:491:34: Operator ASSIGNDLY expects 34 bits on the Assign RHS, but Assign RHS's CONST '1'sh0' generates 1 bits.
+                                                      : ... note: In instance 'ibex_top.u_ibex_core.id_stage_i'
+  491 |      imd_val_q[(1 - i) * 34+:34] <= 1'sb0;
+      |                                  ^~
+%Warning-WIDTHEXPAND: /work/src/ibex_if_stage.v:495:23: Operator ASSIGNDLY expects 32 bits on the Assign RHS, but Assign RHS's CONST '1'sh0' generates 1 bits.
+                                                      : ... note: In instance 'ibex_top.u_ibex_core.if_stage_i'
+  495 |      instr_rdata_id_o <= 1'sb0;
+      |                       ^~
+%Warning-WIDTHEXPAND: /work/src/ibex_if_stage.v:496:27: Operator ASSIGNDLY expects 32 bits on the Assign RHS, but Assign RHS's CONST '1'sh0' generates 1 bits.
+                                                      : ... note: In instance 'ibex_top.u_ibex_core.if_stage_i'
+  496 |      instr_rdata_alu_id_o <= 1'sb0;
+      |                           ^~
+%Warning-WIDTHEXPAND: /work/src/ibex_if_stage.v:499:25: Operator ASSIGNDLY expects 16 bits on the Assign RHS, but Assign RHS's CONST '1'sh0' generates 1 bits.
+                                                      : ... note: In instance 'ibex_top.u_ibex_core.if_stage_i'
+  499 |      instr_rdata_c_id_o <= 1'sb0;
+      |                         ^~
+%Warning-WIDTHEXPAND: /work/src/ibex_if_stage.v:502:26: Operator ASSIGNDLY expects 16 bits on the Assign RHS, but Assign RHS's CONST '1'sh0' generates 1 bits.
+                                                      : ... note: In instance 'ibex_top.u_ibex_core.if_stage_i'
+  502 |      instr_expanded_id_o <= 1'sb0;
+      |                          ^~
+%Warning-WIDTHEXPAND: /work/src/ibex_if_stage.v:504:14: Operator ASSIGNDLY expects 32 bits on the Assign RHS, but Assign RHS's CONST '1'sh0' generates 1 bits.
+                                                      : ... note: In instance 'ibex_top.u_ibex_core.if_stage_i'
+  504 |      pc_id_o <= 1'sb0;
+      |              ^~
+%Warning-WIDTHTRUNC: /work/src/ibex_register_file_ff.v:162:35: Operator FUNCREF 'sv2v_cast_5' expects 5 bits on the Function Argument, but Function Argument's VARREF 'i' generates 32 bits.
+                                                             : ... note: In instance 'ibex_top.gen_regfile_ff.register_file_i'
+  162 |       we_a_dec[i] = (waddr_a_i == sv2v_cast_5(i) ? we_a_i : 1'b0);
+      |                                   ^~~~~~~~~~~
+%Warning-WIDTHEXPAND: /work/src/ibex_core.v:877:26: Operator ASSIGNW expects 3 bits on the Assign RHS, but Assign RHS's CONST '1'sh0' generates 1 bits.
+                                                  : ... note: In instance 'ibex_top.u_ibex_core'
+  877 |    assign lsu_lc_clrperm = 1'sb0;
+      |                          ^
+%Warning-WIDTHEXPAND: /work/src/ibex_top.v:549:26: Operator ASSIGNW expects 128 bits on the Assign RHS, but Assign RHS's CONST '1'sh0' generates 1 bits.
+                                                 : ... note: In instance 'ibex_top'
+  549 |    assign sv2v_tmp_2A187 = 1'sb0;
+      |                          ^
+%Warning-WIDTHEXPAND: /work/src/ibex_top.v:552:26: Operator ASSIGNW expects 64 bits on the Assign RHS, but Assign RHS's CONST '1'sh0' generates 1 bits.
+                                                 : ... note: In instance 'ibex_top'
+  552 |    assign sv2v_tmp_A799D = 1'sb0;
+      |                          ^
+%Warning-WIDTHEXPAND: /work/src/ibex_top.v:703:27: Operator ASSIGNW expects 7 bits on the Assign RHS, but Assign RHS's CONST '1'sh0' generates 1 bits.
+                                                 : ... note: In instance 'ibex_top'
+  703 |    assign trvk_wdata_intg = 1'sb0;
+      |                           ^
+%Warning-WIDTHEXPAND: /work/src/ibex_top.v:929:28: Operator ASSIGNW expects 4 bits on the Assign RHS, but Assign RHS's CONST '1'sh0' generates 1 bits.
+                                                 : ... note: In instance 'ibex_top'
+  929 |    assign data_be_shadow_o = 1'sb0;
+      |                            ^
+%Warning-WIDTHEXPAND: /work/src/ibex_top.v:930:30: Operator ASSIGNW expects 32 bits on the Assign RHS, but Assign RHS's CONST '1'sh0' generates 1 bits.
+                                                 : ... note: In instance 'ibex_top'
+  930 |    assign data_addr_shadow_o = 1'sb0;
+      |                              ^
+%Warning-WIDTHEXPAND: /work/src/ibex_top.v:931:31: Operator ASSIGNW expects 32 bits on the Assign RHS, but Assign RHS's CONST '1'sh0' generates 1 bits.
+                                                 : ... note: In instance 'ibex_top'
+  931 |    assign data_wdata_shadow_o = 1'sb0;
+      |                               ^
+%Warning-WIDTHEXPAND: /work/src/ibex_top.v:932:36: Operator ASSIGNW expects 7 bits on the Assign RHS, but Assign RHS's CONST '1'sh0' generates 1 bits.
+                                                 : ... note: In instance 'ibex_top'
+  932 |    assign data_wdata_intg_shadow_o = 1'sb0;
+      |                                    ^
+%Warning-WIDTHEXPAND: /work/src/ibex_top.v:934:31: Operator ASSIGNW expects 32 bits on the Assign RHS, but Assign RHS's CONST '1'sh0' generates 1 bits.
+                                                 : ... note: In instance 'ibex_top'
+  934 |    assign instr_addr_shadow_o = 1'sb0;
+      |                               ^
+%Warning-WIDTHEXPAND: /work/src/ibex_top.v:988:29: Operator ASSIGNW expects 32 bits on the Assign RHS, but Assign RHS's CONST '1'sh0' generates 1 bits.
+                                                 : ... note: In instance 'ibex_top'
+  988 |    assign trvk_revbm_addr_o = 1'sb0;
+      |                             ^
+%Warning-UNUSEDPARAM: /work/src/ibex_top.v:75:20: Parameter is not used: 'ibex_pkg_PMP_MAX_REGIONS'
+                                                : ... note: In instance 'ibex_top'
+   75 |  localparam [31:0] ibex_pkg_PMP_MAX_REGIONS = 16;
+      |                    ^~~~~~~~~~~~~~~~~~~~~~~~
+%Warning-UNUSEDPARAM: /work/src/ibex_top.v:78:20: Parameter is not used: 'ibex_pkg_PMP_ADDR_MSB'
+                                                : ... note: In instance 'ibex_top'
+   78 |  localparam [31:0] ibex_pkg_PMP_ADDR_MSB = 33;
+      |                    ^~~~~~~~~~~~~~~~~~~~~
+%Warning-UNUSEDPARAM: /work/src/ibex_top.v:102:19: Parameter is not used: 'ICacheScrNumPrinceRoundsHalf'
+                                                 : ... note: In instance 'ibex_top'
+  102 |  parameter [31:0] ICacheScrNumPrinceRoundsHalf = 2;
+      |                   ^~~~~~~~~~~~~~~~~~~~~~~~~~~~
+%Warning-UNUSEDPARAM: /work/src/ibex_top.v:104:27: Parameter is not used: 'ibex_pkg_LfsrWidth'
+                                                 : ... note: In instance 'ibex_top'
+  104 |  localparam signed [31:0] ibex_pkg_LfsrWidth = 32;
+      |                           ^~~~~~~~~~~~~~~~~~
+%Warning-UNUSEDPARAM: /work/src/ibex_top.v:113:20: Parameter is not used: 'ibex_pkg_SCRAMBLE_KEY_W'
+                                                 : ... note: In instance 'ibex_top'
+  113 |  localparam [31:0] ibex_pkg_SCRAMBLE_KEY_W = 128;
+      |                    ^~~~~~~~~~~~~~~~~~~~~~~
+%Warning-UNUSEDPARAM: /work/src/ibex_top.v:116:20: Parameter is not used: 'ibex_pkg_SCRAMBLE_NONCE_W'
+                                                 : ... note: In instance 'ibex_top'
+  116 |  localparam [31:0] ibex_pkg_SCRAMBLE_NONCE_W = 64;
+      |                    ^~~~~~~~~~~~~~~~~~~~~~~~~
+%Warning-UNUSEDPARAM: /work/src/ibex_top.v:204:20: Parameter is not used: 'ibex_pkg_IC_LINE_SIZE'
+                                                 : ... note: In instance 'ibex_top'
+  204 |  localparam [31:0] ibex_pkg_IC_LINE_SIZE = 64;
+      |                    ^~~~~~~~~~~~~~~~~~~~~
+%Warning-UNUSEDPARAM: /work/src/ibex_top.v:706:20: Parameter is not used: 'ibex_cheriot_pkg_CBOUND_W'
+                                                 : ... note: In instance 'ibex_top'
+  706 |  localparam [31:0] ibex_cheriot_pkg_CBOUND_W = 9;
+      |                    ^~~~~~~~~~~~~~~~~~~~~~~~~
+%Warning-UNUSEDPARAM: /work/src/ibex_top.v:707:20: Parameter is not used: 'ibex_cheriot_pkg_CEXP_W'
+                                                 : ... note: In instance 'ibex_top'
+  707 |  localparam [31:0] ibex_cheriot_pkg_CEXP_W = 4;
+      |                    ^~~~~~~~~~~~~~~~~~~~~~~
+%Warning-UNUSEDPARAM: /work/src/ibex_top.v:708:20: Parameter is not used: 'ibex_cheriot_pkg_CPERMS_W'
+                                                 : ... note: In instance 'ibex_top'
+  708 |  localparam [31:0] ibex_cheriot_pkg_CPERMS_W = 6;
+      |                    ^~~~~~~~~~~~~~~~~~~~~~~~~
+%Warning-UNUSEDPARAM: /work/src/ibex_top.v:709:20: Parameter is not used: 'ibex_cheriot_pkg_OTYPE_W'
+                                                 : ... note: In instance 'ibex_top'
+  709 |  localparam [31:0] ibex_cheriot_pkg_OTYPE_W = 3;
+      |                    ^~~~~~~~~~~~~~~~~~~~~~~~
+%Warning-UNUSEDPARAM: /work/src/ibex_core.v:68:20: Parameter is not used: 'ibex_pkg_PMP_MAX_REGIONS'
+                                                 : ... note: In instance 'ibex_top.u_ibex_core'
+   68 |  localparam [31:0] ibex_pkg_PMP_MAX_REGIONS = 16;
+      |                    ^~~~~~~~~~~~~~~~~~~~~~~~
+%Warning-UNUSEDPARAM: /work/src/ibex_core.v:71:20: Parameter is not used: 'ibex_pkg_PMP_ADDR_MSB'
+                                                 : ... note: In instance 'ibex_top.u_ibex_core'
+   71 |  localparam [31:0] ibex_pkg_PMP_ADDR_MSB = 33;
+      |                    ^~~~~~~~~~~~~~~~~~~~~
+%Warning-UNUSEDPARAM: /work/src/ibex_core.v:104:27: Parameter is not used: 'ibex_pkg_LfsrWidth'
+                                                  : ... note: In instance 'ibex_top.u_ibex_core'
+  104 |  localparam signed [31:0] ibex_pkg_LfsrWidth = 32;
+      |                           ^~~~~~~~~~~~~~~~~~
+%Warning-UNUSEDPARAM: /work/src/ibex_core.v:258:20: Parameter is not used: 'ibex_cheriot_pkg_CBOUND_W'
+                                                  : ... note: In instance 'ibex_top.u_ibex_core'
+  258 |  localparam [31:0] ibex_cheriot_pkg_CBOUND_W = 9;
+      |                    ^~~~~~~~~~~~~~~~~~~~~~~~~
+%Warning-UNUSEDPARAM: /work/src/ibex_core.v:259:20: Parameter is not used: 'ibex_cheriot_pkg_CEXP_W'
+                                                  : ... note: In instance 'ibex_top.u_ibex_core'
+  259 |  localparam [31:0] ibex_cheriot_pkg_CEXP_W = 4;
+      |                    ^~~~~~~~~~~~~~~~~~~~~~~
+%Warning-UNUSEDPARAM: /work/src/ibex_core.v:260:20: Parameter is not used: 'ibex_cheriot_pkg_CPERMS_W'
+                                                  : ... note: In instance 'ibex_top.u_ibex_core'
+  260 |  localparam [31:0] ibex_cheriot_pkg_CPERMS_W = 6;
+      |                    ^~~~~~~~~~~~~~~~~~~~~~~~~
+%Warning-UNUSEDPARAM: /work/src/ibex_core.v:261:20: Parameter is not used: 'ibex_cheriot_pkg_OTYPE_W'
+                                                  : ... note: In instance 'ibex_top.u_ibex_core'
+  261 |  localparam [31:0] ibex_cheriot_pkg_OTYPE_W = 3;
+      |                    ^~~~~~~~~~~~~~~~~~~~~~~~
+%Warning-UNUSEDPARAM: /work/src/ibex_core.v:380:20: Parameter is not used: 'ibex_cheriot_pkg_ADDR_W'
+                                                  : ... note: In instance 'ibex_top.u_ibex_core'
+  380 |  localparam [31:0] ibex_cheriot_pkg_ADDR_W = 32;
+      |                    ^~~~~~~~~~~~~~~~~~~~~~~
+%Warning-UNUSEDPARAM: /work/src/ibex_register_file_ff.v:33:27: Parameter is not used: 'ibex_pkg_IbexMuBiWidth'
+                                                             : ... note: In instance 'ibex_top.gen_regfile_ff.register_file_i'
+   33 |  localparam signed [31:0] ibex_pkg_IbexMuBiWidth = 4;
+      |                           ^~~~~~~~~~~~~~~~~~~~~~
+%Warning-UNUSEDPARAM: /work/src/ibex_if_stage.v:94:27: Parameter is not used: 'ibex_pkg_LfsrWidth'
+                                                     : ... note: In instance 'ibex_top.u_ibex_core.if_stage_i'
+   94 |  localparam signed [31:0] ibex_pkg_LfsrWidth = 32;
+      |                           ^~~~~~~~~~~~~~~~~~
+%Warning-UNUSEDPARAM: /work/src/ibex_if_stage.v:104:27: Parameter is not used: 'ibex_pkg_IbexMuBiWidth'
+                                                      : ... note: In instance 'ibex_top.u_ibex_core.if_stage_i'
+  104 |  localparam signed [31:0] ibex_pkg_IbexMuBiWidth = 4;
+      |                           ^~~~~~~~~~~~~~~~~~~~~~
+%Warning-UNUSEDPARAM: /work/src/ibex_if_stage.v:169:20: Parameter is not used: 'ibex_cheriot_pkg_ADDR_W'
+                                                      : ... note: In instance 'ibex_top.u_ibex_core.if_stage_i'
+  169 |  localparam [31:0] ibex_cheriot_pkg_ADDR_W = 32;
+      |                    ^~~~~~~~~~~~~~~~~~~~~~~
+%Warning-UNUSEDPARAM: /work/src/ibex_if_stage.v:170:20: Parameter is not used: 'ibex_cheriot_pkg_CBOUND_W'
+                                                      : ... note: In instance 'ibex_top.u_ibex_core.if_stage_i'
+  170 |  localparam [31:0] ibex_cheriot_pkg_CBOUND_W = 9;
+      |                    ^~~~~~~~~~~~~~~~~~~~~~~~~
+%Warning-UNUSEDPARAM: /work/src/ibex_if_stage.v:171:20: Parameter is not used: 'ibex_cheriot_pkg_CEXP_W'
+                                                      : ... note: In instance 'ibex_top.u_ibex_core.if_stage_i'
+  171 |  localparam [31:0] ibex_cheriot_pkg_CEXP_W = 4;
+      |                    ^~~~~~~~~~~~~~~~~~~~~~~
+%Warning-UNUSEDPARAM: /work/src/ibex_if_stage.v:172:20: Parameter is not used: 'ibex_cheriot_pkg_CPERMS_W'
+                                                      : ... note: In instance 'ibex_top.u_ibex_core.if_stage_i'
+  172 |  localparam [31:0] ibex_cheriot_pkg_CPERMS_W = 6;
+      |                    ^~~~~~~~~~~~~~~~~~~~~~~~~
+%Warning-UNUSEDPARAM: /work/src/ibex_if_stage.v:173:20: Parameter is not used: 'ibex_cheriot_pkg_OTYPE_W'
+                                                      : ... note: In instance 'ibex_top.u_ibex_core.if_stage_i'
+  173 |  localparam [31:0] ibex_cheriot_pkg_OTYPE_W = 3;
+      |                    ^~~~~~~~~~~~~~~~~~~~~~~~
+%Warning-UNUSEDPARAM: /work/src/ibex_id_stage.v:162:27: Parameter is not used: 'ibex_pkg_IbexMuBiWidth'
+                                                      : ... note: In instance 'ibex_top.u_ibex_core.id_stage_i'
+  162 |  localparam signed [31:0] ibex_pkg_IbexMuBiWidth = 4;
+      |                           ^~~~~~~~~~~~~~~~~~~~~~
+%Warning-UNUSEDPARAM: /work/src/ibex_load_store_unit.v:49:27: Parameter is not used: 'ibex_pkg_IbexMuBiWidth'
+                                                            : ... note: In instance 'ibex_top.u_ibex_core.load_store_unit_i'
+   49 |  localparam signed [31:0] ibex_pkg_IbexMuBiWidth = 4;
+      |                           ^~~~~~~~~~~~~~~~~~~~~~
+%Warning-UNUSEDPARAM: /work/src/ibex_load_store_unit.v:203:20: Parameter is not used: 'ibex_cheriot_pkg_REGCAP_W'
+                                                             : ... note: In instance 'ibex_top.u_ibex_core.load_store_unit_i'
+  203 |  localparam [31:0] ibex_cheriot_pkg_REGCAP_W = 35;
+      |                    ^~~~~~~~~~~~~~~~~~~~~~~~~
+%Warning-UNUSEDPARAM: /work/src/ibex_load_store_unit.v:601:20: Parameter is not used: 'ibex_cheriot_pkg_EXP_W'
+                                                             : ... note: In instance 'ibex_top.u_ibex_core.load_store_unit_i'
+  601 |  localparam [31:0] ibex_cheriot_pkg_EXP_W = 5;
+      |                    ^~~~~~~~~~~~~~~~~~~~~~
+%Warning-UNUSEDPARAM: /work/src/ibex_wb_stage.v:69:20: Parameter is not used: 'ibex_cheriot_pkg_CBOUND_W'
+                                                     : ... note: In instance 'ibex_top.u_ibex_core.wb_stage_i'
+   69 |  localparam [31:0] ibex_cheriot_pkg_CBOUND_W = 9;
+      |                    ^~~~~~~~~~~~~~~~~~~~~~~~~
+%Warning-UNUSEDPARAM: /work/src/ibex_wb_stage.v:70:20: Parameter is not used: 'ibex_cheriot_pkg_CEXP_W'
+                                                     : ... note: In instance 'ibex_top.u_ibex_core.wb_stage_i'
+   70 |  localparam [31:0] ibex_cheriot_pkg_CEXP_W = 4;
+      |                    ^~~~~~~~~~~~~~~~~~~~~~~
+%Warning-UNUSEDPARAM: /work/src/ibex_wb_stage.v:71:20: Parameter is not used: 'ibex_cheriot_pkg_CPERMS_W'
+                                                     : ... note: In instance 'ibex_top.u_ibex_core.wb_stage_i'
+   71 |  localparam [31:0] ibex_cheriot_pkg_CPERMS_W = 6;
+      |                    ^~~~~~~~~~~~~~~~~~~~~~~~~
+%Warning-UNUSEDPARAM: /work/src/ibex_wb_stage.v:72:20: Parameter is not used: 'ibex_cheriot_pkg_OTYPE_W'
+                                                     : ... note: In instance 'ibex_top.u_ibex_core.wb_stage_i'
+   72 |  localparam [31:0] ibex_cheriot_pkg_OTYPE_W = 3;
+      |                    ^~~~~~~~~~~~~~~~~~~~~~~~
+%Warning-UNUSEDPARAM: /work/src/ibex_cs_registers.v:125:27: Parameter is not used: 'ibex_pkg_IbexMuBiWidth'
+                                                          : ... note: In instance 'ibex_top.u_ibex_core.cs_registers_i'
+  125 |  localparam signed [31:0] ibex_pkg_IbexMuBiWidth = 4;
+      |                           ^~~~~~~~~~~~~~~~~~~~~~
+%Warning-UNUSEDPARAM: /work/src/ibex_cs_registers.v:144:20: Parameter is not used: 'ibex_cheriot_pkg_CEXP_W'
+                                                          : ... note: In instance 'ibex_top.u_ibex_core.cs_registers_i'
+  144 |  localparam [31:0] ibex_cheriot_pkg_CEXP_W = 4;
+      |                    ^~~~~~~~~~~~~~~~~~~~~~~
+%Warning-UNUSEDPARAM: /work/src/ibex_cs_registers.v:145:20: Parameter is not used: 'ibex_cheriot_pkg_CPERMS_W'
+                                                          : ... note: In instance 'ibex_top.u_ibex_core.cs_registers_i'
+  145 |  localparam [31:0] ibex_cheriot_pkg_CPERMS_W = 6;
+      |                    ^~~~~~~~~~~~~~~~~~~~~~~~~
+%Warning-UNUSEDPARAM: /work/src/ibex_cs_registers.v:146:20: Parameter is not used: 'ibex_cheriot_pkg_OTYPE_W'
+                                                          : ... note: In instance 'ibex_top.u_ibex_core.cs_registers_i'
+  146 |  localparam [31:0] ibex_cheriot_pkg_OTYPE_W = 3;
+      |                    ^~~~~~~~~~~~~~~~~~~~~~~~
+%Warning-UNUSEDPARAM: /work/src/ibex_cs_registers.v:218:20: Parameter is not used: 'ibex_cheriot_pkg_ADDR_W'
+                                                          : ... note: In instance 'ibex_top.u_ibex_core.cs_registers_i'
+  218 |  localparam [31:0] ibex_cheriot_pkg_ADDR_W = 32;
+      |                    ^~~~~~~~~~~~~~~~~~~~~~~
+%Warning-UNUSEDPARAM: /work/src/ibex_cs_registers.v:1563:20: Parameter is not used: 'ibex_cheriot_pkg_EXP_W'
+                                                           : ... note: In instance 'ibex_top.u_ibex_core.cs_registers_i'
+ 1563 |  localparam [31:0] ibex_cheriot_pkg_EXP_W = 5;
+      |                    ^~~~~~~~~~~~~~~~~~~~~~
+%Warning-UNUSEDPARAM: /work/src/ibex_compressed_decoder.v:23:27: Parameter is not used: 'ibex_pkg_IbexMuBiWidth'
+                                                               : ... note: In instance 'ibex_top.u_ibex_core.if_stage_i.compressed_decoder_i'
+   23 |  localparam signed [31:0] ibex_pkg_IbexMuBiWidth = 4;
+      |                           ^~~~~~~~~~~~~~~~~~~~~~
+%Warning-UNUSEDPARAM: /work/src/ibex_decoder.v:78:27: Parameter is not used: 'ibex_pkg_IbexMuBiWidth'
+                                                    : ... note: In instance 'ibex_top.u_ibex_core.id_stage_i.decoder_i'
+   78 |  localparam signed [31:0] ibex_pkg_IbexMuBiWidth = 4;
+      |                           ^~~~~~~~~~~~~~~~~~~~~~
+%Warning-UNUSEDPARAM: /work/src/ibex_controller.v:93:27: Parameter is not used: 'ibex_pkg_IbexMuBiWidth'
+                                                       : ... note: In instance 'ibex_top.u_ibex_core.id_stage_i.controller_i'
+   93 |  localparam signed [31:0] ibex_pkg_IbexMuBiWidth = 4;
+      |                           ^~~~~~~~~~~~~~~~~~~~~~
+%Warning-UNOPTFLAT: /work/src/ibex_id_stage.v:332:7: Signal unoptimizable: Circular combinational logic: 'ibex_top.u_ibex_core.id_stage_i.instr_executing_spec'
+  332 |  wire instr_executing_spec;
+      |       ^~~~~~~~~~~~~~~~~~~~
+                    /work/src/ibex_id_stage.v:332:7:      Example path: ibex_top.u_ibex_core.id_stage_i.instr_executing_spec
+                    /work/src/ibex_id_stage.v:754:2:      Example path: ALWAYS
+                    /work/src/ibex_id_stage.v:330:6:      Example path: ibex_top.u_ibex_core.id_stage_i.jump_set_raw
+                    /work/src/ibex_id_stage.v:724:18:      Example path: ASSIGNW
+                    /work/src/ibex_id_stage.v:329:7:      Example path: ibex_top.u_ibex_core.id_stage_i.jump_set
+                    /work/src/ibex_controller.v:437:2:      Example path: ALWAYS
+                    /work/src/ibex_controller.v:209:6:      Example path: ibex_top.u_ibex_core.id_stage_i.controller_i.halt_if
+                    /work/src/ibex_controller.v:722:23:      Example path: ASSIGNW
+                    /work/src/ibex_core.v:318:7:      Example path: ibex_top.u_ibex_core.id_in_ready
+                    /work/src/ibex_controller.v:437:2:      Example path: ALWAYS
+%Warning-UNOPTFLAT: /work/src/ibex_core.v:318:7: Signal unoptimizable: Circular combinational logic: 'ibex_top.u_ibex_core.id_in_ready'
+  318 |  wire id_in_ready;
+      |       ^~~~~~~~~~~
+                    /work/src/ibex_core.v:318:7:      Example path: ibex_top.u_ibex_core.id_in_ready
+                    /work/src/ibex_controller.v:437:2:      Example path: ALWAYS
+                    /work/src/ibex_controller.v:209:6:      Example path: ibex_top.u_ibex_core.id_stage_i.controller_i.halt_if
+                    /work/src/ibex_controller.v:722:23:      Example path: ASSIGNW
+                    /work/src/ibex_core.v:318:7:      Example path: ibex_top.u_ibex_core.id_in_ready
+%Warning-UNOPTFLAT: /work/src/ibex_core.v:325:7: Signal unoptimizable: Circular combinational logic: 'ibex_top.u_ibex_core.en_wb'
+  325 |  wire en_wb;
+      |       ^~~~~
+                    /work/src/ibex_core.v:325:7:      Example path: ibex_top.u_ibex_core.en_wb
+                    /work/src/ibex_id_stage.v:694:21:      Example path: ASSIGNW
+                    /work/src/ibex_core.v:305:7:      Example path: ibex_top.u_ibex_core.csr_op_en
+                    /work/src/ibex_controller.v:275:21:      Example path: ASSIGNW
+                    /work/src/ibex_controller.v:213:7:      Example path: ibex_top.u_ibex_core.id_stage_i.controller_i.special_req
+                    /work/src/ibex_controller.v:437:2:      Example path: ALWAYS
+                    /work/src/ibex_controller.v:209:6:      Example path: ibex_top.u_ibex_core.id_stage_i.controller_i.halt_if
+                    /work/src/ibex_controller.v:722:23:      Example path: ASSIGNW
+                    /work/src/ibex_core.v:318:7:      Example path: ibex_top.u_ibex_core.id_in_ready
+                    /work/src/ibex_controller.v:437:2:      Example path: ALWAYS

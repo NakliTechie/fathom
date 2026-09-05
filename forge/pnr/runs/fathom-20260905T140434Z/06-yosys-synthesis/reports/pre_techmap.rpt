@@ -1,0 +1,50 @@
+229. Printing statistics.
+
+=== ibex_top ===
+
+   Number of wires:              13049
+   Number of wire bits:          16453
+   Number of public wires:         254
+   Number of public wire bits:    3658
+   Number of ports:                 66
+   Number of port bits:            928
+   Number of memories:               0
+   Number of memory bits:            0
+   Number of processes:              0
+   Number of cells:              15469
+     $_ANDNOT_                    5086
+     $_AND_                        584
+     $_DFFE_PN0N_                   75
+     $_DFFE_PN0P_                 1757
+     $_DFFE_PN1N_                    1
+     $_DFFE_PN1P_                    6
+     $_DFF_PN0_                     31
+     $_DFF_PN1_                      1
+     $_MUX_                       1760
+     $_NAND_                       317
+     $_NOR_                        656
+     $_NOT_                        475
+     $_ORNOT_                      344
+     $_OR_                        4002
+     $_XNOR_                        73
+     $_XOR_                        300
+     sky130_fd_sc_hd__dlclkp_1       1
+
+   Area for cell type $_NOT_ is unknown!
+   Area for cell type $_AND_ is unknown!
+   Area for cell type $_NAND_ is unknown!
+   Area for cell type $_OR_ is unknown!
+   Area for cell type $_NOR_ is unknown!
+   Area for cell type $_XOR_ is unknown!
+   Area for cell type $_XNOR_ is unknown!
+   Area for cell type $_ANDNOT_ is unknown!
+   Area for cell type $_ORNOT_ is unknown!
+   Area for cell type $_MUX_ is unknown!
+   Area for cell type $_DFF_PN0_ is unknown!
+   Area for cell type $_DFF_PN1_ is unknown!
+   Area for cell type $_DFFE_PN0N_ is unknown!
+   Area for cell type $_DFFE_PN0P_ is unknown!
+   Area for cell type $_DFFE_PN1N_ is unknown!
+   Area for cell type $_DFFE_PN1P_ is unknown!
+   Area for cell type \sky130_fd_sc_hd__dlclkp_1 is unknown!
+

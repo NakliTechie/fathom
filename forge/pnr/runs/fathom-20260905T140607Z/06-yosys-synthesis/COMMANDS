@@ -1,0 +1,1 @@
+yosys -y /nix/store/0cgica8q52vjb9a7vbwaccncbajs33gx-python3-3.11.9-env/lib/python3.11/site-packages/openlane/scripts/pyosys/synthesize.py -- --config-in /work/runs/fathom-20260905T140607Z/06-yosys-synthesis/config.json --extra-in /work/runs/fathom-20260905T140607Z/06-yosys-synthesis/extra.json --output /work/runs/fathom-20260905T140607Z/06-yosys-synthesis/ibex_top.nl.v

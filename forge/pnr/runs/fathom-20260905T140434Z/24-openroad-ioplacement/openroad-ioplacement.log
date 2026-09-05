@@ -1,0 +1,14 @@
+Reading OpenROAD database at '/work/runs/fathom-20260905T140434Z/23-openroad-globalplacementskipio/ibex_top.odb'…
+Reading library file at '/pdk/volare/sky130/versions/0fe599b2afb6708d281543108caf8310912f54af/sky130A/libs.ref/sky130_fd_sc_hd/lib/sky130_fd_sc_hd__tt_025C_1v80.lib'…
+Reading design constraints file at '/nix/store/0cgica8q52vjb9a7vbwaccncbajs33gx-python3-3.11.9-env/lib/python3.11/site-packages/openlane/scripts/base.sdc'…
+[INFO] Using clock clk_i…
+[INFO] Setting output delay to: 2.0
+[INFO] Setting input delay to: 2.0
+[INFO] Setting load to: 0.033442
+[INFO] Setting clock uncertainty to: 0.25
+[INFO] Setting clock transition to: 0.1499999999999999944488848768742172978818416595458984375
+[INFO] Setting timing derate to: 5%
+[INFO] place_pins args: -min_distance 3
+Found 0 macro blocks.
+[ERROR PPL-0024] Number of IO pins (928) exceeds maximum number of available positions (688). Increase the die perimeter from 2267.82um to 3155.20um.
+Error: ioplacer.tcl, 62 PPL-0024

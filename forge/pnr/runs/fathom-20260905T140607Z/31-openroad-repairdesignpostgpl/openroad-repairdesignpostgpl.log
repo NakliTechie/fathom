@@ -1,0 +1,166 @@
+Reading timing models for corner nom_tt_025C_1v80…
+Reading timing library for the 'nom_tt_025C_1v80' corner at '/pdk/volare/sky130/versions/0fe599b2afb6708d281543108caf8310912f54af/sky130A/libs.ref/sky130_fd_sc_hd/lib/sky130_fd_sc_hd__tt_025C_1v80.lib'…
+Reading timing models for corner nom_ff_n40C_1v95…
+Reading timing library for the 'nom_ff_n40C_1v95' corner at '/pdk/volare/sky130/versions/0fe599b2afb6708d281543108caf8310912f54af/sky130A/libs.ref/sky130_fd_sc_hd/lib/sky130_fd_sc_hd__ff_n40C_1v95.lib'…
+Reading timing models for corner nom_ss_100C_1v60…
+Reading timing library for the 'nom_ss_100C_1v60' corner at '/pdk/volare/sky130/versions/0fe599b2afb6708d281543108caf8310912f54af/sky130A/libs.ref/sky130_fd_sc_hd/lib/sky130_fd_sc_hd__ss_100C_1v60.lib'…
+Reading OpenROAD database at '/work/runs/fathom-20260905T140607Z/27-openroad-globalplacement/ibex_top.odb'…
+Reading design constraints file at '/nix/store/0cgica8q52vjb9a7vbwaccncbajs33gx-python3-3.11.9-env/lib/python3.11/site-packages/openlane/scripts/base.sdc'…
+[INFO] Using clock clk_i…
+[INFO] Setting output delay to: 2.0
+[INFO] Setting input delay to: 2.0
+[INFO] Setting load to: 0.033442
+[INFO] Setting clock uncertainty to: 0.25
+[INFO] Setting clock transition to: 0.1499999999999999944488848768742172978818416595458984375
+[INFO] Setting timing derate to: 5%
+[INFO] Setting RC values…
+[INFO RSZ-0027] Inserted 157 input buffers.
+[INFO RSZ-0028] Inserted 259 output buffers.
+[INFO RSZ-0058] Using max wire length 6335um.
+Iteration | Resized | Buffers | Nets repaired | Remaining
+---------------------------------------------------------
+        0 |       0 |       0 |             0 |     10413
+      100 |      33 |       0 |             0 |     10313
+      200 |     121 |       8 |             2 |     10213
+      300 |     176 |       8 |             4 |     10113
+      400 |     237 |       8 |             4 |     10013
+      500 |     286 |       8 |             4 |      9913
+      600 |     390 |      26 |             8 |      9813
+      700 |     466 |      54 |            14 |      9713
+      800 |     500 |      60 |            17 |      9613
+      900 |     540 |      60 |            17 |      9513
+     1000 |     591 |      64 |            18 |      9413
+     1100 |     705 |     121 |            35 |      9313
+     1200 |     798 |     141 |            44 |      9213
+     1300 |     866 |     145 |            51 |      9113
+     1400 |     945 |     149 |            60 |      9013
+     1500 |    1026 |     151 |            65 |      8913
+     1600 |    1113 |     151 |            69 |      8813
+     1700 |    1173 |     153 |            72 |      8713
+     1800 |    1262 |     157 |            75 |      8613
+     1900 |    1344 |     159 |            78 |      8513
+     2000 |    1416 |     159 |            78 |      8413
+     2100 |    1503 |     163 |            82 |      8313
+     2200 |    1569 |     163 |            82 |      8213
+     2300 |    1634 |     163 |            88 |      8113
+     2400 |    1725 |     163 |            95 |      8013
+     2500 |    1790 |     168 |            99 |      7913
+     2600 |    1852 |     175 |           102 |      7813
+     2700 |    1955 |     201 |           111 |      7713
+     2800 |    2023 |     208 |           114 |      7613
+     2900 |    2129 |     228 |           121 |      7513
+     3000 |    2237 |     247 |           127 |      7413
+     3100 |    2316 |     249 |           141 |      7313
+     3200 |    2319 |     249 |           141 |      7213
+     3300 |    2319 |     249 |           141 |      7113
+     3400 |    2319 |     249 |           141 |      7013
+     3500 |    2319 |     249 |           141 |      6913
+     3600 |    2319 |     249 |           141 |      6813
+     3700 |    2319 |     249 |           141 |      6713
+     3800 |    2319 |     249 |           141 |      6613
+     3900 |    2377 |     255 |           144 |      6513
+     4000 |    2474 |     273 |           163 |      6413
+     4100 |    2493 |     289 |           167 |      6313
+     4200 |    2508 |     301 |           170 |      6213
+     4300 |    2569 |     326 |           177 |      6113
+     4400 |    2728 |     407 |           200 |      6013
+     4500 |    2875 |     481 |           223 |      5913
+     4600 |    3013 |     531 |           238 |      5813
+     4700 |    3107 |     535 |           240 |      5713
+     4800 |    3209 |     548 |           245 |      5613
+     4900 |    3281 |     558 |           249 |      5513
+     5000 |    3377 |     562 |           251 |      5413
+     5100 |    3479 |     571 |           253 |      5313
+     5200 |    3583 |     584 |           257 |      5213
+     5300 |    3691 |     604 |           264 |      5113
+     5400 |    3795 |     616 |           267 |      5013
+     5500 |    3894 |     616 |           267 |      4913
+     5600 |    3994 |     616 |           267 |      4813
+     5700 |    4093 |     617 |           269 |      4713
+     5800 |    4193 |     617 |           269 |      4613
+     5900 |    4276 |     632 |           274 |      4513
+     6000 |    4365 |     643 |           280 |      4413
+     6100 |    4475 |     655 |           284 |      4313
+     6200 |    4575 |     655 |           284 |      4213
+     6300 |    4675 |     655 |           284 |      4113
+     6400 |    4775 |     655 |           284 |      4013
+     6500 |    4875 |     655 |           284 |      3913
+     6600 |    4978 |     659 |           285 |      3813
+     6700 |    5104 |     702 |           303 |      3713
+     6800 |    5195 |     707 |           305 |      3613
+     6900 |    5317 |     736 |           313 |      3513
+     7000 |    5613 |     939 |           365 |      3413
+     7100 |    5687 |     971 |           370 |      3313
+     7200 |    5741 |     983 |           380 |      3213
+     7300 |    5864 |    1024 |           393 |      3113
+     7400 |    5949 |    1042 |           403 |      3013
+     7500 |    6049 |    1042 |           403 |      2913
+     7600 |    6149 |    1042 |           403 |      2813
+     7700 |    6249 |    1042 |           403 |      2713
+     7800 |    6349 |    1042 |           403 |      2613
+     7900 |    6449 |    1042 |           403 |      2513
+     8000 |    6549 |    1042 |           403 |      2413
+     8100 |    6649 |    1042 |           403 |      2313
+     8200 |    6749 |    1042 |           403 |      2213
+     8300 |    6849 |    1042 |           403 |      2113
+     8400 |    6949 |    1042 |           403 |      2013
+     8500 |    7049 |    1042 |           403 |      1913
+     8600 |    7155 |    1048 |           404 |      1813
+     8700 |    7294 |    1089 |           418 |      1713
+     8800 |    7430 |    1129 |           433 |      1613
+     8900 |    7531 |    1135 |           434 |      1513
+     9000 |    7639 |    1148 |           440 |      1413
+     9100 |    7734 |    1149 |           441 |      1313
+     9200 |    7825 |    1149 |           441 |      1213
+     9300 |    7914 |    1149 |           441 |      1113
+     9400 |    8011 |    1151 |           443 |      1013
+     9500 |    8083 |    1151 |           443 |       913
+     9600 |    8378 |    1401 |           444 |       813
+     9700 |    8378 |    1401 |           444 |       713
+     9800 |    8378 |    1401 |           444 |       613
+     9900 |    8378 |    1401 |           444 |       513
+    10000 |    8378 |    1401 |           444 |       413
+    10100 |    8378 |    1401 |           444 |       313
+    10200 |    8378 |    1401 |           444 |       213
+    10300 |    8378 |    1401 |           444 |       113
+    10400 |    8378 |    1401 |           444 |        13
+    final |    8378 |    1401 |           444 |         0
+---------------------------------------------------------
+[INFO RSZ-0034] Found 111 slew violations.
+[INFO RSZ-0035] Found 339 fanout violations.
+[INFO RSZ-0038] Inserted 1401 buffers in 444 nets.
+[INFO RSZ-0039] Resized 8378 instances.
+[INFO RSZ-0042] Inserted 168 tie sky130_fd_sc_hd__conb_1 instances.
+[INFO RSZ-0042] Inserted 2 tie sky130_fd_sc_hd__conb_1 instances.
+Placement Analysis
+---------------------------------
+total displacement      27607.4 u
+average displacement        1.3 u
+max displacement           13.5 u
+original HPWL          674565.5 u
+legalized HPWL         693403.8 u
+delta HPWL                    3 %
+
+[INFO DPL-0020] Mirrored 3826 instances
+[INFO DPL-0021] HPWL before          693403.8 u
+[INFO DPL-0022] HPWL after           685709.2 u
+[INFO DPL-0023] HPWL delta               -1.1 %
+[INFO] Setting RC values…
+Setting global connections for newly added cells…
+[INFO] Setting global connections...
+Updating metrics…
+Cell type report:                       Count       Area
+  Fill cell                               602    2259.67
+  Tap cell                               9544   11941.45
+  Buffer                                   30     123.87
+  Timing Repair Buffer                   1817   13191.40
+  Inverter                                114     427.91
+  Clock gate cell                           1      17.52
+  Sequential cell                        1871   47555.61
+  Multi-Input combinational cell         7311   66686.46
+  Total                                 21290  142203.88
+Writing OpenROAD database to '/work/runs/fathom-20260905T140607Z/31-openroad-repairdesignpostgpl/ibex_top.odb'…
+Writing netlist to '/work/runs/fathom-20260905T140607Z/31-openroad-repairdesignpostgpl/ibex_top.nl.v'…
+Writing powered netlist to '/work/runs/fathom-20260905T140607Z/31-openroad-repairdesignpostgpl/ibex_top.pnl.v'…
+Writing layout to '/work/runs/fathom-20260905T140607Z/31-openroad-repairdesignpostgpl/ibex_top.def'…
+Writing timing constraints to '/work/runs/fathom-20260905T140607Z/31-openroad-repairdesignpostgpl/ibex_top.sdc'…

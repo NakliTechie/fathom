@@ -1,0 +1,5 @@
+`verilator_config
+lint_off -rule DECLFILENAME
+lint_off -rule EOFNEWLINE
+lint_off -rule UNDRIVEN -file "/work/runs/fathom-20260905T140607Z/tmp/d1d99cee64d24a11a80b646089c49be1.bb.v"
+lint_off -rule UNUSEDSIGNAL -file "/work/runs/fathom-20260905T140607Z/tmp/d1d99cee64d24a11a80b646089c49be1.bb.v"

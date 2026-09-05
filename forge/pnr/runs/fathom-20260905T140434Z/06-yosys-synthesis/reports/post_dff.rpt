@@ -1,0 +1,43 @@
+235. Printing statistics.
+
+=== ibex_top ===
+
+   Number of wires:              14888
+   Number of wire bits:          18292
+   Number of public wires:         254
+   Number of public wire bits:    3658
+   Number of ports:                 66
+   Number of port bits:            928
+   Number of memories:               0
+   Number of memory bits:            0
+   Number of processes:              0
+   Number of cells:              17308
+     $_ANDNOT_                    5086
+     $_AND_                        584
+     $_MUX_                       3599
+     $_NAND_                       317
+     $_NOR_                        656
+     $_NOT_                        475
+     $_ORNOT_                      344
+     $_OR_                        4002
+     $_XNOR_                        73
+     $_XOR_                        300
+     sky130_fd_sc_hd__dfrtp_2     1863
+     sky130_fd_sc_hd__dfstp_2        8
+     sky130_fd_sc_hd__dlclkp_1       1
+
+   Area for cell type $_NOT_ is unknown!
+   Area for cell type $_AND_ is unknown!
+   Area for cell type $_NAND_ is unknown!
+   Area for cell type $_OR_ is unknown!
+   Area for cell type $_NOR_ is unknown!
+   Area for cell type $_XOR_ is unknown!
+   Area for cell type $_XNOR_ is unknown!
+   Area for cell type $_ANDNOT_ is unknown!
+   Area for cell type $_ORNOT_ is unknown!
+   Area for cell type $_MUX_ is unknown!
+   Area for cell type \sky130_fd_sc_hd__dlclkp_1 is unknown!
+
+   Chip area for module '\ibex_top': 49160.899200
+     of which used for sequential elements: 49160.899200 (100.00%)
+

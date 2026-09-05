@@ -1,0 +1,1 @@
+yosys -y /nix/store/0cgica8q52vjb9a7vbwaccncbajs33gx-python3-3.11.9-env/lib/python3.11/site-packages/openlane/scripts/pyosys/json_header.py -- --config-in /work/runs/fathom-20260905T140607Z/05-yosys-jsonheader/config.json --extra-in /work/runs/fathom-20260905T140607Z/05-yosys-jsonheader/extra.json --output /work/runs/fathom-20260905T140607Z/05-yosys-jsonheader/ibex_top.h.json
