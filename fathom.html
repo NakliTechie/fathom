@@ -50,7 +50,7 @@ header h1 { font-size: var(--fs-3); font-weight: var(--w-bold); margin: 0; lette
 header .meta { color: var(--fg-2); font-size: var(--fs-0); }
 header .meta b { color: var(--fg-1); font-weight: var(--w-regular); }
 main { display: grid; grid-template-columns: 1fr; overflow: hidden; }
-#layers { display: grid; grid-template-rows: repeat(4, minmax(0, 1fr)) auto auto; overflow: hidden; }
+#layers { display: grid; grid-template-rows: repeat(4, minmax(0, 1fr)) auto auto auto; overflow: hidden; }
 .layer { display: grid; grid-template-rows: auto 1fr; min-height: 0; border-bottom: 1px solid var(--line); }
 .layer > .head { display: flex; gap: var(--sp-3); align-items: baseline; padding: var(--sp-1) var(--sp-4);
   background: var(--bg-1); color: var(--fg-1); font-size: var(--fs-0); text-transform: uppercase; letter-spacing: .08em; }
@@ -96,6 +96,13 @@ kbd { color: var(--fg-1); border: 1px solid var(--line); border-radius: var(--r)
 .lazy { color: var(--fg-2); }
 .lazy button { font: inherit; color: var(--fg-0); background: var(--bg-3); border: 1px solid var(--line); border-radius: var(--r); padding: var(--sp-1) var(--sp-3); cursor: pointer; }
 .lazy button:hover { background: var(--bg-2); }
+
+/* ---- cells layer: the floorplan ------------------------------------------------- */
+#L-cells .body { display: grid; grid-template-columns: auto 1fr; gap: var(--sp-4); padding: var(--sp-2) var(--sp-4); overflow: hidden; }
+#L-cells canvas { background: var(--bg-1); border: 1px solid var(--line); image-rendering: pixelated; }
+#L-cells .side { overflow: auto; font-size: var(--fs-0); color: var(--fg-1); }
+#L-cells .side .row { grid-template-columns: 7ch 1fr; }
+#L-cells .side .row .n { color: var(--acc-cell); }
 
 /* ---- states ------------------------------------------------------------------ */
 #status { padding: var(--sp-4); color: var(--fg-1); }
@@ -191,6 +198,7 @@ function render() {
   for (const col of document.querySelectorAll('#L-pipe .col')) col.classList.toggle('now', +col.dataset.cycle === c);
   const pc = document.querySelector('#L-pipe .col.now'); if (pc) pc.scrollIntoView({ block: 'nearest', inline: 'center' });
   if (S.gates) renderGates(c);
+  if (S.cells) renderCells(c);
   const now = document.querySelector('#L-asm .row.now'); if (now) now.scrollIntoView({ block: 'nearest' });
   const src = document.querySelector('#L-source .row.now'); if (src) src.scrollIntoView({ block: 'nearest' });
 }
@@ -256,7 +264,11 @@ function build() {
   const gates = layerEl('gates', 'gates', 'var(--acc-gate)', `${a.gates.nets.length} nets · ${a.gates.toggles.rows} toggle events in gates.parquet`);
   gates.querySelector('.body').innerHTML = `<div class="lazy">generic gate netlist, ${a.gates.nets.length} nets — <button id="load-bottom">load the bottom layers</button> <span>(DuckDB-wasm, 18 MB, same-origin)</span></div>`;
   gates.querySelector('#load-bottom').addEventListener('click', () => window.fathom.loadBottom('ui'));
-  L.append(src, ir, asm, arch, pipe, gates);
+  const [x0, y0, x1, y1] = a.cells.die_um;
+  const cells = layerEl('cells', 'cells', 'var(--acc-cell)',
+    `${a.cells.library} · ${a.cells.cells.length} placed cells on a ${(x1 - x0).toFixed(0)} × ${(y1 - y0).toFixed(0)} µm die · ${a.cells.pnr.tool} · setup ${a.cells.pnr.setup_ws_ns_tt.toFixed(2)} ns @tt`);
+  cells.querySelector('.body').innerHTML = `<div class="lazy">placed and routed on Sky130 — loads with the gate layer</div>`;
+  L.append(src, ir, asm, arch, pipe, gates, cells);
   $('scrub').max = a.cycles - 1;
   performance.mark('fathom:built');                    // the 5 s frame is measured, not eyeballed
   $('meta').innerHTML = `${a.core.name} · ${a.core.shape} RV32I · ${a.core.stages.join('→')} · anchor ${a.core.anchor_stage} · <b>${a.program.name}</b> · ${a.cycles} cycles · ${a.exec.length} retires · ${a.artifact_id.slice(0, 19)}`;
@@ -280,13 +292,15 @@ async function duck() {
 }
 async function registerParquet(name, url) {
   const { db } = await duck();
+  const buf = new Uint8Array(await (await fetch(url)).arrayBuffer());
+  const n = buf.byteLength;                          // read before registering: the buffer is transferred
   await db.registerFileBuffer(name, buf);
-  return buf.byteLength;
+  return n;
 }
 async function q(sql) { const { conn } = await duck(); const t = await conn.query(sql); return t.toArray().map(r => r.toJSON()); }
 
 async function loadBottom(door) {
-  if (S.gates) return S.gates.summary;
+  if (S.gates) return { gates: S.gates.summary, cells: S.cells && S.cells.summary };
   rec(door, 'loadBottom', []);
   const a = S.art, prog = a.program.name, t0 = performance.now();
   const body = $('L-gates').querySelector('.body');
@@ -298,13 +312,66 @@ async function loadBottom(door) {
   // gate cycle == pipe cycle, asserted here, not by eye (FATHOM.md §7 C3)
   const missing = [...Array(a.cycles).keys()].filter(c => !byCycle.has(c));
   const max = Math.max(...per.map(r => r.toggles));
+  await q(`SELECT net FROM 'gates.parquet' WHERE cycle = 0 LIMIT 1`);        // pre-warm the plan
   S.gates = { byCycle, max, summary: { bytes, cycles: per.length, missing: missing.length, max_toggles: max, ms: Math.round(performance.now() - t0) } };
+  await loadCells();
   body.innerHTML = `<div class="strip">${[...Array(a.cycles).keys()].map(c => { const r = byCycle.get(c); const h = r ? Math.max(1, Math.round(64 * r.toggles / max)) : 1; return `<div class="bar" data-cycle="${c}" style="height:${h}px" title="cycle ${c}: ${r ? r.toggles + ' toggles on ' + r.nets + ' nets' : 'silent'}"></div>`; }).join('')}</div><div class="stepin"></div>`;
   body.querySelector('.strip').addEventListener('click', ev => { const b = ev.target.closest('.bar'); if (b) seek(+b.dataset.cycle); });
   $('L-gates').querySelector('.note').textContent = `${a.gates.nets.length} nets · ${a.gates.toggles.rows} events · ${missing.length === 0 ? 'every cycle joined' : missing.length + ' silent cycles'} · ${S.gates.summary.ms} ms to load`;
   renderGates(S.cycle);
-  return S.gates.summary;
+  return { gates: S.gates.summary, cells: S.cells && S.cells.summary };
 }
+// ---- the floorplan: every placed cell at its coordinate; the cycle's toggling cells lit -----
+const SITE = { w: 0.46, h: 2.72 };                 // sky130_fd_sc_hd site, µm (cell width is a multiple)
+async function loadCells() {
+  const a = S.art, cl = a.cells, t0 = performance.now();
+  const bytes = await registerParquet('cells.parquet', `artifacts/${a.program.name}/${cl.toggles.file}`);
+  // net -> cells that drive it (one cell per net in practice)
+  const byNet = new Map();
+  cl.cells.forEach((c, i) => { if ('net' in c) { if (!byNet.has(c.net)) byNet.set(c.net, []); byNet.get(c.net).push(i); } });
+  const per = await q(`SELECT cycle::INT AS cycle, count(*)::INT AS nets, sum(count)::INT AS toggles FROM 'cells.parquet' GROUP BY cycle ORDER BY cycle`);
+  await q(`SELECT net FROM 'cells.parquet' WHERE cycle = 0 LIMIT 1`);
+  const [x0, y0, x1, y1] = cl.die_um, W = x1 - x0, H = y1 - y0;
+  const body = $('L-cells').querySelector('.body');
+  const scale = Math.min(1, 236 / H);                // fit a 236 px tall band
+  const cw = Math.ceil(W * scale), ch = Math.ceil(H * scale);
+  body.innerHTML = `<canvas width="${cw}" height="${ch}" aria-label="floorplan"></canvas><div class="side"></div>`;
+  const cv = body.querySelector('canvas'), ctx = cv.getContext('2d');
+  // the static picture, drawn once: every logic cell, dark
+  const base = document.createElement('canvas'); base.width = cw; base.height = ch;
+  const bctx = base.getContext('2d');
+  bctx.fillStyle = getComputedStyle(document.documentElement).getPropertyValue('--fg-3').trim();
+  for (const c of cl.cells) bctx.fillRect((c.x - x0) * scale, ch - (c.y - y0 + SITE.h) * scale, Math.max(1, SITE.w * 4 * scale), Math.max(1, SITE.h * scale));
+  S.cells = { byNet, byCycle: new Map(per.map(r => [r.cycle, r])), base, ctx, cv, scale, x0, y0, ch,
+              summary: { bytes, cells: cl.cells.length, drivers: byNet.size, cycles: per.length, ms: Math.round(performance.now() - t0) } };
+  renderCells(S.cycle);
+}
+let cellsReq = 0;
+async function renderCells(c) {
+  const a = S.art, cl = a.cells, st = S.cells, r = st.byCycle.get(c);
+  const my = ++cellsReq;
+  const rows = r ? await q(`SELECT net::INT AS net, count::INT AS count FROM 'cells.parquet' WHERE cycle = ${c}`) : [];
+  if (my !== cellsReq) return;
+  st.ctx.clearRect(0, 0, st.cv.width, st.cv.height);
+  st.ctx.drawImage(st.base, 0, 0);
+  st.ctx.fillStyle = getComputedStyle(document.documentElement).getPropertyValue('--acc-cell').trim();
+  let lit = 0;
+  const types = new Map();
+  for (const t of rows) {
+    const ids = st.byNet.get(t.net); if (!ids) continue;
+    for (const i of ids) {
+      const cell = cl.cells[i]; lit++;
+      st.ctx.fillRect((cell.x - st.x0) * st.scale, st.ch - (cell.y - st.y0 + SITE.h) * st.scale, Math.max(1, SITE.w * 4 * st.scale), Math.max(1, SITE.h * st.scale));
+      const ty = cl.types[cell.type].replace(/^sky130_(fd|ef)_sc_hd__/, '').replace(/_\d+$/, '');
+      types.set(ty, (types.get(ty) || 0) + 1);
+    }
+  }
+  st.lit = lit;
+  const side = document.querySelector('#L-cells .side');
+  side.innerHTML = `<div class="row"><span class="n">${lit}</span><span>cells switching at cycle ${c}${r ? ` · ${r.toggles} toggles on ${r.nets} nets` : ' · silent'}</span></div>` +
+    [...types.entries()].sort((p, q) => q[1] - p[1]).slice(0, 10).map(([t, n]) => `<div class="row"><span class="n">${n}</span><span>${esc(t)}</span></div>`).join('');
+}
+
 let gatesReq = 0;
 async function renderGates(c) {
   const a = S.art, r = S.gates.byCycle.get(c);
@@ -359,7 +426,14 @@ window.fathom = {
         return q(`SELECT net::INT AS net, count::INT AS count FROM 'gates.parquet' WHERE cycle = ${cycle} ORDER BY count DESC, net LIMIT 50`)
           .then(top => ({ cycle, nets: r ? r.nets : 0, toggles: r ? r.toggles : 0, top: top.map(t => ({ net: a.gates.nets[t.net], count: t.count })) }));
       }
-      default:       throw new Error(`layer ${layer}: cells arrive with the floorplan (C3, in progress)`);
+      case 'cells':  {
+        if (!S.cells) throw new Error('cells: call fathom.loadBottom() first (lazy by design)');
+        const r = S.cells.byCycle.get(cycle);
+        return q(`SELECT net::INT AS net, count::INT AS count FROM 'cells.parquet' WHERE cycle = ${cycle}`)
+          .then(rows => { const lit = []; for (const t of rows) for (const i of (S.cells.byNet.get(t.net) || [])) lit.push({ cell: a.cells.cells[i].name, type: a.cells.types[a.cells.cells[i].type], x: a.cells.cells[i].x, y: a.cells.cells[i].y, count: t.count });
+            return { cycle, nets: r ? r.nets : 0, toggles: r ? r.toggles : 0, cells_switching: lit.length, cells: lit.slice(0, 200), die_um: a.cells.die_um }; });
+      }
+      default:       throw new Error(`layer ${layer}: unknown`);
     }
   },
   trace(xid) {
