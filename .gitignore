@@ -6,3 +6,6 @@ build/
 .venv/
 .claude/
 forge/pnr/runs/
+node_modules/
+forge/test/test-results/
+forge/test/playwright-report/

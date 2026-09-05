@@ -1,0 +1,12 @@
+{
+  "name": "fathom",
+  "private": true,
+  "version": "0.1.0",
+  "description": "One event, followed down every layer of a machine, on one clock.",
+  "license": "AGPL-3.0-only",
+  "scripts": {
+    "deploy": "wrangler deploy",
+    "test": "cd forge/test && npx playwright test"
+  },
+  "devDependencies": { "wrangler": "^4" }
+}

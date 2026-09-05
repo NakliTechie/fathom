@@ -1,0 +1,7 @@
+{
+  "name": "fathom-test",
+  "private": true,
+  "description": "The C4 checkpoint headless, and C5's guide capture. The one Playwright harness.",
+  "scripts": { "test": "playwright test", "guide": "playwright test --grep @guide" },
+  "devDependencies": { "@playwright/test": "^1.56" }
+}
