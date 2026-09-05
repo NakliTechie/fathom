@@ -681,3 +681,44 @@ gate layer aggregated with step-in, the cells layer as a floorplan on the real d
 
 Clean build, four programs, from the pinned `forge/pnr/out/`: **32 s**, all four
 artifacts byte-identical to the committed ones, `git status artifacts/` empty.
+
+
+---
+
+## 11. C3 — the bottom, 2026-09-05
+
+Two layers, both **lazy**: a button or `fathom.loadBottom()` imports the vendored
+DuckDB-wasm (18 MB, same-origin, never on the first-frame path), registers
+`gates.parquet` and `cells.parquet`, and runs one ordered scan per layer into typed
+columns with per-cycle offsets. **A step is then an array slice, never a query.**
+Pulling the block out removes both layers and nothing above them changes.
+
+DuckDB's ESM imports `apache-arrow` as a bare specifier and expects a bundler. Fathom has
+none, so it ships an import map and single-file ESM builds of apache-arrow 13.0.0,
+flatbuffers 23.5.26 and tslib 2.6.2 with their cross-package imports rewritten to
+relative paths. No CDN at runtime (`PERMISSIONS.md`).
+
+**Gates (L5)** — a strip, one bar per cycle, height ∝ toggle events; step-in lists the
+cycle's nets by toggle count. **Cells (L6)** — the floorplan: a canvas of the
+832 × 842 µm die, all 13,740 placed cells drawn dark once, the cycle's switching cells
+lit through each cell's driven net, and a side list by cell type. Both follow the scrub.
+
+**Checkpoint, measured on `popcount`** (259 cycles, 251 k gate rows, 1.21 M cell rows):
+
+| | |
+|---|---|
+| first frame | 45 ms |
+| load, gates | 1.38 s (212 KB Parquet, 137→259 bars, no cycle missing) |
+| load, cells | 2.68 s (1.68 MB Parquet, 13,740 cells, 4,528 drivers) |
+| one-cycle step, both layers live | **7.3 – 18.2 ms** (budget 100 ms) |
+| gate cycle == pipe cycle | asserted at load (no cycle missing from the table) and on every step (bar == column == scrub) |
+
+At cycle 122 of `popcount` (a branch flush): 1,172 gate toggles, 2,428 cells switching.
+At cycle 43 of `uart_puts` (the first UART store retiring): 3,922 cell toggles on 2,615
+nets, 1,107 cells lit — a `mux2_4` at (656, 305) µm among them.
+
+**What the floorplan is honest about.** 4,567 of 13,740 logic cells drive a net that
+toggles in `uart_puts`; the rest are placed and dark for this program and are drawn so.
+Fill, decap and tap cells are not drawn: they are the die's background, not the machine.
+The cell footprint is drawn at a fixed four-site width; real per-cell widths are a later
+refinement, not a truth issue — the position is the DEF's.
