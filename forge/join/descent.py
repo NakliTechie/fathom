@@ -100,7 +100,9 @@ def main():
     prog = sys.argv[1] if len(sys.argv) > 1 else "uart_puts"
     P = BUILD / prog
     elf = need(P / f"{prog}.elf")
-    ll = need(P / f"{prog}.ll")
+    lls = sorted(P.glob("*.ll"))
+    if not lls:
+        die("TOOLCHAIN", f"no .ll under {P.relative_to(ROOT)}", "make program PROGRAM=<name>")
     line_txt = need(P / "line.txt")
     retire_log = need(P / "sim" / "retire.log")
     cycle_log = need(P / "sim" / "cycle.log")
@@ -120,7 +122,7 @@ def main():
 
     # ---- L2 code + L1 IR ------------------------------------------------------
     code, syms = read_code(elf)
-    ir = read_ir(ll)
+    ir = [e for ll in lls for e in read_ir(ll)]
     ir_by_site = {}
     for e in ir:
         if e["line"] is not None:

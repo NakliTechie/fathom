@@ -528,10 +528,15 @@ stands.
 | `uart_puts` | a call frame, a loop, a memory-mapped write | 45 | 95 | branch 18 · load-use 17 |
 | `popcount` | data-dependent branches, taken and not | 50 | 174 | branch 45 · load-use 29 · 6 branch-flushes |
 | `chase` | load-use on every hop of a pointer walk | 25 | 45 | branch 13 · load-use 15 |
+| `sum` | **two translation units**; an extern call across them | 60 | 119 | — |
 
-Join 1 is total on all three. The program class the claim now covers: freestanding C,
-`-O0`, one translation unit plus the assembly stub, static functions, `const` data in
-ROM. Not covered: multiple translation units, inlining, anything above `-O0`.
+Join 1 is total on all four. The program class the claim now covers: freestanding C,
+`-O0`, **one or more translation units** plus the assembly stub, static and extern
+functions, `const` data in ROM. `sum` resolves 60/60 pcs across three source files in
+two compile units — the (compile unit, file index) key from §6.4 doing its job. Not
+covered: inlining, anything above `-O0`, and division (`-march=rv32i` has no `M`, and
+there is no compiler-rt by design — `__divsi3` is an undefined symbol, which is the
+honest boundary of a freestanding RV32I program).
 
 ### 7.4 What the traces say about the core
 

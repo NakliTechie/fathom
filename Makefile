@@ -11,7 +11,11 @@ CFLAGS  := --target=riscv32-unknown-elf -march=rv32i -mabi=ilp32 -O0 -g \
            -ffreestanding -fno-builtin -nostdlib
 
 PROGRAM ?= uart_puts
-PROGRAMS := uart_puts popcount chase
+PROGRAMS := uart_puts popcount chase sum
+# extra translation units per program (sum is two TUs on purpose: SPEC §7.3)
+EXTRA_sum := sum_lib
+EXTRA := $(EXTRA_$(PROGRAM))
+EXTRA_OBJS = $(addprefix $(P)/,$(addsuffix .o,$(EXTRA)))
 
 B       := build
 P       := $(B)/$(PROGRAM)
@@ -29,12 +33,14 @@ programs:
 
 ## program — C + crt0 -> RV32I ELF, IR, the DWARF line table, the memory image
 program: $(ELF)
-$(ELF): forge/program/$(PROGRAM).c forge/program/crt0.S forge/program/link.ld forge/program/mkimage.py
+$(ELF): forge/program/$(PROGRAM).c $(addprefix forge/program/,$(addsuffix .c,$(EXTRA))) forge/program/crt0.S forge/program/link.ld forge/program/mkimage.py
 	@mkdir -p $(P)/sim $(P)/gates
 	$(CLANG) $(CFLAGS) -S -emit-llvm forge/program/$(PROGRAM).c -o $(P)/$(PROGRAM).ll
+	@for t in $(EXTRA); do $(CLANG) $(CFLAGS) -S -emit-llvm forge/program/$$t.c -o $(P)/$$t.ll; done
 	$(CLANG) $(CFLAGS) -c forge/program/crt0.S          -o $(P)/crt0.o
 	$(CLANG) $(CFLAGS) -c forge/program/$(PROGRAM).c    -o $(P)/$(PROGRAM).o
-	ld.lld -T forge/program/link.ld $(P)/crt0.o $(P)/$(PROGRAM).o -o $@
+	@for t in $(EXTRA); do $(CLANG) $(CFLAGS) -c forge/program/$$t.c -o $(P)/$$t.o; done
+	ld.lld -T forge/program/link.ld $(P)/crt0.o $(P)/$(PROGRAM).o $(EXTRA_OBJS) -o $@
 	$(LLVM)/llvm-dwarfdump --debug-line $@ > $(P)/line.txt
 	$(LLVM)/llvm-objcopy -O binary $@ $(P)/$(PROGRAM).bin
 	python3 forge/program/mkimage.py $(P)/$(PROGRAM).bin $(P)/$(PROGRAM).hex
