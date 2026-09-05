@@ -52,3 +52,16 @@ net and module names derived from Ibex's RTL, which the Apache-2.0 grant covers.
   direction requires, and no more.
 - **Runtime:** served same-origin from the tool. No font CDN at runtime (FATHOM.md §7,
   Hard NOTs).
+
+## Vendored runtime library
+
+### DuckDB-wasm — reads the Parquet toggle tables in the browser (C3)
+
+- **Upstream:** https://github.com/duckdb/duckdb-wasm, npm `@duckdb/duckdb-wasm` **1.28.0**
+  (pinned: the last version known to work under a CSP-locked, same-origin deployment).
+- **Licence:** MIT (`vendor/duckdb-wasm/1.28.0/LICENSE`).
+- **Files:** `duckdb-browser.mjs`, `duckdb-browser-eh.worker.js`, `duckdb-eh.wasm` — the
+  exception-handling build only; no MVP or COI bundles.
+- **Runtime:** served same-origin, loaded **lazily** when a bottom layer first opens — never
+  on the first-frame path. No CDN at runtime (FATHOM.md §7, Hard NOTs).
+- **Removable:** pulling it out removes the gate and cells layers; the upper five stand.
