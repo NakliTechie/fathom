@@ -1,0 +1,71 @@
+# forge stage: Ibex RV32I -> Sky130 standard cells (D2, layer under the generic gates).
+# Same read set and parameters as synth.ys; differs only after synth.
+# Top is ibex_top, not ibex_core: the register file lives in ibex_top, and the
+# gate netlist has to run the program standalone (decision 2026-09-05).
+# Config: BaseIsaRV32I, RV32MNone, RV32BNone, minimal Zc, 3-stage (WritebackStage=1),
+# flip-flop regfile, no PMP / ICache / branch predictor / SecureIbex.
+# ibex_top_tracing / ibex_tracer are simulation-only (they $finish at elaboration
+# and drive the trace log); they belong to the sim leg, not the synth leg.
+read_verilog -sv build/synth/generated/ibex_alu.v
+read_verilog -sv build/synth/generated/ibex_branch_predict.v
+read_verilog -sv build/synth/generated/ibex_cheriot_ex.v
+read_verilog -sv build/synth/generated/ibex_compressed_decoder.v
+read_verilog -sv build/synth/generated/ibex_controller.v
+read_verilog -sv build/synth/generated/ibex_core.v
+read_verilog -sv build/synth/generated/ibex_counter.v
+read_verilog -sv build/synth/generated/ibex_cs_registers.v
+read_verilog -sv build/synth/generated/ibex_csr.v
+read_verilog -sv build/synth/generated/ibex_decoder.v
+read_verilog -sv build/synth/generated/ibex_dummy_instr.v
+read_verilog -sv build/synth/generated/ibex_ex_block.v
+read_verilog -sv build/synth/generated/ibex_fetch_fifo.v
+read_verilog -sv build/synth/generated/ibex_icache.v
+read_verilog -sv build/synth/generated/ibex_id_stage.v
+read_verilog -sv build/synth/generated/ibex_if_stage.v
+read_verilog -sv build/synth/generated/ibex_load_store_unit.v
+read_verilog -sv build/synth/generated/ibex_lockstep.v
+read_verilog -sv build/synth/generated/ibex_multdiv_fast.v
+read_verilog -sv build/synth/generated/ibex_multdiv_slow.v
+read_verilog -sv build/synth/generated/ibex_pmp.v
+read_verilog -sv build/synth/generated/ibex_prefetch_buffer.v
+read_verilog -sv build/synth/generated/ibex_register_file_ff.v
+read_verilog -sv build/synth/generated/ibex_register_file_fpga.v
+read_verilog -sv build/synth/generated/ibex_register_file_latch.v
+read_verilog -sv build/synth/generated/ibex_top.v
+read_verilog -sv build/synth/generated/ibex_trvk.v
+read_verilog -sv build/synth/generated/ibex_wb_stage.v
+read_verilog -sv build/synth/generated/prim_and2.v
+read_verilog -sv build/synth/generated/prim_buf.v
+read_verilog -sv build/synth/generated/prim_clock_gating.v
+read_verilog -sv build/synth/generated/prim_clock_mux2.v
+read_verilog -sv build/synth/generated/prim_count.v
+read_verilog -sv build/synth/generated/prim_flop.v
+read_verilog -sv build/synth/generated/prim_lfsr.v
+read_verilog -sv build/synth/generated/prim_secded_inv_39_32_dec.v
+read_verilog -sv build/synth/generated/prim_secded_inv_39_32_enc.v
+
+chparam -set BaseIsa 0 ibex_top
+chparam -set RV32M 0 ibex_top
+chparam -set RV32B 0 ibex_top
+chparam -set RV32ZC 0 ibex_top
+chparam -set WritebackStage 1 ibex_top
+chparam -set BranchTargetALU 0 ibex_top
+chparam -set ICache 0 ibex_top
+chparam -set BranchPredictor 0 ibex_top
+chparam -set SecureIbex 0 ibex_top
+chparam -set PMPEnable 0 ibex_top
+chparam -set RegFile 0 ibex_top
+chparam -set DbgTriggerEn 0 ibex_top
+
+hierarchy -check -top ibex_top
+synth -flatten
+# Technology mapping to sky130_fd_sc_hd, typical corner. dfflibmap maps the
+# flops; abc maps the combinational logic. The liberty path is the one input
+# forge takes from outside the repo; PERMISSIONS.md names the PDK.
+dfflibmap -liberty /Users/chiragpatnaik/.ciel/ciel/sky130/versions/1689ac3f2dc763876eaf967227c7dfe831b031ae/sky130A/libs.ref/sky130_fd_sc_hd/lib/sky130_fd_sc_hd__tt_025C_1v80.lib
+abc -liberty /Users/chiragpatnaik/.ciel/ciel/sky130/versions/1689ac3f2dc763876eaf967227c7dfe831b031ae/sky130A/libs.ref/sky130_fd_sc_hd/lib/sky130_fd_sc_hd__tt_025C_1v80.lib
+opt_clean -purge
+rename -top ibex_top_sky130
+stat -liberty /Users/chiragpatnaik/.ciel/ciel/sky130/versions/1689ac3f2dc763876eaf967227c7dfe831b031ae/sky130A/libs.ref/sky130_fd_sc_hd/lib/sky130_fd_sc_hd__tt_025C_1v80.lib
+write_verilog -noattr build/synth/ibex_top_sky130.v
+write_json build/synth/ibex_top_sky130.json

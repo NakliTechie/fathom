@@ -34,7 +34,7 @@ def die(verdict, where, remedy):
 
 def need(p):
     if not p.exists():
-        die("TOOLCHAIN", f"missing {p.relative_to(ROOT)}", "make all")
+        die("TOOLCHAIN", f"missing {p.relative_to(ROOT)}", "make all PROGRAM=<name>")
     return p
 
 
@@ -97,12 +97,14 @@ def kind(insn):
 
 
 def main():
-    elf = need(BUILD / "uart_puts.elf")
-    ll = need(BUILD / "uart_puts.ll")
-    line_txt = need(BUILD / "line.txt")
-    retire_log = need(BUILD / "sim" / "retire.log")
-    cycle_log = need(BUILD / "sim" / "cycle.log")
-    toggles_js = need(BUILD / "gates" / "toggles.json")
+    prog = sys.argv[1] if len(sys.argv) > 1 else "uart_puts"
+    P = BUILD / prog
+    elf = need(P / f"{prog}.elf")
+    ll = need(P / f"{prog}.ll")
+    line_txt = need(P / "line.txt")
+    retire_log = need(P / "sim" / "retire.log")
+    cycle_log = need(P / "sim" / "cycle.log")
+    toggles_js = need(P / "gates" / "toggles.json")
 
     # ---- L0 source ------------------------------------------------------------
     rows = read_line_table(line_txt)
@@ -177,7 +179,7 @@ def main():
         by_pc.setdefault(e["pc"], []).append(e)
     pipe = []
     prev_pc_if = None
-    prev_ld_out = False
+    prev_arrival_ld_stall = False     # last row: instruction arrived, stalled, load outstanding
     for r in cyc_rows:
         cyc = int(r[0])
         pc_if, pc_id, pc_wb = int(r[1], 16), int(r[2], 16), int(r[3], 16)
@@ -193,7 +195,7 @@ def main():
                 pipe.append({"cycle": cyc, "anchor": None, "stall": "halt", "held": None,
                              "stages": {"IF": pc_if, "ID_EX": pc_id, "WB": pc_wb if wb_done else None}})
                 prev_pc_if = pc_if
-                prev_ld_out = ld_out
+                prev_arrival_ld_stall = False
                 continue
             if not cands:
                 die("ORPHAN", f"cycle {cyc}: ID/EX holds pc 0x{pc_id:08x} with no later retire",
@@ -204,14 +206,16 @@ def main():
                 e["cycle_first"] = cyc
             if not id_new:
                 k = kind(e["insn"])
-                # load-use: the stall asserts on the cycle the dependent
-                # instruction arrives (id_ready=0, ld_out=1); the held row is the
-                # cycle after, by which time ld_out has cleared. Read the previous
-                # cycle's ld_out for the held row.
-                held = ("wb-stall" if not id_ready else
+                # load-use, by its signature: the instruction ARRIVED last cycle
+                # (id_new=1) and was stalled (id_ready=0) while a load was
+                # outstanding in WB (ld_out=1). The held row is this cycle. It is
+                # the cause whatever the instruction is -- a dependent lw, a beqz
+                # on the loaded value -- so it takes precedence over the kind-based
+                # names below.
+                held = ("load-use" if prev_arrival_ld_stall else
+                        "wb-stall" if not id_ready else
                         "mem-wait" if k in ("load", "store") else
-                        "branch" if k in ("branch", "jal", "jalr") else
-                        "load-use" if (ld_out or prev_ld_out) else "multi-cycle")
+                        "branch" if k in ("branch", "jal", "jalr") else "multi-cycle")
         else:
             if pc_if == 0:
                 stall = "reset"
@@ -223,7 +227,7 @@ def main():
                      "stages": {"IF": pc_if, "ID_EX": pc_id if id_valid else None,
                                 "WB": pc_wb if wb_done else None}})
         prev_pc_if = pc_if
-        prev_ld_out = ld_out
+        prev_arrival_ld_stall = id_valid and id_new and not id_ready and ld_out
     for e in exec_:
         if e["cycle_first"] is None:
             e["cycle_first"] = e["cycle_retire"]
@@ -239,7 +243,7 @@ def main():
             "t_clk_ps": tg["t_clk_ps"], "t0_ps": tg["t0_ps"],
             "config": {"BaseIsa": "RV32I", "RV32M": "None", "RV32B": "None",
                        "RV32ZC": "Zca", "WritebackStage": 1, "RegFile": "FF"}}
-    program = {"name": "uart_puts", "source_files": src_names,
+    program = {"name": prog, "source_files": src_names,
                "pc_start": pc_start, "pc_end": pc_end, "no_ir": no_ir}
 
     art = {"schema": "fathom.descent/1", "artifact_id": "",
@@ -252,7 +256,7 @@ def main():
 
     canon = json.dumps(art, sort_keys=True, separators=(",", ":"))
     art["artifact_id"] = "sha256:" + hashlib.sha256(canon.encode()).hexdigest()
-    outdir = ROOT / "artifacts" / "uart_puts"
+    outdir = ROOT / "artifacts" / prog
     outdir.mkdir(parents=True, exist_ok=True)
     out = outdir / "descent.json"
     tmp = out.with_suffix(".json.tmp")

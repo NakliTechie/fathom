@@ -71,13 +71,15 @@ def lookup(rows, pc):
 
 
 def main():
-    line_txt = BUILD / "line.txt"
-    retire = BUILD / "sim" / "retire.log"
-    cycles = BUILD / "sim" / "cycle.log"
+    prog = sys.argv[1] if len(sys.argv) > 1 else "uart_puts"
+    P = BUILD / prog
+    line_txt = P / "line.txt"
+    retire = P / "sim" / "retire.log"
+    cycles = P / "sim" / "cycle.log"
     for p in (line_txt, retire, cycles):
         if not p.exists():
             die("TOOLCHAIN", f"missing {p.relative_to(ROOT)}",
-                "run: make sim   (forge/sim/build.sh then the simulator)")
+                f"run: make sim PROGRAM={prog}")
 
     rows = read_line_table(line_txt)
     retires = []
@@ -116,7 +118,7 @@ def main():
     print(f"  bubbles        : {n - occupied} ({100 * (n - occupied) / n:.0f}%)")
     print(f"  retires        : {len(retires)}  IPC = {len(retires) / n:.2f}")
     print()
-    tj = BUILD / "gates" / "toggles.json"
+    tj = P / "gates" / "toggles.json"
     if tj.exists():
         import json
         d = json.loads(tj.read_text())

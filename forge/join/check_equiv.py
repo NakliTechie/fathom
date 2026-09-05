@@ -18,11 +18,13 @@ def rows(path):
 
 
 def main():
-    rtl = ROOT / "build/sim/bus.log"
-    gates = ROOT / "build/gates/bus.log"
+    prog = sys.argv[1] if len(sys.argv) > 1 else "uart_puts"
+    P = ROOT / "build" / prog
+    rtl = P / "sim/bus.log"
+    gates = P / "gates/bus.log"
     for p in (rtl, gates):
         if not p.exists():
-            print(f"TOOLCHAIN: missing {p.relative_to(ROOT)}\n  remedy: make gates")
+            print(f"TOOLCHAIN: missing {p.relative_to(ROOT)}\n  remedy: make gates PROGRAM={prog}")
             sys.exit(2)
     a, b = rows(rtl), rows(gates)
     # The RTL run is the reference: it halts on the program's own self-loop. The
@@ -62,8 +64,8 @@ def main():
         print("MISMATCH")
         sys.exit(1)
     # the UART bytes too — the bottom of the descent must land on the same cycles
-    ua = (ROOT / "build/sim/uart.log").read_text().split()
-    ub = (ROOT / "build/gates/uart.log").read_text().split()
+    ua = (P / "sim/uart.log").read_text().split()
+    ub = (P / "gates/uart.log").read_text().split()
     print(f"uart         : rtl {ua}  gates {ub}")
     if ua != ub:
         print("MISMATCH (uart)")
