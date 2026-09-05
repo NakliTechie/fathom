@@ -312,8 +312,11 @@ async function loadBottom(door) {
   // gate cycle == pipe cycle, asserted here, not by eye (FATHOM.md §7 C3)
   const missing = [...Array(a.cycles).keys()].filter(c => !byCycle.has(c));
   const max = Math.max(...per.map(r => r.toggles));
-  await q(`SELECT net FROM 'gates.parquet' WHERE cycle = 0 LIMIT 1`);        // pre-warm the plan
-  S.gates = { byCycle, max, summary: { bytes, cycles: per.length, missing: missing.length, max_toggles: max, ms: Math.round(performance.now() - t0) } };
+  // the per-cycle index, built once: a step is then an array slice, never a query.
+  // DuckDB does the ordered scan; the browser keeps two typed columns per layer.
+  const rows = await q(`SELECT cycle::INT AS cycle, net::INT AS net, count::INT AS count FROM 'gates.parquet' ORDER BY cycle, count DESC, net`);
+  const idx = indexByCycle(rows, a.cycles);
+  S.gates = { byCycle, max, idx, summary: { bytes, cycles: per.length, missing: missing.length, max_toggles: max, ms: Math.round(performance.now() - t0) } };
   await loadCells();
   body.innerHTML = `<div class="strip">${[...Array(a.cycles).keys()].map(c => { const r = byCycle.get(c); const h = r ? Math.max(1, Math.round(64 * r.toggles / max)) : 1; return `<div class="bar" data-cycle="${c}" style="height:${h}px" title="cycle ${c}: ${r ? r.toggles + ' toggles on ' + r.nets + ' nets' : 'silent'}"></div>`; }).join('')}</div><div class="stepin"></div>`;
   body.querySelector('.strip').addEventListener('click', ev => { const b = ev.target.closest('.bar'); if (b) seek(+b.dataset.cycle); });
@@ -330,7 +333,8 @@ async function loadCells() {
   const byNet = new Map();
   cl.cells.forEach((c, i) => { if ('net' in c) { if (!byNet.has(c.net)) byNet.set(c.net, []); byNet.get(c.net).push(i); } });
   const per = await q(`SELECT cycle::INT AS cycle, count(*)::INT AS nets, sum(count)::INT AS toggles FROM 'cells.parquet' GROUP BY cycle ORDER BY cycle`);
-  await q(`SELECT net FROM 'cells.parquet' WHERE cycle = 0 LIMIT 1`);
+  const rows = await q(`SELECT cycle::INT AS cycle, net::INT AS net, count::INT AS count FROM 'cells.parquet' ORDER BY cycle, net`);
+  const idx = indexByCycle(rows, a.cycles);
   const [x0, y0, x1, y1] = cl.die_um, W = x1 - x0, H = y1 - y0;
   const body = $('L-cells').querySelector('.body');
   const scale = Math.min(1, 236 / H);                // fit a 236 px tall band
@@ -342,29 +346,27 @@ async function loadCells() {
   const bctx = base.getContext('2d');
   bctx.fillStyle = getComputedStyle(document.documentElement).getPropertyValue('--fg-3').trim();
   for (const c of cl.cells) bctx.fillRect((c.x - x0) * scale, ch - (c.y - y0 + SITE.h) * scale, Math.max(1, SITE.w * 4 * scale), Math.max(1, SITE.h * scale));
-  S.cells = { byNet, byCycle: new Map(per.map(r => [r.cycle, r])), base, ctx, cv, scale, x0, y0, ch,
+  S.cells = { byNet, idx, byCycle: new Map(per.map(r => [r.cycle, r])), base, ctx, cv, scale, x0, y0, ch,
               summary: { bytes, cells: cl.cells.length, drivers: byNet.size, cycles: per.length, ms: Math.round(performance.now() - t0) } };
   renderCells(S.cycle);
 }
-let cellsReq = 0;
-async function renderCells(c) {
+function litCells(c) {
+  const sl = S.cells.idx.slice(c), out = [];
+  for (let i = 0; i < sl.net.length; i++) for (const ci of (S.cells.byNet.get(sl.net[i]) || [])) out.push({ i: ci, count: sl.count[i] });
+  return out;
+}
+function renderCells(c) {
   const a = S.art, cl = a.cells, st = S.cells, r = st.byCycle.get(c);
-  const my = ++cellsReq;
-  const rows = r ? await q(`SELECT net::INT AS net, count::INT AS count FROM 'cells.parquet' WHERE cycle = ${c}`) : [];
-  if (my !== cellsReq) return;
   st.ctx.clearRect(0, 0, st.cv.width, st.cv.height);
   st.ctx.drawImage(st.base, 0, 0);
   st.ctx.fillStyle = getComputedStyle(document.documentElement).getPropertyValue('--acc-cell').trim();
   let lit = 0;
   const types = new Map();
-  for (const t of rows) {
-    const ids = st.byNet.get(t.net); if (!ids) continue;
-    for (const i of ids) {
-      const cell = cl.cells[i]; lit++;
-      st.ctx.fillRect((cell.x - st.x0) * st.scale, st.ch - (cell.y - st.y0 + SITE.h) * st.scale, Math.max(1, SITE.w * 4 * st.scale), Math.max(1, SITE.h * st.scale));
-      const ty = cl.types[cell.type].replace(/^sky130_(fd|ef)_sc_hd__/, '').replace(/_\d+$/, '');
-      types.set(ty, (types.get(ty) || 0) + 1);
-    }
+  for (const { i } of litCells(c)) {
+    const cell = cl.cells[i]; lit++;
+    st.ctx.fillRect((cell.x - st.x0) * st.scale, st.ch - (cell.y - st.y0 + SITE.h) * st.scale, Math.max(1, SITE.w * 4 * st.scale), Math.max(1, SITE.h * st.scale));
+    const ty = cl.types[cell.type].replace(/^sky130_(fd|ef)_sc_hd__/, '').replace(/_\d+$/, '');
+    types.set(ty, (types.get(ty) || 0) + 1);
   }
   st.lit = lit;
   const side = document.querySelector('#L-cells .side');
@@ -372,16 +374,22 @@ async function renderCells(c) {
     [...types.entries()].sort((p, q) => q[1] - p[1]).slice(0, 10).map(([t, n]) => `<div class="row"><span class="n">${n}</span><span>${esc(t)}</span></div>`).join('');
 }
 
-let gatesReq = 0;
-async function renderGates(c) {
+function indexByCycle(rows, ncycles) {
+  // rows are ordered by cycle; offsets[c]..offsets[c+1] is cycle c's slice
+  const net = new Uint32Array(rows.length), count = new Uint16Array(rows.length), offsets = new Uint32Array(ncycles + 1);
+  let c = 0;
+  rows.forEach((r, i) => { net[i] = r.net; count[i] = r.count; while (c < r.cycle) offsets[++c] = i; });
+  while (c < ncycles) offsets[++c] = rows.length;
+  return { net, count, offsets, slice(cy) { const s = offsets[cy], e = offsets[cy + 1]; return { net: net.subarray(s, e), count: count.subarray(s, e) }; } };
+}
+function renderGates(c) {
   const a = S.art, r = S.gates.byCycle.get(c);
   for (const b of document.querySelectorAll('#L-gates .bar')) b.classList.toggle('now', +b.dataset.cycle === c);
   const now = document.querySelector('#L-gates .bar.now'); if (now) now.scrollIntoView({ block: 'nearest', inline: 'center' });
   const box = document.querySelector('#L-gates .stepin');
   if (!r) { box.innerHTML = `<div class="row"><span class="n"></span><span>cycle ${c}: silent</span></div>`; return; }
-  const my = ++gatesReq;
-  const top = await q(`SELECT net::INT AS net, count::INT AS count FROM 'gates.parquet' WHERE cycle = ${c} ORDER BY count DESC, net LIMIT 14`);
-  if (my !== gatesReq) return;                        // a newer cycle superseded this one
+  const sl = S.gates.idx.slice(c);
+  const top = Array.from({ length: Math.min(14, sl.net.length) }, (_, i) => ({ net: sl.net[i], count: sl.count[i] }));
   box.innerHTML = `<div class="row"><span class="n">${r.toggles}</span><span>toggles on ${r.nets} nets at cycle ${c}</span></div>` +
     top.map(t => `<div class="row"><span class="n">×${t.count}</span><span>${esc(a.gates.nets[t.net])}</span></div>`).join('');
 }
@@ -422,16 +430,15 @@ window.fathom = {
       case 'pipe':   return p;
       case 'gates':  {
         if (!S.gates) throw new Error('gates: call fathom.loadBottom() first (lazy by design)');
-        const r = S.gates.byCycle.get(cycle);
-        return q(`SELECT net::INT AS net, count::INT AS count FROM 'gates.parquet' WHERE cycle = ${cycle} ORDER BY count DESC, net LIMIT 50`)
-          .then(top => ({ cycle, nets: r ? r.nets : 0, toggles: r ? r.toggles : 0, top: top.map(t => ({ net: a.gates.nets[t.net], count: t.count })) }));
+        const r = S.gates.byCycle.get(cycle), sl = S.gates.idx.slice(cycle);
+        return { cycle, nets: r ? r.nets : 0, toggles: r ? r.toggles : 0,
+                 top: Array.from({ length: Math.min(50, sl.net.length) }, (_, i) => ({ net: a.gates.nets[sl.net[i]], count: sl.count[i] })) };
       }
       case 'cells':  {
         if (!S.cells) throw new Error('cells: call fathom.loadBottom() first (lazy by design)');
         const r = S.cells.byCycle.get(cycle);
-        return q(`SELECT net::INT AS net, count::INT AS count FROM 'cells.parquet' WHERE cycle = ${cycle}`)
-          .then(rows => { const lit = []; for (const t of rows) for (const i of (S.cells.byNet.get(t.net) || [])) lit.push({ cell: a.cells.cells[i].name, type: a.cells.types[a.cells.cells[i].type], x: a.cells.cells[i].x, y: a.cells.cells[i].y, count: t.count });
-            return { cycle, nets: r ? r.nets : 0, toggles: r ? r.toggles : 0, cells_switching: lit.length, cells: lit.slice(0, 200), die_um: a.cells.die_um }; });
+        const lit = litCells(cycle).map(({ i, count }) => ({ cell: a.cells.cells[i].name, type: a.cells.types[a.cells.cells[i].type], x: a.cells.cells[i].x, y: a.cells.cells[i].y, count }));
+        return { cycle, nets: r ? r.nets : 0, toggles: r ? r.toggles : 0, cells_switching: lit.length, cells: lit.slice(0, 200), die_um: a.cells.die_um };
       }
       default:       throw new Error(`layer ${layer}: unknown`);
     }
