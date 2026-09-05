@@ -577,5 +577,63 @@ so `forge/synth/sv2v.sh` sets it on the *generated* Verilog — a forge knob, no
 vendored source. Both netlists carry it; the three programs re-verified with upper layers
 unchanged.
 
-**Place-and-route (D2, leg 2)** is `forge/pnr/` — OpenLane 2.3.10, Docker backend,
-`sky130A`. In progress at the time of writing; not yet a layer.
+### 8.1 Place-and-route (D2, leg 2) — closed 2026-09-05
+
+`forge/pnr/`: OpenLane 2.3.10 under Docker, `sky130A`, `FP_CORE_UTIL 18` (928 I/O pins
+need a 3155 µm perimeter). The flow ran synthesis → floorplan → placement → CTS → detailed
+routing → fill → GDS streamout → LVS (**passed**) → antenna check, reaching step 68 of 78
+and stopping without writing `final/`; step 52's DEF is the placed, routed, filled design
+and is what the coordinates come from.
+
+| metric | value |
+|---|---|
+| die | 831.8 × 842.5 µm, 700,733 µm² (0.70 mm²) |
+| instances | 23,284 (13,740 logic incl. 3,995 clock/hold buffers and 370 antenna diodes; 59,811 fill/decap/tap) |
+| utilisation | 24.9 % |
+| wirelength | 888 k µm |
+| setup slack, tt | **−3.69 ns** against a 10 ns clock (≈ 73 MHz would close) |
+| hold slack, tt | +0.17 ns |
+| routing DRC | **3,589** after three iterations |
+| antenna | **68** violating pins, 60 nets |
+
+**Placed and routed, not tape-out clean.** The claims vocabulary for L6 is *"placed and
+routed on Sky130; timing and DRC as reported"* and the artifact carries the numbers in
+`cells.pnr`. Closing timing and DRC is engineering the instrument does not need; it needs
+the geometry to be real, and it is.
+
+### 8.2 The join by name — and why the routed netlist is the cells layer
+
+The plan was: run my Yosys netlist, read the DEF, join toggles to coordinates by instance
+name. **Zero of 11,004 names overlapped** — not the flops either. Two synthesis runs of
+the same RTL (`abc` on my side, OpenLane's Yosys flow on theirs) share no instance
+naming, and OpenLane renames what it keeps.
+
+So the cells layer is **OpenLane's post-fill netlist** (`forge/pnr/out/ibex_top.nl.v`),
+whose instance names are the DEF's by construction. It runs the same programs under the
+same harness against the PDK's cell models; RTL == routed netlist on every cycle for all
+four programs. The verifier asserts every listed cell is placed inside the die and that
+placed == netlist by name (one Verilog escaped identifier, `\core_clock_gate_i.u_icg`,
+normalised). Fill, decap and tap cells are omitted from the artifact's list and counted:
+they carry no signal.
+
+**The physical design is pinned, not built** — `forge/pnr/out/` holds the netlist
+(4.7 MB), the coordinates (4.6 MB) and the flow metrics, with a README. Place-and-route
+is neither byte-deterministic nor fast (≈ 40 min under Docker), so `forge` treats these
+as inputs, the same posture as the vendored core. A regeneration is a deliberate,
+recorded change. C1's byte-identity claim is over the chain from pinned inputs.
+
+The earlier `synth_sky130.ys` mapping (11,004 cells, 97,586 µm²) stays in the repo as
+the fast, deterministic cell mapping; it is no longer a layer.
+
+### 8.3 Sizes, with the physical layer
+
+| artifact | descent.json | gates.parquet | cells.parquet | cell toggles |
+|---|---|---|---|---|
+| `uart_puts` | 3.25 MB | 0.12 MB | 0.88 MB | 595,019 |
+| `popcount` | 3.28 MB | 0.22 MB | 1.82 MB | 1,214,059 |
+| `chase` | 3.24 MB | 0.06 MB | 0.45 MB | 325,059 |
+| `sum` | 3.26 MB | 0.14 MB | 1.15 MB | 775,968 |
+
+The JSON is ~3.2 MB regardless of program: 13,740 placed cells with names and
+coordinates, and ~14 k net names. Cell toggles rose ~50 % over the un-routed netlist —
+the clock tree is real switching activity.

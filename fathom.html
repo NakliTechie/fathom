@@ -65,7 +65,7 @@ main { display: grid; grid-template-columns: 1fr; overflow: hidden; }
 .row[data-count]::after { content: attr(data-count); color: var(--fg-3); font-size: var(--fs-0); }
 footer { display: flex; gap: var(--sp-4); align-items: center; padding: var(--sp-2) var(--sp-4);
   border-top: 1px solid var(--line); background: var(--bg-1); font-size: var(--fs-0); color: var(--fg-2); }
-footer input[type=range] { flex: 1; accent-color: var(--acc-now); }
+footer input[type=range] { flex: 1; accent-color: var(--acc-now); font: inherit; }  /* UA default is a non-token size */
 footer .cyc { color: var(--fg-0); font-weight: var(--w-bold); min-width: 12ch; }
 kbd { color: var(--fg-1); border: 1px solid var(--line); border-radius: var(--r); padding: 0 var(--sp-1); font-size: var(--fs-0); }
 
@@ -237,6 +237,7 @@ function build() {
   pipe.querySelector('.pipe').addEventListener('click', ev => { const col = ev.target.closest('.col'); if (col) seek(+col.dataset.cycle); });
   L.append(src, ir, asm, arch, pipe);
   $('scrub').max = a.cycles - 1;
+  performance.mark('fathom:built');                    // the 5 s frame is measured, not eyeballed
   $('meta').innerHTML = `${a.core.name} · ${a.core.shape} RV32I · ${a.core.stages.join('→')} · anchor ${a.core.anchor_stage} · <b>${a.program.name}</b> · ${a.cycles} cycles · ${a.exec.length} retires · ${a.artifact_id.slice(0, 19)}`;
   render();
 }
@@ -287,6 +288,13 @@ window.fathom = {
     return { xid, pc: e.pc, asm: c.asm, lines: c.lines, ir: c.ir, cycles, cycle_first: e.cycle_first, cycle_retire: e.cycle_retire };
   },
   history() { return S.hist.slice(); },
+  timing() {
+    const nav = performance.getEntriesByType('navigation')[0];
+    const built = performance.getEntriesByName('fathom:built')[0];
+    return { built_ms: built ? +built.startTime.toFixed(0) : null,
+             response_ms: nav ? +nav.responseEnd.toFixed(0) : null,
+             dom_ms: nav ? +nav.domContentLoadedEventEnd.toFixed(0) : null };
+  },
 };
 
 // ---- keyboard: keyboard-first (FATHOM.md §7 C4) ---------------------------------
