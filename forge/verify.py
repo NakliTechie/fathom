@@ -7,9 +7,12 @@ output: what it cannot prove from the artifact and the source tree, it fails.
 Verdicts (SPEC §0.3): OK | ORPHAN | AMBIGUOUS | SCHEMA | TOOLCHAIN.
 Green is one line. Failures print at most 20 exemplars per class and the total.
 """
+import hashlib
 import json
 import pathlib
 import sys
+
+import pyarrow.parquet as pq
 
 ROOT = pathlib.Path(__file__).resolve().parents[1]
 STALLS = {"reset", "fetch", "load-use", "branch-flush", "mem-wait", "halt"}
@@ -67,6 +70,26 @@ class Verify:
         if h != a["artifact_id"]:
             self.fail("SCHEMA", f"artifact_id does not match content: {a['artifact_id'][:23]} vs {h[:23]}")
 
+    def toggles(self, a, layer):
+        """Load a layer's toggle table from its parquet, checking the digest first."""
+        ref = a[layer]["toggles"]
+        path = self.path.parent / ref["file"]
+        if not path.exists():
+            self.fail("TOOLCHAIN", f"{layer}: {ref['file']} missing beside the artifact")
+            return []
+        digest = "sha256:" + hashlib.sha256(path.read_bytes()).hexdigest()
+        if digest != ref["sha256"]:
+            self.fail("AMBIGUOUS", f"{layer}: {ref['file']} digest {digest[:23]} != artifact's {ref['sha256'][:23]}")
+            return []
+        t = pq.read_table(path)
+        if t.column_names != ref["columns"]:
+            self.fail("SCHEMA", f"{layer}: parquet columns {t.column_names} != {ref['columns']}")
+            return []
+        if t.num_rows != ref["rows"]:
+            self.fail("AMBIGUOUS", f"{layer}: parquet has {t.num_rows} rows, artifact says {ref['rows']}")
+        cols = [t.column(c).to_pylist() for c in ref["columns"]]
+        return list(zip(*cols))
+
     # ---- the joins ------------------------------------------------------------
     def joins(self, a):
         N = a["cycles"]
@@ -77,7 +100,8 @@ class Verify:
 
         # 1. every toggle -> exactly one cycle in [0, N)
         nnets = len(a["gates"]["nets"])
-        for c, n, k in a["gates"]["toggles"]:
+        gate_toggles = self.toggles(a, "gates")
+        for c, n, k in gate_toggles:
             if not (0 <= c < N):
                 self.fail("ORPHAN", f"toggle at cycle {c} outside [0,{N})")
             if not (0 <= n < nnets):
@@ -136,7 +160,8 @@ class Verify:
                 self.fail("AMBIGUOUS", f"source {src} in artifact differs from the file on disk")
         # 1b. the cells layer: same totality as gates, plus every cell has a known type
         cl = a["cells"]
-        for c, n, k in cl["toggles"]:
+        cell_toggles = self.toggles(a, "cells")
+        for c, n, k in cell_toggles:
             if not (0 <= c < N):
                 self.fail("ORPHAN", f"cell toggle at cycle {c} outside [0,{N})")
             if not (0 <= n < len(cl["nets"])):
@@ -170,7 +195,7 @@ class Verify:
             n = a["cycles"]
             print(f"OK  {self.path.relative_to(ROOT)}  {a['artifact_id'][:23]}  "
                   f"{n} cycles  {len(a['exec'])} exec  {len(a['code'])} code  "
-                  f"{len(a['gates']['toggles'])} gate  {len(a['cells']['toggles'])} cell toggles  8/8 assertions")
+                  f"{a['gates']['toggles']['rows']} gate  {a['cells']['toggles']['rows']} cell toggles  8/8 assertions")
             return 0
         for verdict in ("TOOLCHAIN", "SCHEMA", "AMBIGUOUS", "ORPHAN"):
             msgs = self.failures.get(verdict, [])

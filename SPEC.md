@@ -511,15 +511,19 @@ artifacts/` is empty after either run. This held without any dedicated work: can
 serialisation, no timestamps, no absolute paths, interned names, and a harness whose
 `t₀` is fixed by construction were enough.
 
-| artifact | size | cycles | exec | gate toggles | cell toggles |
-|---|---|---|---|---|---|
-| `uart_puts` | 7.9 MB | 137 | 95 | 120,179 | 388,823 |
-| `popcount` | 15 MB | 259 | 174 | 250,996 | 821,938 |
-| `chase` | 5.1 MB | 80 | 45 | 66,241 | 214,706 |
+| artifact | descent.json | gates.parquet | cells.parquet | cycles | exec | gate toggles | cell toggles |
+|---|---|---|---|---|---|---|---|
+| `uart_puts` | 1.88 MB | 0.12 MB | 0.61 MB | 137 | 95 | 120,179 | 388,823 |
+| `popcount` | 1.91 MB | 0.22 MB | 1.31 MB | 259 | 174 | 250,996 | 821,938 |
+| `chase` | 1.87 MB | 0.06 MB | 0.31 MB | 80 | 45 | 66,241 | 214,706 |
+| `sum` | 1.89 MB | 0.14 MB | 0.84 MB | 175 | 119 | 162,277 | 537,393 |
 
-`popcount` at 15 MB is FATHOM.md §8.2's size risk arriving on schedule: the cells layer
-carries three times the gate layer's events. Parquet for the two bottom layers at C3
-stands.
+The two toggle tables are Parquet (zstd, one row group, no statistics, no writer string —
+byte-identical across writes, so the determinism check covers them). `descent.json`
+carries each table's row count and sha256, and the content address covers both. As
+JSON, `popcount` was 15 MB; as JSON + Parquet it is 3.4 MB, of which the JSON's 1.9 MB
+is now mostly net and cell **names** — the next size lever, if C2 needs one, is
+interning those.
 
 ### 7.3 The three programs
 

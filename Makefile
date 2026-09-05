@@ -26,7 +26,7 @@ SKY     := $(B)/synth/ibex_top_sky130.v
 
 .PHONY: all programs program sim gates equiv toggles descent probe verify synth status clean
 all: descent equiv probe
-	python3 forge/verify.py artifacts/$(PROGRAM)/descent.json
+	./.venv/bin/python forge/verify.py artifacts/$(PROGRAM)/descent.json
 
 programs:
 	@for p in $(PROGRAMS); do $(MAKE) --no-print-directory all PROGRAM=$$p || exit 1; done
@@ -95,7 +95,7 @@ $(P)/gates/toggles.json: $(P)/gates/bus.log forge/join/vcd_toggles.py
 ## descent — the join pass: every layer -> artifacts/<program>/descent.json
 descent: artifacts/$(PROGRAM)/descent.json
 artifacts/$(PROGRAM)/descent.json: $(P)/sim/retire.log $(P)/gates/toggles.json $(P)/sky130/toggles.json forge/join/descent.py forge/join/probe_joins.py
-	python3 forge/join/descent.py $(PROGRAM)
+	./.venv/bin/python forge/join/descent.py $(PROGRAM)
 
 ## probe — join totality, from build outputs (the verifier's ancestor)
 probe: $(P)/gates/toggles.json
@@ -103,14 +103,14 @@ probe: $(P)/gates/toggles.json
 
 ## verify — the C0 checkpoint. Reads ONLY committed artifacts + the source tree.
 verify:
-	@for p in $(PROGRAMS); do python3 forge/verify.py artifacts/$$p/descent.json || exit 1; done
+	@for p in $(PROGRAMS); do ./.venv/bin/python forge/verify.py artifacts/$$p/descent.json || exit 1; done
 
 ## status — the single perception act
 status:
 	@echo "fathom / forge"
 	@for p in $(PROGRAMS); do \
 	  if [ -f artifacts/$$p/descent.json ]; then \
-	    python3 forge/verify.py artifacts/$$p/descent.json | sed 's/^/  /'; \
+	    ./.venv/bin/python forge/verify.py artifacts/$$p/descent.json | sed 's/^/  /'; \
 	  else echo "  MISSING  artifacts/$$p/descent.json   -> make all PROGRAM=$$p"; fi; done
 
 clean:
