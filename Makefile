@@ -111,9 +111,10 @@ guide:
 	cd forge/test && npx playwright test --grep @guide
 	python3 forge/guide/build.py
 
-## status — the single perception act
+## status — the single perception act: artifacts' verdicts, then the journal's tail
 status:
 	@echo "fathom / forge"
+	@test -f $(B)/journal.jsonl && { echo "  journal (last 4):"; tail -4 $(B)/journal.jsonl | sed 's/^/    /'; } || echo "  journal: none yet (make programs)"
 	@for p in $(PROGRAMS); do \
 	  if [ -f artifacts/$$p/descent.json ]; then \
 	    ./.venv/bin/python forge/verify.py artifacts/$$p/descent.json | sed 's/^/  /'; \

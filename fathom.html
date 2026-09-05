@@ -133,6 +133,15 @@ kbd { color: var(--fg-1); border: 1px solid var(--line); border-radius: var(--r)
 #help ul { padding-left: var(--sp-5); margin: 0 0 var(--sp-3); }
 #help .v { color: var(--fg-2); font-size: var(--fs-0); }
 
+/* ---- interaction states: every click target shows it (rubric: states) ------------------
+   hover is a background lift; focus-visible is the accent ring; nothing moves (no motion,
+   on purpose -- an instrument operated for hours should not animate). */
+#L-source .row[data-key], #L-asm .row[data-pc] { cursor: pointer; }
+#L-source .row[data-key]:hover, #L-asm .row[data-pc]:hover { background: var(--bg-2); }
+.pipe .col:hover > i, .strip .bar:hover { outline: 1px solid var(--fg-2); }
+.layer > .head:hover { background: var(--bg-2); color: var(--fg-0); }
+:focus-visible { outline: 2px solid var(--acc-now); outline-offset: 1px; }
+
 /* ---- states ------------------------------------------------------------------ */
 #status { padding: var(--sp-4); color: var(--fg-1); }
 #status.err { color: var(--acc-gate); }
@@ -145,7 +154,7 @@ kbd { color: var(--fg-1); border: 1px solid var(--line); border-radius: var(--r)
     <h2 id="help-h">Fathom</h2>
     <p>One event, followed down every layer of a machine, on one clock. The machine is a
     <b>three-stage RV32I core</b> (lowRISC Ibex), synthesised to gates, mapped to Sky130 cells,
-    placed and routed. It is not your computer and not x86; every layer is a model of that
+    placed and routed. It is not the computer in front of you; every layer is a model of that
     core and says so in its header.</p>
     <ul>
       <li><kbd>←</kbd><kbd>→</kbd> step a cycle · <kbd>⇧</kbd> ×10 · <kbd>Home</kbd><kbd>End</kbd></li>
@@ -216,7 +225,7 @@ const hex = (n) => '0x' + (n >>> 0).toString(16).padStart(8, '0');
 function layerEl(id, title, acc, note) {
   const el = document.createElement('section');
   el.className = 'layer'; el.id = 'L-' + id; el.style.setProperty('--acc', acc);
-  el.innerHTML = `<div class="head"><span class="dot"></span><span>${title}</span><span class="note">${note}</span></div><div class="body"></div>`;
+  el.innerHTML = `<div class="head"><span class="dot"></span><span>${esc(title)}</span><span class="note">${esc(note)}</span></div><div class="body"></div>`;
   return el;
 }
 function anchorOf(cycle) {
@@ -279,12 +288,13 @@ function build() {
   const perLine = new Map();
   for (const e of a.exec) { const c = S.codeByPc.get(e.pc); if (!c) continue; for (const r of c.lines) { const k = r.slice(0, r.lastIndexOf(':', r.lastIndexOf(':') - 1)) + ':' + r.split(':').at(-2); perLine.set(k, (perLine.get(k) || 0) + 1); } }
   src.querySelector('.body').innerHTML = a.program.source_files.map(f =>
-    `<div class="row"><span class="n"></span><span style="color:var(--fg-2)">${f}</span></div>` +
-    a.source[f].map((t, i) => { const k = `${f}:${i + 1}`, n = perLine.get(k); return `<div class="row" data-key="${k}"${n ? ` data-count=" ×${n}"` : ''}><span class="n">${i + 1}</span><span>${esc(t)}</span></div>`; }).join('')
+    `<div class="row"><span class="n"></span><span style="color:var(--fg-2)">${esc(f)}</span></div>` +
+    a.source[f].map((t, i) => { const k = `${f}:${i + 1}`, n = perLine.get(k); return `<div class="row" data-key="${esc(k)}"${n ? ` data-count=" ×${n}"` : ''}><span class="n">${i + 1}</span><span>${esc(t)}</span></div>`; }).join('')
   ).join('');
   // L1 IR
   const ir = layerEl('ir', 'IR', 'var(--acc-ir)', `${a.ir.length} instructions · clang -O0`);
-  ir.querySelector('.body').innerHTML = a.ir.map(e => `<div class="row" data-key="${e.id}"><span class="n">${e.line ?? ''}</span><span>${esc(e.text)}</span></div>`).join('');
+  // F7: the line column names its function, since a line number alone is ambiguous across files
+  ir.querySelector('.body').innerHTML = a.ir.map(e => `<div class="row" data-key="${esc(e.id)}"><span class="n" title="${esc(e.func)}">${e.line ?? ''}</span><span>${esc(e.text)}</span></div>`).join('');
   // L2 assembly
   const asm = layerEl('asm', 'assembly', 'var(--acc-asm)', '');
   asm.querySelector('.body').innerHTML = a.code.map(c => `<div class="row" data-pc="${c.pc}"><span class="n">${c.func === '_start' ? 'stub' : ''}</span><span>${hex(c.pc)}  ${c.bytes.padEnd(8)}  ${esc(c.asm)}</span></div>`).join('');
@@ -309,7 +319,7 @@ function build() {
   // L5 gates: lazy. The Parquet table is read by DuckDB-wasm (vendored, 18 MB), which
   // never sits on the first-frame path: the band offers to load, and loads on demand.
   const gates = layerEl('gates', 'gates', 'var(--acc-gate)', `${a.gates.nets.length} nets · ${a.gates.toggles.rows} toggle events in gates.parquet`);
-  gates.querySelector('.body').innerHTML = `<div class="lazy">generic gate netlist, ${a.gates.nets.length} nets — <button id="load-bottom">load the bottom layers</button> <span>(DuckDB-wasm, 18 MB, same-origin)</span></div>`;
+  gates.querySelector('.body').innerHTML = `<div class="lazy">generic gate netlist, ${+a.gates.nets.length} nets — <button id="load-bottom">load the bottom layers</button> <span>(DuckDB-wasm, 18 MB, same-origin)</span></div>`;
   gates.querySelector('#load-bottom').addEventListener('click', () => window.fathom.loadBottom('ui'));
   const [x0, y0, x1, y1] = a.cells.die_um;
   const cells = layerEl('cells', 'cells', 'var(--acc-cell)',
@@ -319,28 +329,30 @@ function build() {
   $('scrub').max = a.cycles - 1;
   // click a layer's header to put it in focus (a descent to it at the current cycle);
   // click a source line or an assembly row to descend to that selector
-  for (const el of L.children) el.querySelector('.head').addEventListener('click', () => descend(el.id.replace(/^L-/, '')));
+  for (const el of L.children) el.querySelector('.head').addEventListener('click', () => { try { descend(el.id.replace(/^L-/, '')); } catch (e) { $('crumbs').textContent = e.message; } });
   src.querySelector('.body').addEventListener('click', ev => { const r = ev.target.closest('.row[data-key]'); if (r) { try { descend('source', r.dataset.key); } catch (e) { $('crumbs').textContent = e.message; } } });
   asm.querySelector('.body').addEventListener('click', ev => { const r = ev.target.closest('.row[data-pc]'); if (r) { try { descend('asm', +r.dataset.pc); } catch (e) { $('crumbs').textContent = e.message; } } });
   performance.mark('fathom:built');                    // the 5 s frame is measured, not eyeballed
-  $('meta').innerHTML = `${a.core.name} · ${a.core.shape} RV32I · ${a.core.stages.join('→')} · anchor ${a.core.anchor_stage} · <b>${a.program.name}</b> · ${a.cycles} cycles · ${a.exec.length} retires · ${a.artifact_id.slice(0, 19)}`;
+  $('meta').innerHTML = esc(`${a.core.name} · ${a.core.shape} RV32I · ${a.core.stages.join('→')} · anchor ${a.core.anchor_stage} · `) + `<b>${esc(a.program.name)}</b>` + esc(` · ${a.cycles} cycles · ${a.exec.length} retires · ${a.artifact_id.slice(0, 19)}`);
   render();
 }
-function esc(s) { return s.replace(/[&<>]/g, ch => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;' }[ch])); }
+function esc(s) { return String(s).replace(/[&<>"']/g, ch => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[ch])); }
 
 // ---- the bottom layers: DuckDB-wasm over the Parquet tables (C3) -------------------------
 // Lazy by construction. Pulling this block out removes the gate and cells layers and
 // nothing above them changes (FATHOM.md §3, removability).
 const DUCK = new URL('vendor/duckdb-wasm/1.28.0/', location.href).href;   // import() needs a URL, not a bare path
 async function duck() {
-  if (S.duck) return S.duck;
+  if (S.duckP) return S.duckP;                       // one instance, however many callers
+  S.duckP = (async () => {
   const m = await import(DUCK + 'duckdb-browser.mjs');
   const worker = new Worker(DUCK + 'duckdb-browser-eh.worker.js');
   const db = new m.AsyncDuckDB(new m.ConsoleLogger(m.LogLevel.WARNING), worker);
   await db.instantiate(DUCK + 'duckdb-eh.wasm');
   const conn = await db.connect();
-  S.duck = { m, db, conn };
-  return S.duck;
+  return { m, db, conn };
+  })();
+  return S.duckP;
 }
 async function registerParquet(name, url) {
   const { db } = await duck();
@@ -351,9 +363,19 @@ async function registerParquet(name, url) {
 }
 async function q(sql) { const { conn } = await duck(); const t = await conn.query(sql); return t.toArray().map(r => r.toJSON()); }
 
-async function loadBottom(door) {
-  if (S.gates) return { gates: S.gates.summary, cells: S.cells && S.cells.summary };
+function loadBottom(door) {
+  if (S.bottomP) return S.bottomP;                   // memoised: button and agent share one load
   rec(door, 'loadBottom', []);
+  S.bottomP = loadBottomOnce().catch(e => {          // a failure state, with a way back
+    S.bottomP = null;
+    const body = $('L-gates').querySelector('.body');
+    body.innerHTML = `<div class="lazy">could not load the bottom layers: ${esc(e.message)} — <button id="load-bottom">retry</button></div>`;
+    body.querySelector('#load-bottom').addEventListener('click', () => loadBottom('ui'));
+    throw e;
+  });
+  return S.bottomP;
+}
+async function loadBottomOnce() {
   const a = S.art, prog = a.program.name, t0 = performance.now();
   const body = $('L-gates').querySelector('.body');
   body.innerHTML = `<div class="lazy">loading DuckDB-wasm…</div>`;
@@ -368,12 +390,12 @@ async function loadBottom(door) {
   // DuckDB does the ordered scan; the browser keeps two typed columns per layer.
   const rows = await q(`SELECT cycle::INT AS cycle, net::INT AS net, count::INT AS count FROM 'gates.parquet' ORDER BY cycle, count DESC, net`);
   const idx = indexByCycle(rows, a.cycles);
-  S.gates = { byCycle, max, idx, summary: { bytes, cycles: per.length, missing: missing.length, max_toggles: max, ms: Math.round(performance.now() - t0) } };
-  await loadCells();
   body.innerHTML = `<div class="strip">${[...Array(a.cycles).keys()].map(c => { const r = byCycle.get(c); const h = r ? Math.max(1, Math.round(64 * r.toggles / max)) : 1; return `<div class="bar" data-cycle="${c}" style="height:${h}px" title="cycle ${c}: ${r ? r.toggles + ' toggles on ' + r.nets + ' nets' : 'silent'}"></div>`; }).join('')}</div><div class="stepin"></div>`;
   body.querySelector('.strip').addEventListener('click', ev => { const b = ev.target.closest('.bar'); if (b) seek(+b.dataset.cycle); });
+  S.gates = { byCycle, max, idx, summary: { bytes, cycles: per.length, missing: missing.length, max_toggles: max, ms: Math.round(performance.now() - t0) } };
   $('L-gates').querySelector('.note').textContent = `${a.gates.nets.length} nets · ${a.gates.toggles.rows} events · ${missing.length === 0 ? 'every cycle joined' : missing.length + ' silent cycles'} · ${S.gates.summary.ms} ms to load`;
   renderGates(S.cycle);
+  await loadCells();
   return { gates: S.gates.summary, cells: S.cells && S.cells.summary };
 }
 // ---- the floorplan: every placed cell at its coordinate; the cycle's toggling cells lit -----
@@ -439,6 +461,7 @@ function renderGates(c) {
   for (const b of document.querySelectorAll('#L-gates .bar')) b.classList.toggle('now', +b.dataset.cycle === c);
   const now = document.querySelector('#L-gates .bar.now'); if (now) now.scrollIntoView({ block: 'nearest', inline: 'center' });
   const box = document.querySelector('#L-gates .stepin');
+  if (!box) return;                                  // strip not built yet
   if (!r) { box.innerHTML = `<div class="row"><span class="n"></span><span>cycle ${c}: silent</span></div>`; return; }
   const sl = S.gates.idx.slice(c);
   const top = Array.from({ length: Math.min(14, sl.net.length) }, (_, i) => ({ net: sl.net[i], count: sl.count[i] }));
@@ -459,9 +482,8 @@ function resolveSelector(layer, sel) {
   // returns the cycle a selector lands on, or throws with the reason
   const a = S.art;
   if (sel === undefined || sel === null) return S.cycle;
-  if (typeof sel === 'number') return sel;                          // a cycle
   switch (layer) {
-    case 'source': {                                                // "file:line" or "line"
+    case 'source': {                                                // "file:line", or a line of the main file
       const key = String(sel).includes(':') ? String(sel) : `${a.program.source_files.at(-1)}:${sel}`;
       const pcs = a.code.filter(c => c.lines.some(r => r.slice(0, r.lastIndexOf(':', r.lastIndexOf(':') - 1)) + ':' + r.split(':').at(-2) === key)).map(c => c.pc);
       const xs = a.exec.filter(e => pcs.includes(e.pc));
@@ -487,7 +509,9 @@ function resolveSelector(layer, sel) {
       if (!f) throw new Error(`arch ${sel}: never written`);
       return f.cycle;
     }
-    default: return S.cycle;                                        // pipe / gates / cells: a cycle
+    default:                                                        // pipe / gates / cells: a cycle
+      if (typeof sel !== 'number') throw new Error(`${layer}: selector must be a cycle`);
+      return sel;
   }
 }
 function setFocus(layer) {
@@ -508,6 +532,7 @@ function setFocus(layer) {
 function descend(layer, selector, door = 'ui') {
   if (!S.art) throw new Error('no descent loaded');
   const target = layer || ORDER[Math.min(ORDER.length - 1, ORDER.indexOf(S.focus || 'source') + (S.focus ? 1 : 0))];
+  if (!layer && S.focus === target) return { layer: target, cycle: S.cycle, depth: S.trail.length };   // already at the bottom
   if (!ORDER.includes(target)) throw new Error(`layer ${target}: unknown`);
   if ((target === 'gates' || target === 'cells') && !S.gates) throw new Error(`${target}: call loadBottom() first`);
   const cycle = resolveSelector(target, selector);
@@ -585,6 +610,20 @@ window.fathom = {
   },
   history() { return S.hist.slice(); },
   help(show) { rec('agent', 'help', [show]); toggleHelp(show); return !$('help').hidden; },
+  export(range) {
+    // a bounded slice of the descent: [from, to] cycles inclusive; refuses an unbounded one
+    rec('agent', 'export', [range]);
+    if (!S.art) throw new Error('no descent loaded');
+    if (!range || !Number.isInteger(range.from) || !Number.isInteger(range.to)) throw new Error('export: range {from, to} required (bounded, SPEC §0.4)');
+    const from = Math.max(0, range.from), to = Math.min(S.art.cycles - 1, range.to);
+    if (to - from > 2000) throw new Error('export: at most 2000 cycles per call');
+    const a = S.art;
+    const pipe = a.pipe.slice(from, to + 1);
+    const xids = new Set(pipe.map(p => p.anchor).filter(x => x !== null));
+    return { schema: 'fathom.export/1', artifact_id: a.artifact_id, program: a.program.name, range: { from, to },
+      pipe, exec: a.exec.filter(e => xids.has(e.xid)), frames: a.arch.frames.filter(f => f.cycle >= from && f.cycle <= to),
+      gates: S.gates ? Array.from({ length: to - from + 1 }, (_, i) => { const sl = S.gates.idx.slice(from + i); return { cycle: from + i, nets: sl.net.length, toggles: Array.from(sl.count).reduce((x, y) => x + y, 0) }; }) : null };
+  },
   loadBottom(door = 'agent') { return loadBottom(door); },
   descend(layer, selector) { return descend(layer, selector, 'agent'); },
   ascend() { return ascend('agent'); },
@@ -598,6 +637,32 @@ window.fathom = {
              dom_ms: nav ? +nav.domContentLoadedEventEnd.toFixed(0) : null };
   },
 };
+
+// ---- the manifest: every command, one place (FATHOM.md hard rule 6) ---------------------
+// The lint (forge/test/descent.spec.js) asserts manifest ⊇ the face's callable commands.
+window.fathom.manifest = [
+  { name: 'loadDescent', args: ['url'], mutates: false, doc: 'load and validate a descent artifact' },
+  { name: 'describe', args: [], mutates: false, doc: 'the whole situation in one bounded read' },
+  { name: 'layers', args: [], mutates: false, doc: 'the seven layer names, top to bottom' },
+  { name: 'seek', args: ['cycle'], mutates: false, doc: 'move every layer to a cycle' },
+  { name: 'descend', args: ['layer?', 'selector?'], mutates: false, doc: 'focus a layer; resolve a selector to its cycle' },
+  { name: 'ascend', args: [], mutates: false, doc: 'back up the trail' },
+  { name: 'stateAt', args: ['layer', 'cycle?'], mutates: false, doc: 'one layer\'s state at a cycle' },
+  { name: 'trace', args: ['xid'], mutates: false, doc: 'one dynamic instruction, every layer' },
+  { name: 'export', args: ['{from,to}'], mutates: false, doc: 'a bounded slice of the descent' },
+  { name: 'loadBottom', args: [], mutates: false, doc: 'load the gate and cell layers (lazy)' },
+  { name: 'help', args: ['show?'], mutates: false, doc: 'the in-app help' },
+  { name: 'history', args: [], mutates: false, doc: 'every call, with its door' },
+  { name: 'trail', args: [], mutates: false, doc: 'the descent so far' },
+  { name: 'focus', args: [], mutates: false, doc: 'the layer in focus, or null' },
+  { name: 'timing', args: [], mutates: false, doc: 'first-frame timing' },
+];
+// navigator.modelContext, where present: register the read tools, no setting (FATHOM.md §4.7)
+if (navigator.modelContext && typeof navigator.modelContext.registerTool === 'function') {
+  for (const m of window.fathom.manifest) {
+    try { navigator.modelContext.registerTool({ name: 'fathom.' + m.name, description: m.doc, inputSchema: { type: 'object' }, execute: (args) => window.fathom[m.name](...Object.values(args || {})) }); } catch { /* the host decides */ }
+  }
+}
 
 // ---- keyboard: keyboard-first (FATHOM.md §7 C4) ---------------------------------
 function toggleHelp(force) {
@@ -622,9 +687,10 @@ $('scrub').addEventListener('input', (ev) => seek(+ev.target.value));
 
 // ---- boot: the artifact named in the URL, else the first program ----------------
 (async () => {
-  const prog = new URLSearchParams(location.search).get('p') || 'uart_puts';
+  let prog = new URLSearchParams(location.search).get('p') || 'uart_puts';
+  if (!/^[a-z0-9_]{1,40}$/.test(prog)) prog = 'uart_puts';           // a program name, never a path
   try { await window.fathom.loadDescent(`artifacts/${prog}/descent.json`); }
-  catch (e) { const s = $('status') || $('layers'); s.className = 'err'; s.innerHTML = `Could not load <code>artifacts/${prog}/descent.json</code>: ${esc(String(e.message))}`; $('meta').innerHTML = '<b>failed</b>'; }
+  catch (e) { const s = $('status') || $('layers'); s.className = 'err'; s.innerHTML = `Could not load <code>${esc(`artifacts/${prog}/descent.json`)}</code>: ${esc(String(e.message))}`; $('meta').innerHTML = '<b>failed</b>'; }
 })();
 </script>
 </body>

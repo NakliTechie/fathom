@@ -15,7 +15,7 @@ SECTIONS = [
     ("04-descend-asm", "…to the instruction", "Down again: the assembly in focus, the IR above and the register file below as context. The trail in the footer records each stop so the way back is exact."),
     ("05-descend-pipe", "…to the pipeline", "The pipeline: one column per cycle, one row per stage. Yellow is the instruction the descent follows; dim yellow is an instruction held in place — a taken branch or a load-use dependency — and red is a bubble with a named cause."),
     ("06-descend-gates", "…to the gates", "The bottom layers load on demand. The gate layer shows switching activity per cycle and, for the cycle in focus, which nets toggled."),
-    ("07-descend-cells", "…to the silicon plan", "The cells: every placed standard cell on the real die, dark; the ones switching this cycle, lit. Placed and routed on Sky130 — timing and DRC as reported in the artifact, not tape-out clean."),
+    ("07-descend-cells", "…to the placed cells", "The cells: every placed standard cell on the real die, dark; the ones switching this cycle, lit. Placed and routed on Sky130 — timing and DRC as reported in the artifact, not tape-out clean."),
     ("08-help", "Help", "? opens the help; it says what the machine is and is not, lists every key and click target, and names the agent face for anything that wants to drive the instrument programmatically."),
     ("09-popcount-branch-flush", "Another program", "The library has four programs, each chosen to show one thing: a call frame writing to a memory-mapped port, data-dependent branches, load-use stalls on a pointer walk, and a call across two compile units. This is popcount at a branch flush."),
 ]

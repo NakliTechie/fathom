@@ -7,8 +7,12 @@ t0 and T_clk come from the gate run's cycle.log, written by the harness at the
 first rising edge after reset release -- the same definition the RTL run uses,
 so both sides of join 3 share a clock by construction.
 
-Conventions fixed here (SPEC §1.2):
-- a toggle exactly at an edge belongs to the cycle that edge opens;
+Conventions fixed here (SPEC §1.2, corrected 2026-09-05 by the forward pass):
+- the RTL harness logs row c at posedge c, sampling PRE-edge values, so row c is
+  the state held during [edge c-1, edge c). A toggle in that same interval is
+  what PRODUCED row c's state, so it is labelled c:  cycle = floor((t-t0)/T) + 1.
+  Cycle 0 collects the interval after reset release; the ripple after the halt
+  edge falls past the end and is counted as dropped;
 - multiple toggles of one net inside one cycle collapse to {net, count};
 - events before t0 (reset) are dropped and counted, never silently ignored.
 
@@ -117,7 +121,7 @@ def main():
         if t < t0:
             dropped_pre += 1
             continue
-        cyc = int((t - t0) // tclk)
+        cyc = int((t - t0) // tclk) + 1          # see the convention above
         if cyc >= ncycles:
             dropped_post += 1                     # counted, never silent (SPEC §0.8)
             continue

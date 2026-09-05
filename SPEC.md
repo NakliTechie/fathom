@@ -102,8 +102,9 @@ descent.
 - [x] Single perception act — `forge status` / `fathom.describe()`
 - [x] Closed verdict vocabulary with remedies
 - [x] Output bound stated — grows with divergence, not trace length
-- [x] Crash safety — temp + atomic rename, content-hash stamps
-- [x] Trajectory — `build/journal.jsonl`, rendered by `forge status`
+- [~] Crash safety — `descent.py` writes temp + atomic rename; the other stages do not yet.
+  Staleness is mtime-driven (`make`), not content-hashed. (Unticked 2026-09-05, forward pass F10.)
+- [x] Trajectory — `build/journal.jsonl`, one record per artifact, tailed by `make status`
 - [x] Accretion — every caught orphan class becomes a permanent assertion
 - [x] Tower drawn — §0.1
 - [x] Evaluator boundary — §0.8, fail closed on `TOOLCHAIN`
@@ -151,7 +152,12 @@ A cycle with `anchor: null` and no `stall.cause` is an orphan and fails the buil
 Conventions that must be fixed or the joins wobble:
 
 - **Clock.** `t₀` = the first rising edge after reset deassert; `T_clk` constant, declared
-  in `core.json`. A toggle exactly at an edge belongs to the cycle the edge *opens*.
+  in `core.json`. **Corrected 2026-09-05 (forward pass F1):** the RTL harness logs row `c`
+  at edge `c` sampling *pre-edge* values, so row `c` is the state held during
+  `[edge c−1, edge c)`. A toggle in that interval is what *produced* row `c`'s state and is
+  labelled `c`: `cycle = floor((t − t₀)/T_clk) + 1`. Before the correction the bottom two
+  layers were one cycle ahead of the rest and every range check still passed — which is
+  why verifier assertion 9 now exists.
 - **Glitches.** Multiple toggles of one net inside one cycle collapse to
   `{net, count}`. The count is kept — it is real switching activity — but the descent
   does not model intra-cycle time.
@@ -172,7 +178,9 @@ Conventions that must be fixed or the joins wobble:
    (expected members: compiler-emitted prologue/epilogue fill, alignment padding);
 6. no `xid` is referenced that no cycle anchors;
 7. no `file:line` claimed present that the source file does not contain;
-8. the artifact round-trips the schema validator byte-identically.
+8. the artifact round-trips the schema validator byte-identically;
+9. **every store retires in a cycle adjacent to a `data_we_o` toggle** — the layers describe
+   the same *event*, not merely the same index (added 2026-09-05, forward pass F1).
 
 Assertions 5 and 7 are additions to the handoff's four. 5 exists because `-O0` still emits
 instructions with no IR ancestor and the honest move is an explicit allow-list with
@@ -755,3 +763,26 @@ each, zero console errors.
 **Harness.** The test needs a browser (canvas, wasm). The repo has no Playwright harness;
 today the script runs from the browser pane. One `forge/test/` Playwright harness that
 C5's guide capture also uses satisfies FATHOM.md's "no second harness". Pending a word.
+
+
+---
+
+## 13. The forward pass, 2026-09-05
+
+Run in fresh context by a subagent over `fathom.html`, `forge/`, `Makefile`, `SPEC.md`,
+`FATHOM.md`; no file edited, no build run; twelve findings, all acted on the same day.
+
+| # | finding | fix |
+|---|---|---|
+| F1 | the pipe rows sample pre-edge, the toggle tables post-edge: **L5/L6 were one cycle ahead** and every range check passed | `vcd_toggles.py` labels the producing interval; **assertion 9** (store retire ↔ `data_we_o` toggle) makes it permanent |
+| F2 | a number selector was always a cycle, so clicking an assembly row sought the last cycle | numbers mean a line on `source`, a pc on `asm`, a cycle only on the bottom three |
+| F3 | the traced region was `fathom_main` to its self-loop; callees are linked above it, so assertions 4–5 covered a fifth of the code and `region` was mislabelled | region = every non-stub pc; `pc_halt` separate; verifier asserts `region`; `no_ir` grew from 4 to 9 — the honest count |
+| F4–F6 | a seek during `loadBottom` threw; two concurrent loads made two wasm instances; a failed load had no state | DOM before state; memoised promise; a failure band with retry |
+| F7 | duplicate trail stops at the bottom; uncaught header clicks; IR lines without a file; dead code; a comment claiming a strip that never ran | each fixed |
+| F8 | **reflected XSS via `?p=`** on the failure path; `?p=` usable as a path | a name pattern, `esc()` on the message; a test that loads `?p=<img onerror>` and expects `uart_puts` |
+| F9 | artifact strings reached `innerHTML` unescaped in five places; no CSP | `esc()` covers quotes and every artifact string; `_headers` with a same-origin CSP (`wasm-unsafe-eval` for DuckDB) |
+| F10 | §0.9 ticked a journal, content-hash stamps and atomic writes that did not exist | the journal exists (`build/journal.jsonl`, `make status` tails it); the other two are unticked |
+| F11 | the key-collision assertion from §6.4 was not implemented; a phantom `probe.js`; `export(range)`, `navigator.modelContext` and the manifest lint were in the handoff but not the code | assertion added; reference fixed; `export(range)` bounded to 2000 cycles; `manifest` on the face with a Playwright lint asserting manifest = callable set; `modelContext` registration where present |
+| F12 | "not x86" in the help (the word is banned even negated); "silicon plan" in a guide title | reworded |
+
+After: `make verify` 4 × 9/9; Playwright 8/8; design checks 4/4.

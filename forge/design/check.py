@@ -10,7 +10,7 @@ Runs over fathom.html with no browser:
      produce, counted over the tokens it uses;
   4. the two vendored weights are the only weights referenced.
 The runtime half ("no blank or pending band", interaction states by computed
-style) is forge/design/probe.js, run in the browser pane.
+style, fonts loaded) runs in the browser: forge/test/descent.spec.js.
 
 Exit 0 = OK, 1 = a check failed. Green is one line per check.
 """

@@ -26,8 +26,6 @@ LLVM = pathlib.Path("/opt/homebrew/opt/llvm/bin")
 sys.path.insert(0, str(ROOT / "forge" / "join"))
 from probe_joins import read_line_table, lookup  # noqa: E402
 
-STALL_CAUSES = ("reset", "fetch", "load-use", "branch-flush", "mem-wait", "halt")
-HELD_CAUSES = ("mem-wait", "branch", "wb-stall", "multi-cycle")
 
 
 def die(verdict, where, remedy):
@@ -137,12 +135,12 @@ def main():
         if e["line"] is not None:
             ir_by_line.setdefault((e["func"], e["line"]), []).append(e["id"])
 
-    pc_start = next(pc for pc, f in syms.items() if f == "fathom_main")
-    pc_end = max(c["pc"] for c in code)
-    # the self-loop: last `j` to itself in fathom_main
-    for c in code:
-        if c["func"] == "fathom_main" and c["bytes"] == "0000006f":
-            pc_end = c["pc"]
+    # The traced region is every instruction that is not the reset stub: the
+    # callees are linked ABOVE fathom_main, so "fathom_main to its self-loop"
+    # covered a fifth of the program (forward pass F3). pc_halt is the self-loop.
+    prog_pcs = [c["pc"] for c in code if c["func"] != "_start"]
+    pc_start, pc_end = min(prog_pcs), max(prog_pcs)
+    pc_halt = next(c["pc"] for c in code if c["func"] == "fathom_main" and c["bytes"] == "0000006f")
 
     no_ir = []
     for c in code:
@@ -197,7 +195,7 @@ def main():
         anchor, stall, held = None, None, None
         if id_valid:
             cands = [e for e in by_pc.get(pc_id, []) if e["cycle_retire"] >= cyc]
-            if not cands and pc_id == pc_end:
+            if not cands and pc_id == pc_halt:
                 # The self-loop at pc_end is in ID/EX but its next retire lies past
                 # the end of the trace. That is the `halt` cause (SPEC §1.1), not an
                 # orphan: the trace ends because the program has nowhere left to go.
@@ -243,6 +241,9 @@ def main():
 
     # ---- L5 gates -------------------------------------------------------------
     tg = json.loads(toggles_js.read_text())
+    # the cycles in which the data-write strobe toggles, for verifier assertion 9
+    we_idx = next((i for i, n in enumerate(tg["nets"]) if n.endswith(".data_we_o")), None)
+    we_cycles = sorted({c for c, n, k in tg["toggles"] if n == we_idx}) if we_idx is not None else []
     if tg["cycles"] != N:
         die("AMBIGUOUS", f"gate run {tg['cycles']} cycles vs RTL {N}", "make gates")
 
@@ -302,7 +303,7 @@ def main():
             "config": {"BaseIsa": "RV32I", "RV32M": "None", "RV32B": "None",
                        "RV32ZC": "Zca", "WritebackStage": 1, "RegFile": "FF"}}
     program = {"name": prog, "source_files": src_names,
-               "pc_start": pc_start, "pc_end": pc_end, "no_ir": no_ir}
+               "pc_start": pc_start, "pc_end": pc_end, "pc_halt": pc_halt, "no_ir": no_ir}
 
     art = {"schema": "fathom.descent/1", "artifact_id": "",
            "program": program, "core": core, "cycles": N,
@@ -310,7 +311,8 @@ def main():
            "arch": {"encoding": "delta", "regs_at_0": {f"x{i}": 0 for i in range(32)},
                     "frames": frames},
            "pipe": pipe,
-           "gates": {"nets": tg["nets"], "static_nets_omitted": tg.get("static_nets", 0), "toggles": tg["toggles"]},
+           "gates": {"nets": tg["nets"], "static_nets_omitted": tg.get("static_nets", 0),
+                     "data_we_toggle_cycles": we_cycles, "toggles": tg["toggles"]},
            "cells": {"pdk": "sky130A", "library": "sky130_fd_sc_hd",
                      "corner": "tt_025C_1v80", "types": cell_types, "cells": cells,
                      "die_um": co["die_um"], "units": "um",
@@ -351,8 +353,7 @@ def main():
         pq.write_table(t, tmp, compression="zstd", write_statistics=False,
                        row_group_size=len(rows) or 1, use_dictionary=False,
                        data_page_version="2.0")
-        # strip the writer's version string from the footer metadata for byte-stability
-        tmp.replace(path)
+        tmp.replace(path)                           # atomic; pyarrow's footer is byte-stable for a fixed version
         digest = hashlib.sha256(path.read_bytes()).hexdigest()
         return {"file": f"{layer}.parquet", "rows": len(rows), "sha256": "sha256:" + digest,
                 "columns": ["cycle", "net", "count"]}
@@ -368,6 +369,10 @@ def main():
     tmp.replace(out)                                     # atomic (SPEC §0.5)
 
     gp, cp = outdir / "gates.parquet", outdir / "cells.parquet"
+    journal = BUILD / "journal.jsonl"
+    with journal.open("a") as jf:
+        jf.write(json.dumps({"stage": "descent", "program": prog, "artifact_id": art["artifact_id"],
+                             "cycles": N, "exec": len(exec_), "verdict": "OK"}) + "\n")
     print(f"artifact     : {out.relative_to(ROOT)}  {out.stat().st_size/1e6:.2f} MB"
           f"  + gates.parquet {gp.stat().st_size/1e6:.2f} MB  + cells.parquet {cp.stat().st_size/1e6:.2f} MB")
     print(f"artifact_id  : {art['artifact_id'][:23]}...")

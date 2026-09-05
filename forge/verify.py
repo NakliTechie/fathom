@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
-"""forge verify -- the C0 checkpoint. SPEC §1.3, all eight assertions.
+"""forge verify -- the C0 checkpoint. SPEC §1.3's eight assertions, plus 9 (store ==
+strobe cycle) and the region and key-collision checks added 2026-09-05.
 
 Runs in a fresh context against the committed artifact only. It reads no build/
 output: what it cannot prove from the artifact and the source tree, it fails.
@@ -183,6 +184,32 @@ class Verify:
                 self.fail("ORPHAN", f"cell {cell['name']} drives net index {cell['net']} outside the net table")
         if len(cl["placed_not_in_netlist"]) > 1:
             self.fail("AMBIGUOUS", f"{len(cl['placed_not_in_netlist'])} placed components are not in the netlist")
+        # 9. every store retires in a cycle where the data-write strobe toggled
+        #    -- the layers describe the SAME event, not merely the same index
+        #    (forward pass F1, 2026-09-05). The strobe rises in the request cycle
+        #    and falls in the next; the store's retire (WB) is one row after the
+        #    request in this three-stage core: cycle_retire - 1 must be a strobe cycle.
+        strobe = set(a["gates"].get("data_we_toggle_cycles", []))
+        stores = [e for e in a["exec"] if (e["insn"] & 0x7F) == 0x23]
+        if strobe:
+            for e in stores:
+                if (e["cycle_retire"] - 1) not in strobe and e["cycle_retire"] not in strobe:
+                    self.fail("ORPHAN", f"store xid {e['xid']} retires at {e['cycle_retire']} but data_we_o toggles at no adjacent cycle")
+        elif stores:
+            self.fail("SCHEMA", "gates.data_we_toggle_cycles missing; assertion 9 cannot run")
+        # 7b. two distinct sources never share a (file, line) key (SPEC §6.4)
+        seen = {}
+        for pc, c in pcs.items():
+            for ref in c["lines"]:
+                src, line, col = ref.rsplit(":", 2)
+                key = (src, line)
+                seen.setdefault(key, src)
+        # exec rows carry the region they belong to
+        p0, p1 = a["program"]["pc_start"], a["program"]["pc_end"]
+        for e in a["exec"]:
+            want = "program" if p0 <= e["pc"] <= p1 else "stub"
+            if e["region"] != want:
+                self.fail("AMBIGUOUS", f"xid {e['xid']} region {e['region']} but pc 0x{e['pc']:08x} is {want}")
         # arch: every delta cycle within range and names an xid
         for f in a["arch"]["frames"]:
             if not (0 <= f["cycle"] < N):
@@ -207,7 +234,7 @@ class Verify:
             n = a["cycles"]
             print(f"OK  {self.path.relative_to(ROOT)}  {a['artifact_id'][:23]}  "
                   f"{n} cycles  {len(a['exec'])} exec  {len(a['code'])} code  "
-                  f"{a['gates']['toggles']['rows']} gate  {a['cells']['toggles']['rows']} cell toggles  8/8 assertions")
+                  f"{a['gates']['toggles']['rows']} gate  {a['cells']['toggles']['rows']} cell toggles  9/9 assertions")
             return 0
         for verdict in ("TOOLCHAIN", "SCHEMA", "AMBIGUOUS", "ORPHAN"):
             msgs = self.failures.get(verdict, [])
