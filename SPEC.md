@@ -305,5 +305,83 @@ Fixed for C0:
 - **Verilator** (present) as the fast RTL path if the cycle trace needs it.
 - **Python 3.12** + **GNU Make** for `forge`.
 
-The core simulator's trace emitter is ours regardless of D1 — we instrument whatever core
-we vendor rather than trusting a third-party trace format.
+---
+
+## 5. The core (D1) — closed 2026-09-05
+
+**Ibex**, pinned at `34b0705760ef3dfa00e99637432473d2be8f22f3`, Apache-2.0, vendored unmodified
+under `vendor/ibex/`. Licence basis in `PERMISSIONS.md`.
+
+Configured **by parameter only**, at synthesis time (`forge/synth/synth.ys`):
+
+| Parameter | Value | Why |
+|---|---|---|
+| `BaseIsa` | `BaseIsaRV32I` (0) | the target ISA |
+| `RV32M` | `RV32MNone` (0) | no multiplier — dead logic in the gate layer otherwise |
+| `RV32B` | `RV32BNone` (0) | no bit-manipulation |
+| `RV32ZC` | `RV32Zca` (0) | minimum; this Ibex has no fully-`None` option |
+| `WritebackStage` | `1` | **three stages: IF · ID/EX · WB** |
+| `BranchTargetALU`, `ICache`, `BranchPredictor`, `SecureIbex`, `PMPEnable` | `0` | keep the netlist to the story |
+
+### 5.1 Why Ibex, and the shape it actually has
+
+D1's tension (FATHOM.md §5, §8.3) is the canonical five-stage picture versus the
+permissive cores that exist. Resolved by **labelling, not by drawing a pipeline the core
+does not have** — Fathom says "a three-stage RV32I core" everywhere, never "five-stage".
+
+Ibex wins on the two things C0 is actually at risk on, both of which it already has
+in-tree:
+
+1. **RVFI** — the RISC-V Formal Interface, a standardised per-retire trace port, already
+   on `ibex_core` (514 references in `ibex_core.sv`). Join 2 gets a standard rather
+   than a bespoke emitter tapped into internals.
+2. **A Yosys synthesis flow** (`vendor/ibex/syn/`), so the gate leg is a known-good
+   path rather than a research project.
+
+Considered and rejected:
+
+- **VexRiscv** (MIT) — genuinely five-stage and configurable, so it is the one core that
+  would give the canonical picture honestly. Rejected on build cost: no pre-generated
+  Verilog and no release assets, so `forge` would need JVM + sbt + SpinalHDL to emit
+  RTL. That makes the pipeline non-hermetic for the sake of two stages. **Revisit if the
+  three-stage picture proves to under-serve the pipeline layer** — this is the one
+  reversal in the stack that is worth its cost.
+- **PicoRV32** (ISC) and **SERV** (ISC) — both eliminate layer L4 rather than shrink it.
+  PicoRV32 is multi-cycle: there is no pipeline to show. SERV is bit-serial: ~32 cycles
+  per instruction, so L4 becomes a shift register. Neither can carry the microarchitecture
+  layer the product is built around.
+- **darkriscv** (BSD-3), **neorv32** (BSD-3) — permissive and small, but neither ships an
+  RVFI port or a maintained Yosys flow, so both cost more than Ibex at every leg.
+
+### 5.2 The anchor stage
+
+Ibex with `WritebackStage=1` has IF · ID/EX · WB. **Anchor stage = ID/EX** — the stage
+where an instruction executes, which is what the descent follows. Retire is observed at
+WB via RVFI, which is what stamps `cycle_retire`. Both facts go in `core.json`
+(SPEC §2) so no layer infers them.
+
+### 5.3 Synthesis, measured 2026-09-05
+
+`forge/synth/sv2v.sh` then `yosys -s forge/synth/synth.ys`:
+
+- 38 modules through sv2v; `ibex_top_tracing` and `ibex_tracer` excluded — they are
+  simulation-only and `$finish` at elaboration demanding a global RVFI define.
+- **8091 cells** after `abc -g AND,OR,XOR,NAND,NOR,XNOR,MUX` and `opt_clean -purge`:
+  **883 flip-flops** and **7208 combinational gates**
+  (`$_AND_` 2076, `$_NAND_` 3376, `$_MUX_` 631, `$_OR_` 478, `$_NOR_` 204,
+  `$_XOR_` 171, `$_XNOR_` 156, `$_NOT_` 115).
+- **4.31 s** wall-clock, 170 MB peak.
+- Outputs: `build/synth/ibex_core_gates.v` (720 KB),
+  `build/synth/ibex_core_gates.json` (4.5 MB).
+
+7208 combinational gates is the number layer L5 has to survive. It is inside the range
+aggregation can carry (FATHOM.md §8.2's legibility risk is not retired, but it is now
+quantified rather than feared).
+
+### 5.4 The trace emitter
+
+Ours to build regardless, but thinner than assumed: RVFI gives retire events with the
+architectural deltas already attached. What `forge` adds is the **cycle-accurate**
+half — per-cycle stage occupancy and stall causes, which RVFI does not expose — tapped
+from the ID/EX and WB stage-valid signals in the simulation wrapper, never from the
+synthesised netlist.

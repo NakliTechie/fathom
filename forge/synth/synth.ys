@@ -1,0 +1,63 @@
+# forge stage: Ibex RV32I -> gate netlist.
+# Config: BaseIsaRV32I, RV32MNone, RV32BNone, minimal Zc, 3-stage (WritebackStage=1),
+# flip-flop regfile, no PMP / ICache / branch predictor / SecureIbex.
+# ibex_top_tracing / ibex_tracer are simulation-only (they $finish at elaboration
+# and drive the trace log); they belong to the sim leg, not the synth leg.
+read_verilog -sv build/synth/generated/ibex_alu.v
+read_verilog -sv build/synth/generated/ibex_branch_predict.v
+read_verilog -sv build/synth/generated/ibex_cheriot_ex.v
+read_verilog -sv build/synth/generated/ibex_compressed_decoder.v
+read_verilog -sv build/synth/generated/ibex_controller.v
+read_verilog -sv build/synth/generated/ibex_core.v
+read_verilog -sv build/synth/generated/ibex_counter.v
+read_verilog -sv build/synth/generated/ibex_cs_registers.v
+read_verilog -sv build/synth/generated/ibex_csr.v
+read_verilog -sv build/synth/generated/ibex_decoder.v
+read_verilog -sv build/synth/generated/ibex_dummy_instr.v
+read_verilog -sv build/synth/generated/ibex_ex_block.v
+read_verilog -sv build/synth/generated/ibex_fetch_fifo.v
+read_verilog -sv build/synth/generated/ibex_icache.v
+read_verilog -sv build/synth/generated/ibex_id_stage.v
+read_verilog -sv build/synth/generated/ibex_if_stage.v
+read_verilog -sv build/synth/generated/ibex_load_store_unit.v
+read_verilog -sv build/synth/generated/ibex_lockstep.v
+read_verilog -sv build/synth/generated/ibex_multdiv_fast.v
+read_verilog -sv build/synth/generated/ibex_multdiv_slow.v
+read_verilog -sv build/synth/generated/ibex_pmp.v
+read_verilog -sv build/synth/generated/ibex_prefetch_buffer.v
+read_verilog -sv build/synth/generated/ibex_register_file_ff.v
+read_verilog -sv build/synth/generated/ibex_register_file_fpga.v
+read_verilog -sv build/synth/generated/ibex_register_file_latch.v
+read_verilog -sv build/synth/generated/ibex_top.v
+read_verilog -sv build/synth/generated/ibex_trvk.v
+read_verilog -sv build/synth/generated/ibex_wb_stage.v
+read_verilog -sv build/synth/generated/prim_and2.v
+read_verilog -sv build/synth/generated/prim_buf.v
+read_verilog -sv build/synth/generated/prim_clock_mux2.v
+read_verilog -sv build/synth/generated/prim_count.v
+read_verilog -sv build/synth/generated/prim_flop.v
+read_verilog -sv build/synth/generated/prim_lfsr.v
+read_verilog -sv build/synth/generated/prim_secded_inv_39_32_dec.v
+read_verilog -sv build/synth/generated/prim_secded_inv_39_32_enc.v
+
+chparam -set BaseIsa 0        ibex_core
+chparam -set RV32M 0          ibex_core
+chparam -set RV32B 0          ibex_core
+chparam -set RV32ZC 0         ibex_core
+chparam -set WritebackStage 1 ibex_core
+chparam -set BranchTargetALU 0 ibex_core
+chparam -set ICache 0         ibex_core
+chparam -set BranchPredictor 0 ibex_core
+chparam -set SecureIbex 0     ibex_core
+chparam -set PMPEnable 0      ibex_core
+
+hierarchy -check -top ibex_core
+# hierarchy has already set the top (a $paramod derived from our chparam values),
+# so synth must not re-resolve it by name.
+synth -flatten
+# Map to a small, nameable gate set. The gate layer renders these.
+abc -g AND,OR,XOR,NAND,NOR,XNOR,MUX
+opt_clean -purge
+write_verilog -noattr build/synth/ibex_core_gates.v
+write_json build/synth/ibex_core_gates.json
+stat
