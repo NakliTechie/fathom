@@ -748,6 +748,10 @@ back to all layers, 14 agent-door calls, zero console errors. The cycle moves as
 selectors resolve — line 5 first ran at 35; `sp` was first written at 6 — and the trail
 carries each stop's cycle so the ascent lands where the descent was.
 
+On the other three programs, from the browser pane: `popcount` `ok` (`source@15 … cells@6`),
+`chase` `ok` (`source@8 … cells@6`), `sum` `ok` (`source@8 … cells@6`), 14 agent-door calls
+each, zero console errors.
+
 **Harness.** The test needs a browser (canvas, wasm). The repo has no Playwright harness;
 today the script runs from the browser pane. One `forge/test/` Playwright harness that
 C5's guide capture also uses satisfies FATHOM.md's "no second harness". Pending a word.

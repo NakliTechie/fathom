@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<meta name="fathom-version" content="0.1.0-c2">
+<meta name="fathom-version" content="0.1.0">
 <title>Fathom</title>
 <style>
 /* ---- tokens: Dense direction (DIRECTIONS.md), one family, two weights ---------
@@ -121,6 +121,15 @@ kbd { color: var(--fg-1); border: 1px solid var(--line); border-radius: var(--r)
 #crumbs { color: var(--fg-2); font-size: var(--fs-0); }
 #crumbs b { color: var(--fg-0); font-weight: var(--w-regular); }
 
+/* ---- help: an in-app overlay, never a native dialog ------------------------------ */
+#help { position: fixed; inset: 0; background: color-mix(in srgb, var(--bg-0) 82%, transparent); display: grid; place-items: center; z-index: 10; }
+#help[hidden] { display: none; }
+#help .card { background: var(--bg-1); border: 1px solid var(--line); border-radius: var(--r); padding: var(--sp-5); max-width: 64ch; }
+#help h2 { font-size: var(--fs-3); font-weight: var(--w-bold); margin: 0 0 var(--sp-3); }
+#help p, #help li { margin: 0 0 var(--sp-2); color: var(--fg-1); }
+#help ul { padding-left: var(--sp-5); margin: 0 0 var(--sp-3); }
+#help .v { color: var(--fg-2); font-size: var(--fs-0); }
+
 /* ---- states ------------------------------------------------------------------ */
 #status { padding: var(--sp-4); color: var(--fg-1); }
 #status.err { color: var(--acc-gate); }
@@ -128,6 +137,23 @@ kbd { color: var(--fg-1); border: 1px solid var(--line); border-radius: var(--r)
 </style>
 </head>
 <body>
+<div id="help" hidden role="dialog" aria-modal="true" aria-labelledby="help-h">
+  <div class="card">
+    <h2 id="help-h">Fathom</h2>
+    <p>One event, followed down every layer of a machine, on one clock. The machine is a
+    <b>three-stage RV32I core</b> (lowRISC Ibex), synthesised to gates, mapped to Sky130 cells,
+    placed and routed. It is not your computer and not x86; every layer is a model of that
+    core and says so in its header.</p>
+    <ul>
+      <li><kbd>←</kbd><kbd>→</kbd> step a cycle · <kbd>⇧</kbd> ×10 · <kbd>Home</kbd><kbd>End</kbd></li>
+      <li><kbd>↓</kbd> descend into the next layer · <kbd>↑</kbd> ascend · <kbd>Esc</kbd> all layers</li>
+      <li>click a source line, an assembly row, a pipeline column, a gate bar, or a layer's header</li>
+      <li>the bottom two layers load on demand (DuckDB-wasm, 18 MB, same-origin)</li>
+      <li>agents: <code>window.fathom</code> — <code>describe · seek · descend · ascend · stateAt · trace · loadBottom · history</code></li>
+    </ul>
+    <p class="v">version <span id="help-v"></span> · every artifact is precomputed and read-only · no network beyond this origin · <kbd>?</kbd> or <kbd>Esc</kbd> closes</p>
+  </div>
+</div>
 <div id="app">
   <header>
     <h1>FATHOM</h1>
@@ -555,6 +581,7 @@ window.fathom = {
     return { xid, pc: e.pc, asm: c.asm, lines: c.lines, ir: c.ir, cycles, cycle_first: e.cycle_first, cycle_retire: e.cycle_retire };
   },
   history() { return S.hist.slice(); },
+  help(show) { rec('agent', 'help', [show]); toggleHelp(show); return !$('help').hidden; },
   loadBottom(door = 'agent') { return loadBottom(door); },
   descend(layer, selector) { return descend(layer, selector, 'agent'); },
   ascend() { return ascend('agent'); },
@@ -570,7 +597,14 @@ window.fathom = {
 };
 
 // ---- keyboard: keyboard-first (FATHOM.md §7 C4) ---------------------------------
+function toggleHelp(force) {
+  const h = $('help'); h.hidden = force === undefined ? !h.hidden : !force;
+  $('help-v').textContent = window.fathom.version;
+}
+$('help').addEventListener('click', ev => { if (ev.target === $('help')) toggleHelp(false); });
 document.addEventListener('keydown', (ev) => {
+  if (ev.key === '?') { toggleHelp(); ev.preventDefault(); return; }
+  if (!$('help').hidden) { if (ev.key === 'Escape') { toggleHelp(false); ev.preventDefault(); } return; }
   if (!S.art) return;
   const step = ev.shiftKey ? 10 : 1;
   if (ev.key === 'ArrowRight') { seek(S.cycle + step); ev.preventDefault(); }
