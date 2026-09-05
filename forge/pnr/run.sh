@@ -1,13 +1,18 @@
 #!/usr/bin/env bash
-# forge stage: place-and-route with OpenLane 2 (Docker backend), Sky130.
-# Long-running. Output lands in forge/pnr/runs/<tag>/. D2 leg 2.
+# forge stage: place-and-route with OpenLane 2, Sky130. D2 leg 2. Long-running.
+#
+# The container is run directly rather than through `openlane --dockerized`:
+# that wrapper always attaches a TTY (-t) and 2.3.10 has no flag not to, so it
+# cannot run from a background shell. Same image, same arguments, no -t.
 set -euo pipefail
 ROOT="$(cd "$(dirname "$0")/../.." && pwd)"
-cd "$ROOT/forge/pnr"
-export PDK_ROOT="${PDK_ROOT:-$HOME/.ciel}"
-# OpenLane 2.3's Docker wrapper always attaches a TTY and has no flag not to,
-# so a background run needs a pseudo-terminal: script(1) provides one.
-mkdir -p "$ROOT/build"
-script -q "$ROOT/build/openlane.log" \
-  "$ROOT/.venv/bin/openlane" --dockerized --pdk-root "$PDK_ROOT" --pdk sky130A \
-  --run-tag "fathom-$(date -u +%Y%m%dT%H%M%SZ)" config.json
+IMAGE="${OPENLANE_IMAGE:-ghcr.io/efabless/openlane2:2.3.10}"
+PDK_ROOT="${PDK_ROOT:-$HOME/.ciel}"
+TAG="fathom-$(date -u +%Y%m%dT%H%M%SZ)"
+mkdir -p "$ROOT/build" "$ROOT/forge/pnr/runs"
+docker run --rm -i \
+  -v "$ROOT/forge/pnr:/work" -v "$PDK_ROOT:/pdk" -w /work \
+  -e PDK_ROOT=/pdk -e PDK=sky130A \
+  "$IMAGE" \
+  openlane --pdk-root /pdk --pdk sky130A --run-tag "$TAG" config.json
+echo "run: forge/pnr/runs/$TAG"
