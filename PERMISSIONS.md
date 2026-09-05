@@ -65,3 +65,15 @@ net and module names derived from Ibex's RTL, which the Apache-2.0 grant covers.
 - **Runtime:** served same-origin, loaded **lazily** when a bottom layer first opens — never
   on the first-frame path. No CDN at runtime (FATHOM.md §7, Hard NOTs).
 - **Removable:** pulling it out removes the gate and cells layers; the upper five stand.
+
+#### DuckDB-wasm's runtime dependencies (vendored beside it, `deps/`)
+
+`duckdb-browser.mjs` imports `apache-arrow` as a bare specifier and expects a bundler.
+Fathom has none, so it ships an import map and the following single-file ESM builds
+(jsDelivr `+esm` bundles, then the two cross-package imports rewritten to relative paths):
+
+- **apache-arrow 13.0.0** — Apache-2.0 (`deps/LICENSE.apache-arrow`)
+- **flatbuffers 23.5.26** — Apache-2.0 (`deps/LICENSE.flatbuffers`)
+- **tslib 2.6.2** — 0BSD (`deps/LICENSE.tslib`)
+
+No other imports remain; nothing is fetched from a CDN at runtime.

@@ -50,7 +50,7 @@ header h1 { font-size: var(--fs-3); font-weight: var(--w-bold); margin: 0; lette
 header .meta { color: var(--fg-2); font-size: var(--fs-0); }
 header .meta b { color: var(--fg-1); font-weight: var(--w-regular); }
 main { display: grid; grid-template-columns: 1fr; overflow: hidden; }
-#layers { display: grid; grid-template-rows: repeat(4, minmax(0, 1fr)) auto; overflow: hidden; }
+#layers { display: grid; grid-template-rows: repeat(4, minmax(0, 1fr)) auto auto; overflow: hidden; }
 .layer { display: grid; grid-template-rows: auto 1fr; min-height: 0; border-bottom: 1px solid var(--line); }
 .layer > .head { display: flex; gap: var(--sp-3); align-items: baseline; padding: var(--sp-1) var(--sp-4);
   background: var(--bg-1); color: var(--fg-1); font-size: var(--fs-0); text-transform: uppercase; letter-spacing: .08em; }
@@ -85,6 +85,18 @@ kbd { color: var(--fg-1); border: 1px solid var(--line); border-radius: var(--r)
 .pipe-rows { display: grid; grid-template-rows: repeat(3, 12px) 6px; gap: 1px; color: var(--fg-3); font-size: var(--fs-0); margin-right: var(--sp-2); line-height: 12px; }
 #L-pipe .body > div { display: flex; }
 
+/* ---- gate layer: activity per cycle, step-in to one cycle ------------------------ */
+#L-gates .body { display: grid; grid-template-columns: 1fr 44ch; gap: var(--sp-4); padding: var(--sp-2) var(--sp-4); overflow: hidden; }
+.strip { display: grid; grid-auto-flow: column; grid-auto-columns: 14px; gap: 1px; align-items: end; height: 64px; overflow-x: auto; overflow-y: hidden; }
+.strip .bar { background: var(--fg-3); min-height: 1px; cursor: pointer; }
+.strip .bar.now { background: var(--acc-gate); outline: 1px solid var(--acc-now); }
+.stepin { overflow: auto; font-size: var(--fs-0); }
+.stepin .row { grid-template-columns: 6ch 1fr; }
+.stepin .row .n { color: var(--acc-gate); }
+.lazy { color: var(--fg-2); }
+.lazy button { font: inherit; color: var(--fg-0); background: var(--bg-3); border: 1px solid var(--line); border-radius: var(--r); padding: var(--sp-1) var(--sp-3); cursor: pointer; }
+.lazy button:hover { background: var(--bg-2); }
+
 /* ---- states ------------------------------------------------------------------ */
 #status { padding: var(--sp-4); color: var(--fg-1); }
 #status.err { color: var(--acc-gate); }
@@ -105,6 +117,9 @@ kbd { color: var(--fg-1); border: 1px solid var(--line); border-radius: var(--r)
   </footer>
 </div>
 
+<script type="importmap">
+{ "imports": { "apache-arrow": "./vendor/duckdb-wasm/1.28.0/deps/apache-arrow-13.0.0.mjs" } }
+</script>
 <script>
 'use strict';
 /* =============================================================================
@@ -175,6 +190,7 @@ function render() {
   renderArch(c);
   for (const col of document.querySelectorAll('#L-pipe .col')) col.classList.toggle('now', +col.dataset.cycle === c);
   const pc = document.querySelector('#L-pipe .col.now'); if (pc) pc.scrollIntoView({ block: 'nearest', inline: 'center' });
+  if (S.gates) renderGates(c);
   const now = document.querySelector('#L-asm .row.now'); if (now) now.scrollIntoView({ block: 'nearest' });
   const src = document.querySelector('#L-source .row.now'); if (src) src.scrollIntoView({ block: 'nearest' });
 }
@@ -235,13 +251,73 @@ function build() {
     `<div><div class="pipe-rows"><span>IF</span><span>ID/EX</span><span>WB</span><span></span></div><div class="pipe">${cols}</div></div>`
     + `<div class="pipe-legend"><span><i style="background:var(--acc-pipe)"></i>anchor</span><span><i style="background:color-mix(in srgb, var(--acc-pipe) 45%, var(--bg-2))"></i>held</span><span><i style="background:var(--acc-gate)"></i>stall</span><span><i style="background:var(--fg-3)"></i>occupied</span><span><i style="background:var(--acc-arch)"></i>retire</span></div>`;
   pipe.querySelector('.pipe').addEventListener('click', ev => { const col = ev.target.closest('.col'); if (col) seek(+col.dataset.cycle); });
-  L.append(src, ir, asm, arch, pipe);
+  // L5 gates: lazy. The Parquet table is read by DuckDB-wasm (vendored, 18 MB), which
+  // never sits on the first-frame path: the band offers to load, and loads on demand.
+  const gates = layerEl('gates', 'gates', 'var(--acc-gate)', `${a.gates.nets.length} nets · ${a.gates.toggles.rows} toggle events in gates.parquet`);
+  gates.querySelector('.body').innerHTML = `<div class="lazy">generic gate netlist, ${a.gates.nets.length} nets — <button id="load-bottom">load the bottom layers</button> <span>(DuckDB-wasm, 18 MB, same-origin)</span></div>`;
+  gates.querySelector('#load-bottom').addEventListener('click', () => window.fathom.loadBottom('ui'));
+  L.append(src, ir, asm, arch, pipe, gates);
   $('scrub').max = a.cycles - 1;
   performance.mark('fathom:built');                    // the 5 s frame is measured, not eyeballed
   $('meta').innerHTML = `${a.core.name} · ${a.core.shape} RV32I · ${a.core.stages.join('→')} · anchor ${a.core.anchor_stage} · <b>${a.program.name}</b> · ${a.cycles} cycles · ${a.exec.length} retires · ${a.artifact_id.slice(0, 19)}`;
   render();
 }
 function esc(s) { return s.replace(/[&<>]/g, ch => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;' }[ch])); }
+
+// ---- the bottom layers: DuckDB-wasm over the Parquet tables (C3) -------------------------
+// Lazy by construction. Pulling this block out removes the gate and cells layers and
+// nothing above them changes (FATHOM.md §3, removability).
+const DUCK = new URL('vendor/duckdb-wasm/1.28.0/', location.href).href;   // import() needs a URL, not a bare path
+async function duck() {
+  if (S.duck) return S.duck;
+  const m = await import(DUCK + 'duckdb-browser.mjs');
+  const worker = new Worker(DUCK + 'duckdb-browser-eh.worker.js');
+  const db = new m.AsyncDuckDB(new m.ConsoleLogger(m.LogLevel.WARNING), worker);
+  await db.instantiate(DUCK + 'duckdb-eh.wasm');
+  const conn = await db.connect();
+  S.duck = { m, db, conn };
+  return S.duck;
+}
+async function registerParquet(name, url) {
+  const { db } = await duck();
+  await db.registerFileBuffer(name, buf);
+  return buf.byteLength;
+}
+async function q(sql) { const { conn } = await duck(); const t = await conn.query(sql); return t.toArray().map(r => r.toJSON()); }
+
+async function loadBottom(door) {
+  if (S.gates) return S.gates.summary;
+  rec(door, 'loadBottom', []);
+  const a = S.art, prog = a.program.name, t0 = performance.now();
+  const body = $('L-gates').querySelector('.body');
+  body.innerHTML = `<div class="lazy">loading DuckDB-wasm…</div>`;
+  const bytes = await registerParquet('gates.parquet', `artifacts/${prog}/${a.gates.toggles.file}`);
+  // per-cycle activity: one row per cycle, nets touched and toggle events
+  const per = await q(`SELECT cycle::INT AS cycle, count(*)::INT AS nets, sum(count)::INT AS toggles FROM 'gates.parquet' GROUP BY cycle ORDER BY cycle`);
+  const byCycle = new Map(per.map(r => [r.cycle, r]));
+  // gate cycle == pipe cycle, asserted here, not by eye (FATHOM.md §7 C3)
+  const missing = [...Array(a.cycles).keys()].filter(c => !byCycle.has(c));
+  const max = Math.max(...per.map(r => r.toggles));
+  S.gates = { byCycle, max, summary: { bytes, cycles: per.length, missing: missing.length, max_toggles: max, ms: Math.round(performance.now() - t0) } };
+  body.innerHTML = `<div class="strip">${[...Array(a.cycles).keys()].map(c => { const r = byCycle.get(c); const h = r ? Math.max(1, Math.round(64 * r.toggles / max)) : 1; return `<div class="bar" data-cycle="${c}" style="height:${h}px" title="cycle ${c}: ${r ? r.toggles + ' toggles on ' + r.nets + ' nets' : 'silent'}"></div>`; }).join('')}</div><div class="stepin"></div>`;
+  body.querySelector('.strip').addEventListener('click', ev => { const b = ev.target.closest('.bar'); if (b) seek(+b.dataset.cycle); });
+  $('L-gates').querySelector('.note').textContent = `${a.gates.nets.length} nets · ${a.gates.toggles.rows} events · ${missing.length === 0 ? 'every cycle joined' : missing.length + ' silent cycles'} · ${S.gates.summary.ms} ms to load`;
+  renderGates(S.cycle);
+  return S.gates.summary;
+}
+let gatesReq = 0;
+async function renderGates(c) {
+  const a = S.art, r = S.gates.byCycle.get(c);
+  for (const b of document.querySelectorAll('#L-gates .bar')) b.classList.toggle('now', +b.dataset.cycle === c);
+  const now = document.querySelector('#L-gates .bar.now'); if (now) now.scrollIntoView({ block: 'nearest', inline: 'center' });
+  const box = document.querySelector('#L-gates .stepin');
+  if (!r) { box.innerHTML = `<div class="row"><span class="n"></span><span>cycle ${c}: silent</span></div>`; return; }
+  const my = ++gatesReq;
+  const top = await q(`SELECT net::INT AS net, count::INT AS count FROM 'gates.parquet' WHERE cycle = ${c} ORDER BY count DESC, net LIMIT 14`);
+  if (my !== gatesReq) return;                        // a newer cycle superseded this one
+  box.innerHTML = `<div class="row"><span class="n">${r.toggles}</span><span>toggles on ${r.nets} nets at cycle ${c}</span></div>` +
+    top.map(t => `<div class="row"><span class="n">×${t.count}</span><span>${esc(a.gates.nets[t.net])}</span></div>`).join('');
+}
 
 // ---- the agent face (SPEC §0, FATHOM.md §7): every call recorded with its door --
 function rec(door, op, args) { S.hist.push({ t: Date.now(), door, op, args }); if (S.hist.length > 500) S.hist.shift(); }
@@ -277,7 +353,13 @@ window.fathom = {
       case 'asm':    return e ? { xid: e.xid, pc: e.pc, asm: S.codeByPc.get(e.pc).asm, held: p.held } : { stall: p.stall };
       case 'arch':   { const s = stateAt(cycle); return { regs: s.regs, mem: Object.fromEntries(s.mem) }; }
       case 'pipe':   return p;
-      default:       throw new Error(`layer ${layer}: not loaded in C2 (gates, cells arrive at C3)`);
+      case 'gates':  {
+        if (!S.gates) throw new Error('gates: call fathom.loadBottom() first (lazy by design)');
+        const r = S.gates.byCycle.get(cycle);
+        return q(`SELECT net::INT AS net, count::INT AS count FROM 'gates.parquet' WHERE cycle = ${cycle} ORDER BY count DESC, net LIMIT 50`)
+          .then(top => ({ cycle, nets: r ? r.nets : 0, toggles: r ? r.toggles : 0, top: top.map(t => ({ net: a.gates.nets[t.net], count: t.count })) }));
+      }
+      default:       throw new Error(`layer ${layer}: cells arrive with the floorplan (C3, in progress)`);
     }
   },
   trace(xid) {
@@ -288,6 +370,7 @@ window.fathom = {
     return { xid, pc: e.pc, asm: c.asm, lines: c.lines, ir: c.ir, cycles, cycle_first: e.cycle_first, cycle_retire: e.cycle_retire };
   },
   history() { return S.hist.slice(); },
+  loadBottom(door = 'agent') { return loadBottom(door); },
   timing() {
     const nav = performance.getEntriesByType('navigation')[0];
     const built = performance.getEntriesByName('fathom:built')[0];
