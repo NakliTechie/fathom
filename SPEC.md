@@ -385,3 +385,64 @@ architectural deltas already attached. What `forge` adds is the **cycle-accurate
 half — per-cycle stage occupancy and stall causes, which RVFI does not expose — tapped
 from the ID/EX and WB stage-valid signals in the simulation wrapper, never from the
 synthesised netlist.
+
+
+---
+
+## 6. C0 measurements — the simulation and join legs, 2026-09-05
+
+### 6.1 The harness
+
+`forge/sim/fathom_tb.sv` — Ibex + one flat 128 KiB memory at `0x8000_0000` + a
+memory-mapped UART at `0x1000_0000`. Verilator 5.050, `--binary --timing`, `-DRVFI`.
+Zero-latency grant, one-cycle response; out-of-range accesses `$fatal` rather than wrap
+(SPEC §0.8, fail closed).
+
+**Ibex's reset vector is `boot_addr_i + 0x80`**, and `boot_addr_i` must be 256-byte
+aligned. The program is therefore linked at `0x8000_0080`, not `0x8000_0000` — putting the
+program at the vector rather than un-aligning the boot address. `forge/program/mkimage.py`
+pads the image by `0x80` so word index stays `(addr - MemBase) / 4`.
+
+`crt0.S` sets `sp` and enters `fathom_main`. It is outside `[pc_start, pc_end)` by
+construction (§1.2) — without it `_start` ran with `sp` uninitialised.
+
+### 6.2 The run
+
+- **95 retires in 136 cycles**, IPC 0.70. `pc_end = 0x8000_00ac`, the self-loop.
+- **The memory-mapped write happens**: `0x1000_0000` receives `0x68 0x69 0x0a` at cycles
+  43, 74, 105. The bottom of the descent is observed, not assumed.
+- **A store's effect precedes its retire by 2 cycles** — the UART log records cycles 41,
+  72, 103 against retires at 43, 74, 105. The descent must render this honestly rather
+  than collapsing effect and retire onto one cycle.
+- Simulation wall-clock: 0.007 s.
+
+### 6.3 Join totality — the C0 risk, probed
+
+`forge/join/probe_joins.py`, run by `make probe`:
+
+| Join | Result |
+|---|---|
+| 1 — `pc -> file:line:col` | **45/45 distinct executed pcs resolve. Zero orphans.** |
+| 2 — `cycle -> anchor` | 136 cycles, ID/EX occupied 132, **4 bubbles (3%)** |
+| 3 — `cycle -> gate toggle` | **NOT PROBED** — no gate-level simulation yet |
+
+FATHOM.md §8.1's risk is retired for join 1 **on this program class** (freestanding C,
+`-O0`, one translation unit plus an assembly stub). It is not retired in general, and
+join 3 is untested.
+
+**132 occupied cycles against 95 retires** means an instruction sits in ID/EX for several
+cycles. §1.1's "exactly one anchor per cycle" holds as a **many-to-one** relation:
+consecutive cycles legitimately share an `xid`. The verifier must assert one anchor per
+cycle, never one cycle per instruction.
+
+### 6.4 A correction to §1.2 — the file index is not a key
+
+The DWARF file index alone does **not** identify a source file. Every compile unit numbers
+its own file table from 0, so `crt0.S` and `uart_puts.c` are both `file[0]` and their line
+numbers silently merge — the first probe run reported `line 7: 7 retires` where the truth
+was `crt0.S:7` 2 and `uart_puts.c:7` 5.
+
+**Join 1's key is `(compile unit, file index, line, column)`**, resolved to a source path
+via that CU's own file table. This is an `AMBIGUOUS`, not an `ORPHAN`: the ids resolved,
+they resolved to the wrong thing, and a totality count alone would never have caught it.
+Verifier assertion 7 (§1.3) is extended: two distinct sources must not share a key.
