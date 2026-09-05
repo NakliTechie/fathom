@@ -637,3 +637,47 @@ the fast, deterministic cell mapping; it is no longer a layer.
 The JSON is ~3.2 MB regardless of program: 13,740 placed cells with names and
 coordinates, and ~14 k net names. Cell toggles rose ~50 % over the un-routed netlist —
 the clock tree is real switching activity.
+
+
+---
+
+## 9. C2 — the shell and the upper layers, 2026-09-05
+
+`fathom.html` — one file, 300 lines, no build step. Dense direction; JetBrains Mono at
+400/700, four sizes, true neutrals only, eight layer accents. Loads
+`artifacts/<program>/descent.json` through the schema validator as the single ingress
+(SPEC §0.8): a failing artifact renders nothing and reports the verdict.
+
+Layers landed: **source** (every file in the artifact, retire counts per line) · **IR** ·
+**assembly** (anchor, IF and WB rows marked) · **architectural state** (x0–x31 and last
+stores, delta-decoded from RVFI, changed registers marked) · **pipeline** (one column per
+cycle, IF / ID-EX / WB rows, anchor · held · stall · occupied · retire as token colours,
+click to seek). One scrub bar; `←`/`→` step a cycle, `⇧` ×10, `Home`/`End`.
+
+**Agent face** (`window.fathom`): `loadDescent` · `describe` · `layers` · `seek` ·
+`stateAt(layer, cycle)` · `trace(xid)` · `history` · `timing`. Every call is recorded
+with its door (`ui` / `agent`), so History tells a click from a call. Driven from the
+browser pane: `seek(43)` lands on xid 31 with `a0 = 0x68` and `a1 = 0x1000_0000` in the
+architectural state — the UART store's operands at its retire cycle.
+
+**Checks.** Static (`forge/design/check.py`, 4/4): every colour a token (31 tokens, 0
+stray literals); zero tinted neutrals (9 neutral tokens, channel spread < 8); 3 sizes × 2
+weights = 6 type styles at the Dense budget; shipped weights = used weights. Runtime, by
+computed style in the browser pane: no blank band across five layers; three distinct
+interaction-state backgrounds (`row` / `hot` / `now`); both font faces loaded; four type
+styles in use.
+
+**The 5 s frame.** `fathom.timing()` reads a `performance.mark` set when the layers are
+built: **84 ms** from navigation start on localhost with the 3.25 MB artifact (response
+6 ms, DOMContentLoaded 14 ms). On a 30 Mbit connection the fetch alone is ≈ 0.9 s; the
+frame is inside the gate with margin. A cold-cache capture over a real network is the
+C5 measurement, not this one.
+
+**Not in C2:** the gate and cells layers (C3: DuckDB-wasm over the Parquet tables, the
+gate layer aggregated with step-in, the cells layer as a floorplan on the real die), and
+`?` help (C5).
+
+## 10. C1, re-checked against the pinned physical design
+
+Clean build, four programs, from the pinned `forge/pnr/out/`: **32 s**, all four
+artifacts byte-identical to the committed ones, `git status artifacts/` empty.
