@@ -13,7 +13,7 @@ PROG   := $(B)/uart_puts.elf
 SIM    := $(B)/sim/obj/fathom_sim
 
 .PHONY: all program sim synth probe clean status
-all: probe equiv toggles
+all: probe equiv toggles descent
 
 ## program — C + crt0 -> RV32I ELF, IR and the DWARF line table
 program: $(PROG)
@@ -56,9 +56,17 @@ equiv: gates
 toggles: gates
 	python3 forge/join/vcd_toggles.py
 
+## descent — the join pass: every layer -> artifacts/<program>/descent.json
+descent: sim toggles
+	python3 forge/join/descent.py
+
 ## probe — join totality. The C0 checkpoint's ancestor.
 probe: sim
 	python3 forge/join/probe_joins.py
+
+## verify — the C0 checkpoint. Reads ONLY the committed artifact + source tree.
+verify:
+	python3 forge/verify.py artifacts/uart_puts/descent.json
 
 ## status — the single perception act (SPEC §0.2)
 status:
