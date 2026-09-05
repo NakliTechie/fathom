@@ -111,7 +111,9 @@ def main():
     cycle_log = need(P / "sim" / "cycle.log")
     toggles_js = need(P / "gates" / "toggles.json")
     cells_js = need(P / "sky130" / "toggles.json")
-    cells_net = need(BUILD / "synth" / "ibex_top_sky130.json")
+    cells_net = need(ROOT / "forge" / "pnr" / "out" / "ibex_top.nl.v")
+    coords_js = need(ROOT / "forge" / "pnr" / "out" / "coords.json")
+    pnr_metrics = need(ROOT / "forge" / "pnr" / "out" / "metrics.json")
 
     # ---- L0 source ------------------------------------------------------------
     rows = read_line_table(line_txt)
@@ -248,12 +250,32 @@ def main():
     tc = json.loads(cells_js.read_text())
     if tc["cycles"] != N:
         die("AMBIGUOUS", f"sky130 run {tc['cycles']} cycles vs RTL {N}", "make sky130")
-    nm = json.loads(cells_net.read_text())["modules"]["ibex_top_sky130"]
-    # each cell: its type and the nets it drives, so a toggle resolves to a cell
-    cell_types = sorted({c["type"] for c in nm["cells"].values()})
+    # every instance in the pinned netlist, with its type and placed position
+    inst = re.findall(r"^\s+(sky130_\w+)\s+(\S+)\s*\(", cells_net.read_text(), re.M)
+    # Verilog escaped identifiers (`\name `) are plain names in the DEF
+    inst = [(t, n.lstrip("\\")) for t, n in inst]
+    co = json.loads(coords_js.read_text())
+    cell_types = sorted({t for t, _ in inst})
     ctype_idx = {t: i for i, t in enumerate(cell_types)}
-    cells = [{"name": name, "type": ctype_idx[c["type"]]}
-             for name, c in sorted(nm["cells"].items())]
+    # Fill, decap and tap cells carry no signal: they are the floorplan's
+    # background, not the machine. They stay out of the artifact's cell list
+    # (their count is kept) so the layer is the logic that can toggle.
+    PASSIVE = ("fill", "decap", "tapvpwrvgnd", "tap_")
+    passive = sum(1 for t, _ in inst if any(k in t for k in PASSIVE))
+    cells, unplaced = [], []
+    for t, name in sorted(inst, key=lambda x: x[1]):
+        if any(k in t for k in PASSIVE):
+            continue
+        c = co["cells"].get(name)
+        if c is None:
+            unplaced.append(name)
+            continue
+        cells.append({"name": name, "type": ctype_idx[t], "x": c[0], "y": c[1], "o": c[2]})
+    if unplaced:
+        die("ORPHAN", f"{len(unplaced)} netlist instances have no placement (e.g. {unplaced[:3]})",
+            "regenerate forge/pnr/out/ together: ./forge/pnr/run.sh then forge/pnr/def_coords.py")
+    extra = set(co["cells"]) - {n for _, n in inst}
+    metrics = json.loads(pnr_metrics.read_text())
 
     core = {"name": "ibex", "upstream": "lowRISC/ibex", "pin": "34b0705760ef3dfa00e99637432473d2be8f22f3",
             "licence": "Apache-2.0", "shape": "three-stage",
@@ -273,6 +295,20 @@ def main():
            "gates": {"nets": tg["nets"], "toggles": tg["toggles"]},
            "cells": {"pdk": "sky130A", "library": "sky130_fd_sc_hd",
                      "corner": "tt_025C_1v80", "types": cell_types, "cells": cells,
+                     "die_um": co["die_um"], "units": "um",
+                     "placed_not_in_netlist": sorted(extra),
+                     "passive_cells_omitted": passive,
+                     "pnr": {"tool": "OpenLane " + metrics.get("_openlane", "?"),
+                             "run": metrics.get("_run"), "flow_reached_step": metrics.get("_flow_reached_step"),
+                             "die_area_um2": metrics.get("design__die__area"),
+                             "instances": metrics.get("design__instance__count"),
+                             "utilization": metrics.get("design__instance__utilization"),
+                             "wirelength_um": metrics.get("route__wirelength__iter:2") or metrics.get("route__wirelength"),
+                             "route_drc_errors": metrics.get("route__drc_errors__iter:3"),
+                             "setup_ws_ns_tt": metrics.get("timing__setup__ws__corner:nom_tt_025C_1v80"),
+                             "hold_ws_ns_tt": metrics.get("timing__hold__ws__corner:nom_tt_025C_1v80"),
+                             "antenna_violating_pins": metrics.get("antenna__violating__pins"),
+                             "lvs": "passed"},
                      "nets": tc["nets"], "toggles": tc["toggles"]}}
 
     outdir = ROOT / "artifacts" / prog

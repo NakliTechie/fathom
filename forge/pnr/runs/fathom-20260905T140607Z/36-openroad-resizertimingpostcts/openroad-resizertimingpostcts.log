@@ -634,3 +634,81 @@ Reading design constraints file at '/nix/store/0cgica8q52vjb9a7vbwaccncbajs33gx-
     1870* |       0 |     979 |       54 |     50 |    79 |  -12.065 |    -8638.4 |    872 | _14448_/D
     1871* |       0 |     979 |       54 |     50 |    79 |  -12.065 |    -8638.4 |    872 | _14448_/D
     1872* |       0 |     979 |       54 |     50 |    79 |  -12.065 |    -8638.4 |    872 | _14448_/D
+    1873* |       0 |     979 |       54 |     50 |    79 |  -12.065 |    -8638.4 |    872 | _14448_/D
+    1874* |       0 |     979 |       54 |     50 |    79 |  -12.065 |    -8638.4 |    872 | _14448_/D
+    1875* |       0 |     979 |       54 |     50 |    79 |  -12.065 |    -8638.4 |    872 | _14448_/D
+    1876* |       0 |     979 |       54 |     50 |    79 |  -12.065 |    -8638.4 |    872 | _14448_/D
+    1877* |       0 |     979 |       54 |     50 |    79 |  -12.065 |    -8638.4 |    872 | _14448_/D
+    1878* |       0 |     979 |       54 |     50 |    79 |  -12.065 |    -8638.4 |    872 | _14448_/D
+    1879* |       0 |     979 |       54 |     50 |    79 |  -12.065 |    -8638.4 |    872 | _14448_/D
+    1880* |       0 |     979 |       54 |     50 |    79 |  -12.065 |    -8638.4 |    872 | _14448_/D
+    1880* |       0 |     979 |       54 |     50 |    79 |  -12.065 |    -8638.4 |    872 | _14448_/D
+    1881* |       0 |     979 |       54 |     50 |    79 |  -12.065 |    -8638.4 |    872 | _14448_/D
+    1882* |       0 |     979 |       54 |     50 |    79 |  -12.065 |    -8638.4 |    872 | _14448_/D
+    1883* |       0 |     979 |       54 |     50 |    79 |  -12.065 |    -8638.4 |    872 | _14448_/D
+    1884* |       0 |     979 |       54 |     50 |    79 |  -12.065 |    -8638.4 |    872 | _14448_/D
+    1885* |       0 |     979 |       54 |     50 |    79 |  -12.065 |    -8638.4 |    872 | _14448_/D
+    1886* |       0 |     979 |       54 |     50 |    79 |  -12.065 |    -8638.4 |    872 | _14448_/D
+    1887* |       0 |     979 |       54 |     50 |    79 |  -12.065 |    -8638.4 |    872 | _14448_/D
+    1888* |       0 |     979 |       54 |     50 |    79 |  -12.065 |    -8638.4 |    872 | _14448_/D
+    1889* |       0 |     979 |       54 |     50 |    79 |  -12.065 |    -8638.4 |    872 | _14448_/D
+    1890* |       0 |     979 |       54 |     50 |    79 |  -12.065 |    -8638.4 |    872 | _14448_/D
+    1890* |       0 |     979 |       54 |     50 |    79 |  -12.065 |    -8638.4 |    872 | _14448_/D
+    1891* |       0 |     979 |       54 |     50 |    79 |  -12.065 |    -8638.4 |    872 | _14448_/D
+    1892* |       0 |     979 |       54 |     50 |    79 |  -12.065 |    -8638.4 |    872 | _14448_/D
+    1893* |       0 |     979 |       54 |     50 |    79 |  -12.065 |    -8638.4 |    872 | _14448_/D
+    1894* |       0 |     979 |       54 |     50 |    79 |  -12.065 |    -8638.4 |    872 | _14448_/D
+    1895* |       0 |     979 |       54 |     50 |    79 |  -12.065 |    -8638.4 |    872 | _14448_/D
+    1896* |       0 |     979 |       54 |     50 |    79 |  -12.065 |    -8638.4 |    872 | _14448_/D
+    1897* |       0 |     979 |       54 |     50 |    79 |  -12.065 |    -8638.4 |    872 | _14448_/D
+    1898* |       0 |     979 |       54 |     50 |    79 |  -12.065 |    -8638.4 |    872 | _14448_/D
+    1899* |       0 |     979 |       54 |     50 |    79 |  -12.065 |    -8638.4 |    872 | _14448_/D
+    1900* |       0 |     979 |       54 |     50 |    79 |  -12.065 |    -8638.4 |    872 | _14448_/D
+    final |       0 |     979 |       54 |     50 |    79 |  -12.065 |    -8638.4 |    872 | _14448_/D
+---------------------------------------------------------------------------------------------------
+[INFO RSZ-0040] Inserted 23 buffers.
+[INFO RSZ-0041] Resized 979 instances.
+[INFO RSZ-0043] Swapped pins on 79 instances.
+[INFO RSZ-0049] Cloned 50 instances.
+[WARNING RSZ-0062] Unable to repair all setup violations.
+[INFO RSZ-0046] Found 2575 endpoints with hold violations.
+Iteration | Resized | Buffers | Cloned Gates |   WNS   |   TNS   | Endpoint
+---------------------------------------------------------------------------
+        0 |       0 |       0 |            0 |  -0.702 | -179.933 | _15064_/D
+    final |       0 |    1501 |            0 |   0.100 |   0.000 | _16098_/D
+---------------------------------------------------------------------------
+[INFO RSZ-0032] Inserted 1501 hold buffers.
+Placement Analysis
+---------------------------------
+total displacement       7879.0 u
+average displacement        0.3 u
+max displacement           11.6 u
+original HPWL          723978.9 u
+legalized HPWL         739425.0 u
+delta HPWL                    2 %
+
+[INFO DPL-0020] Mirrored 5422 instances
+[INFO DPL-0021] HPWL before          739425.0 u
+[INFO DPL-0022] HPWL after           726807.9 u
+[INFO DPL-0023] HPWL delta               -1.7 %
+[INFO] Setting RC values…
+Setting global connections for newly added cells…
+[INFO] Setting global connections...
+Updating metrics…
+Cell type report:                       Count       Area
+  Fill cell                               602    2259.67
+  Tap cell                               9544   11941.45
+  Buffer                                   30     123.87
+  Clock buffer                            441    6209.71
+  Timing Repair Buffer                   3391   29733.52
+  Inverter                                114     440.42
+  Clock inverter                          211    2755.14
+  Clock gate cell                           1      17.52
+  Sequential cell                        1871   47555.61
+  Multi-Input combinational cell         7311   67748.73
+  Total                                 23516  168785.63
+Writing OpenROAD database to '/work/runs/fathom-20260905T140607Z/36-openroad-resizertimingpostcts/ibex_top.odb'…
+Writing netlist to '/work/runs/fathom-20260905T140607Z/36-openroad-resizertimingpostcts/ibex_top.nl.v'…
+Writing powered netlist to '/work/runs/fathom-20260905T140607Z/36-openroad-resizertimingpostcts/ibex_top.pnl.v'…
+Writing layout to '/work/runs/fathom-20260905T140607Z/36-openroad-resizertimingpostcts/ibex_top.def'…
+Writing timing constraints to '/work/runs/fathom-20260905T140607Z/36-openroad-resizertimingpostcts/ibex_top.sdc'…

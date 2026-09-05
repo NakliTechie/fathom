@@ -169,8 +169,17 @@ class Verify:
         for cell in cl["cells"]:
             if not (0 <= cell["type"] < len(cl["types"])):
                 self.fail("ORPHAN", f"cell {cell['name']} has unknown type index {cell['type']}")
-        if not cl["types"] or not all(t.startswith(cl["library"]) for t in cl["types"]):
-            self.fail("SCHEMA", f"cells.types must all be {cl['library']} cells")
+        if not cl["types"] or not all(t.startswith(("sky130_fd_sc_hd", "sky130_ef_sc_hd")) for t in cl["types"]):
+            self.fail("SCHEMA", "cells.types must all be sky130 hd cells")
+        # 1c. every cell is placed inside the die; the DEF and the netlist agree
+        x0, y0, x1, y1 = cl["die_um"]
+        for cell in cl["cells"]:
+            if not ("x" in cell and "y" in cell):
+                self.fail("ORPHAN", f"cell {cell['name']} has no placement")
+            elif not (x0 <= cell["x"] <= x1 and y0 <= cell["y"] <= y1):
+                self.fail("ORPHAN", f"cell {cell['name']} placed at ({cell['x']},{cell['y']}) outside the die")
+        if len(cl["placed_not_in_netlist"]) > 1:
+            self.fail("AMBIGUOUS", f"{len(cl['placed_not_in_netlist'])} placed components are not in the netlist")
         # arch: every delta cycle within range and names an xid
         for f in a["arch"]["frames"]:
             if not (0 <= f["cycle"] < N):

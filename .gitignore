@@ -5,3 +5,4 @@ plan/
 build/
 .venv/
 .claude/
+forge/pnr/runs/

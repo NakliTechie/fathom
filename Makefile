@@ -22,7 +22,7 @@ P       := $(B)/$(PROGRAM)
 ELF     := $(P)/$(PROGRAM).elf
 SIM     := $(B)/sim/obj/fathom_sim
 GATES   := $(B)/synth/ibex_top_gates.v
-SKY     := $(B)/synth/ibex_top_sky130.v
+SKY     := forge/pnr/out/ibex_top.nl.v
 
 .PHONY: all programs program sim gates equiv toggles descent probe verify synth status clean
 all: descent equiv probe
@@ -59,10 +59,7 @@ $(GATES): forge/synth/synth.ys forge/synth/sv2v.sh
 	./forge/synth/sv2v.sh
 	yosys -q -s forge/synth/synth.ys
 
-## sky130 — Ibex -> sky130_fd_sc_hd cells (D2), and the same program on that netlist
-$(SKY): forge/synth/synth_sky130.ys forge/synth/sv2v.sh
-	./forge/synth/sv2v.sh
-	yosys -q -s forge/synth/synth_sky130.ys
+## sky130 — the same program on the PINNED place-and-route netlist (D2)
 sky130: $(P)/sky130/toggles.json
 $(P)/sky130/bus.log: $(SKY) $(P)/sim/retire.log forge/sim/fathom_gates_tb.sv forge/sim/fathom_mem.sv forge/sim/build_sky130.sh
 	@mkdir -p $(P)/sky130
@@ -94,7 +91,7 @@ $(P)/gates/toggles.json: $(P)/gates/bus.log forge/join/vcd_toggles.py
 
 ## descent — the join pass: every layer -> artifacts/<program>/descent.json
 descent: artifacts/$(PROGRAM)/descent.json
-artifacts/$(PROGRAM)/descent.json: $(P)/sim/retire.log $(P)/gates/toggles.json $(P)/sky130/toggles.json forge/join/descent.py forge/join/probe_joins.py
+artifacts/$(PROGRAM)/descent.json: $(P)/sim/retire.log $(P)/gates/toggles.json $(P)/sky130/toggles.json forge/join/descent.py forge/join/probe_joins.py forge/pnr/out/coords.json $(SKY)
 	./.venv/bin/python forge/join/descent.py $(PROGRAM)
 
 ## probe — join totality, from build outputs (the verifier's ancestor)

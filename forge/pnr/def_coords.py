@@ -21,11 +21,17 @@ ROOT = pathlib.Path(__file__).resolve().parents[2]
 
 
 def latest_def():
+    """final/def if the flow wrote its views; else the newest step DEF after fill
+    insertion, which is the placed, routed, filled design (the flow reached step
+    68 of 78 -- past routing, fill, GDS and LVS -- without writing final/)."""
     runs = sorted((ROOT / "forge/pnr/runs").glob("fathom-*"))
     for run in reversed(runs):
         finals = sorted(run.glob("final/def/*.def"))
         if finals:
-            return finals[0]
+            return finals[0].resolve()
+        steps = sorted(run.glob("*-odb-cellfrequencytables/*.def")) or sorted(run.glob("*-openroad-fillinsertion/*.def"))
+        if steps:
+            return steps[-1].resolve()
     return None
 
 
@@ -48,7 +54,7 @@ def parse_def(path):
 
 
 def main():
-    d = pathlib.Path(sys.argv[1]) if len(sys.argv) > 1 else latest_def()
+    d = pathlib.Path(sys.argv[1]).resolve() if len(sys.argv) > 1 else latest_def()
     if d is None or not d.exists():
         print("TOOLCHAIN: no final DEF under forge/pnr/runs/*/final/def/\n  remedy: ./forge/pnr/run.sh")
         sys.exit(2)
