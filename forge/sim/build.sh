@@ -7,6 +7,7 @@ PRIM="$IBEX/vendor/lowrisc_ip/ip/prim/rtl"
 PRIMG="$IBEX/vendor/lowrisc_ip/ip/prim_generic/rtl"
 DVU="$IBEX/vendor/lowrisc_ip/dv/sv/dv_utils"
 OUT="$ROOT/build/sim/obj"
+mkdir -p "$OUT"
 
 verilator --binary --timing -j 0 \
   -DRVFI -DSYNTHESIS=0 \

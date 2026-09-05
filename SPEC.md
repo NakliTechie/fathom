@@ -489,3 +489,84 @@ code, none in the core:
 
 `toggles.json` is 1.7 MB for 137 cycles — the gate layer's size is the events, not the
 names, and `.parquet` at C3 remains the plan for longer traces.
+
+
+---
+
+## 7. C0 and C1 checkpoints — met, 2026-09-05
+
+### 7.1 `forge verify`
+
+`forge/verify.py` reads **only** the committed artifact and the source tree — never
+`build/` — and fails closed. Eight assertions from §1.3 plus the cells layer's totality.
+Green is one line. Failures print at most 20 exemplars per verdict class and the total.
+
+`make verify` runs it on every committed artifact. All three pass 8/8.
+
+### 7.2 Determinism (C1)
+
+Two consecutive `make clean && make programs` runs: **34 s wall-clock each**, all three
+artifacts **byte-identical** to the committed ones and to each other. `git status
+artifacts/` is empty after either run. This held without any dedicated work: canonical
+serialisation, no timestamps, no absolute paths, interned names, and a harness whose
+`t₀` is fixed by construction were enough.
+
+| artifact | size | cycles | exec | gate toggles | cell toggles |
+|---|---|---|---|---|---|
+| `uart_puts` | 7.9 MB | 137 | 95 | 120,179 | 388,823 |
+| `popcount` | 15 MB | 259 | 174 | 250,996 | 821,938 |
+| `chase` | 5.1 MB | 80 | 45 | 66,241 | 214,706 |
+
+`popcount` at 15 MB is FATHOM.md §8.2's size risk arriving on schedule: the cells layer
+carries three times the gate layer's events. Parquet for the two bottom layers at C3
+stands.
+
+### 7.3 The three programs
+
+| program | teaches | static | dynamic | stalls (held) |
+|---|---|---|---|---|
+| `uart_puts` | a call frame, a loop, a memory-mapped write | 45 | 95 | branch 18 · load-use 17 |
+| `popcount` | data-dependent branches, taken and not | 50 | 174 | branch 45 · load-use 29 · 6 branch-flushes |
+| `chase` | load-use on every hop of a pointer walk | 25 | 45 | branch 13 · load-use 15 |
+
+Join 1 is total on all three. The program class the claim now covers: freestanding C,
+`-O0`, one translation unit plus the assembly stub, static functions, `const` data in
+ROM. Not covered: multiple translation units, inlining, anything above `-O0`.
+
+### 7.4 What the traces say about the core
+
+With a zero-latency memory, **Ibex never waits on memory** — `mem-wait` and `wb-stall`
+appear in no artifact. Every held cycle is control (`branch`: taken branches and jumps
+take two cycles) or data (`load-use`). The vocabulary keeps both names for a memory with
+latency; the artifacts say what is true for this one.
+
+`load-use` is named by its **signature**, not by instruction kind: the instruction
+arrived (`id_new`), was stalled (`id_ready=0`) while a load was outstanding in WB
+(`ld_out`); the held row is the cycle after. It fires on a dependent `lw` and on a
+`beqz` consuming a loaded value alike. Naming by kind mislabelled both.
+
+---
+
+## 8. Layer L6 — cells (D2, leg 1)
+
+`descent.json` gains `cells`: PDK, library, corner, the cell-type table (72 types), all
+11,004 cells with their type, the nets, and per-cycle toggles from running the same
+program on the `sky130_fd_sc_hd` netlist. `make equiv` asserts RTL == gates **and** RTL
+== sky130 on every cycle. The claims vocabulary for this layer: *"mapped to Sky130
+standard cells, typical corner"* — the PDK is named; nothing is placed yet.
+
+Synthesis: `dfflibmap` + `abc -liberty` + one techmap for the clock-gate latch
+(`$_DLATCH_N_` → `dlxtn_1`, which `dfflibmap` does not cover). 97,586 µm², 1,877
+sequential cells — the same 1,877 the generic netlist has, which is the check that the
+mapping lost nothing.
+
+**`ResetAll = 1`, set on the generated `ibex_top.v`.** Ibex resets only the flops
+function needs; the remaining 345 start X in a gate-level sim, and the PDK's cell
+primitives propagate that X into the fetch address (the generic netlist had merged it
+away through Verilog's `?:`). `ibex_top` pins `ResetAll` to `Lockstep` as a localparam,
+so `forge/synth/sv2v.sh` sets it on the *generated* Verilog — a forge knob, not an edit to
+vendored source. Both netlists carry it; the three programs re-verified with upper layers
+unchanged.
+
+**Place-and-route (D2, leg 2)** is `forge/pnr/` — OpenLane 2.3.10, Docker backend,
+`sky130A`. In progress at the time of writing; not yet a layer.
