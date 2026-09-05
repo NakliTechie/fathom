@@ -105,6 +105,8 @@ def main():
     retire_log = need(P / "sim" / "retire.log")
     cycle_log = need(P / "sim" / "cycle.log")
     toggles_js = need(P / "gates" / "toggles.json")
+    cells_js = need(P / "sky130" / "toggles.json")
+    cells_net = need(BUILD / "synth" / "ibex_top_sky130.json")
 
     # ---- L0 source ------------------------------------------------------------
     rows = read_line_table(line_txt)
@@ -237,6 +239,17 @@ def main():
     if tg["cycles"] != N:
         die("AMBIGUOUS", f"gate run {tg['cycles']} cycles vs RTL {N}", "make gates")
 
+    # ---- L6 cells: the same program on the sky130_fd_sc_hd netlist ------------
+    tc = json.loads(cells_js.read_text())
+    if tc["cycles"] != N:
+        die("AMBIGUOUS", f"sky130 run {tc['cycles']} cycles vs RTL {N}", "make sky130")
+    nm = json.loads(cells_net.read_text())["modules"]["ibex_top_sky130"]
+    # each cell: its type and the nets it drives, so a toggle resolves to a cell
+    cell_types = sorted({c["type"] for c in nm["cells"].values()})
+    ctype_idx = {t: i for i, t in enumerate(cell_types)}
+    cells = [{"name": name, "type": ctype_idx[c["type"]]}
+             for name, c in sorted(nm["cells"].items())]
+
     core = {"name": "ibex", "upstream": "lowRISC/ibex", "pin": "34b0705760ef3dfa00e99637432473d2be8f22f3",
             "licence": "Apache-2.0", "shape": "three-stage",
             "stages": ["IF", "ID_EX", "WB"], "anchor_stage": "ID_EX",
@@ -252,7 +265,10 @@ def main():
            "arch": {"encoding": "delta", "regs_at_0": {f"x{i}": 0 for i in range(32)},
                     "frames": frames},
            "pipe": pipe,
-           "gates": {"nets": tg["nets"], "toggles": tg["toggles"]}}
+           "gates": {"nets": tg["nets"], "toggles": tg["toggles"]},
+           "cells": {"pdk": "sky130A", "library": "sky130_fd_sc_hd",
+                     "corner": "tt_025C_1v80", "types": cell_types, "cells": cells,
+                     "nets": tc["nets"], "toggles": tc["toggles"]}}
 
     canon = json.dumps(art, sort_keys=True, separators=(",", ":"))
     art["artifact_id"] = "sha256:" + hashlib.sha256(canon.encode()).hexdigest()
@@ -269,7 +285,7 @@ def main():
     print(f"no_ir        : {len(no_ir)} pcs")
     print(f"stalls       : { {p['stall'] for p in pipe if p['stall']} }")
     print(f"held causes  : { {p['held'] for p in pipe if p['held']} }")
-    print(f"arch frames  : {len(frames)}   gate pairs: {len(tg['toggles'])}")
+    print(f"arch frames  : {len(frames)}   gate pairs: {len(tg['toggles'])}   cell pairs: {len(tc['toggles'])}   cells: {len(cells)}")
     print("OK")
 
 

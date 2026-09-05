@@ -28,7 +28,7 @@ class Verify:
     # ---- schema: shape, types, closed vocabularies ---------------------------
     def schema(self, a):
         need = {"schema", "artifact_id", "program", "core", "cycles", "source", "ir",
-                "code", "exec", "arch", "pipe", "gates"}
+                "code", "exec", "arch", "pipe", "gates", "cells"}
         missing = need - set(a)
         if missing:
             self.fail("SCHEMA", f"top-level keys missing: {sorted(missing)}")
@@ -134,6 +134,18 @@ class Verify:
                 self.fail("TOOLCHAIN", f"source file {src} not on disk")
             elif (ROOT / src).read_text().splitlines() != a["source"][src]:
                 self.fail("AMBIGUOUS", f"source {src} in artifact differs from the file on disk")
+        # 1b. the cells layer: same totality as gates, plus every cell has a known type
+        cl = a["cells"]
+        for c, n, k in cl["toggles"]:
+            if not (0 <= c < N):
+                self.fail("ORPHAN", f"cell toggle at cycle {c} outside [0,{N})")
+            if not (0 <= n < len(cl["nets"])):
+                self.fail("ORPHAN", f"cell toggle on net index {n} outside the net table")
+        for cell in cl["cells"]:
+            if not (0 <= cell["type"] < len(cl["types"])):
+                self.fail("ORPHAN", f"cell {cell['name']} has unknown type index {cell['type']}")
+        if not cl["types"] or not all(t.startswith(cl["library"]) for t in cl["types"]):
+            self.fail("SCHEMA", f"cells.types must all be {cl['library']} cells")
         # arch: every delta cycle within range and names an xid
         for f in a["arch"]["frames"]:
             if not (0 <= f["cycle"] < N):
@@ -158,7 +170,7 @@ class Verify:
             n = a["cycles"]
             print(f"OK  {self.path.relative_to(ROOT)}  {a['artifact_id'][:23]}  "
                   f"{n} cycles  {len(a['exec'])} exec  {len(a['code'])} code  "
-                  f"{len(a['gates']['toggles'])} toggles  8/8 assertions")
+                  f"{len(a['gates']['toggles'])} gate  {len(a['cells']['toggles'])} cell toggles  8/8 assertions")
             return 0
         for verdict in ("TOOLCHAIN", "SCHEMA", "AMBIGUOUS", "ORPHAN"):
             msgs = self.failures.get(verdict, [])

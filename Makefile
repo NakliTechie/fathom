@@ -18,6 +18,7 @@ P       := $(B)/$(PROGRAM)
 ELF     := $(P)/$(PROGRAM).elf
 SIM     := $(B)/sim/obj/fathom_sim
 GATES   := $(B)/synth/ibex_top_gates.v
+SKY     := $(B)/synth/ibex_top_sky130.v
 
 .PHONY: all programs program sim gates equiv toggles descent probe verify synth status clean
 all: descent equiv probe
@@ -52,6 +53,20 @@ $(GATES): forge/synth/synth.ys forge/synth/sv2v.sh
 	./forge/synth/sv2v.sh
 	yosys -q -s forge/synth/synth.ys
 
+## sky130 — Ibex -> sky130_fd_sc_hd cells (D2), and the same program on that netlist
+$(SKY): forge/synth/synth_sky130.ys forge/synth/sv2v.sh
+	./forge/synth/sv2v.sh
+	yosys -q -s forge/synth/synth_sky130.ys
+sky130: $(P)/sky130/toggles.json
+$(P)/sky130/bus.log: $(SKY) $(P)/sim/retire.log forge/sim/fathom_gates_tb.sv forge/sim/fathom_mem.sv forge/sim/build_sky130.sh
+	@mkdir -p $(P)/sky130
+	./forge/sim/build_sky130.sh
+	vvp $(B)/sky130/fathom_sky130_sim +hex=$(P)/$(PROGRAM).hex +outdir=$(P)/sky130 +vcd=$(P)/sky130/gates.vcd \
+	       +halt_cycle=$$(grep '^# halt' $(P)/sim/cycle.log | sed -E 's/.*cycle ([0-9]+).*/\1/') \
+	       | grep -vE '^(VCD info|WARNING: .*readmemh)'
+$(P)/sky130/toggles.json: $(P)/sky130/bus.log forge/join/vcd_toggles.py
+	python3 forge/join/vcd_toggles.py $(PROGRAM) sky130
+
 ## gates — the same program on the netlist (Icarus), to VCD
 gates: $(P)/gates/bus.log
 $(P)/gates/bus.log: $(GATES) $(P)/sim/retire.log forge/sim/fathom_gates_tb.sv forge/sim/fathom_mem.sv forge/sim/build_gates.sh
@@ -62,8 +77,9 @@ $(P)/gates/bus.log: $(GATES) $(P)/sim/retire.log forge/sim/fathom_gates_tb.sv fo
 	       | grep -vE '^(VCD info|WARNING: .*readmemh)'
 
 ## equiv — RTL == gates on the bus, every cycle
-equiv: gates
-	python3 forge/join/check_equiv.py $(PROGRAM)
+equiv: gates $(P)/sky130/bus.log
+	python3 forge/join/check_equiv.py $(PROGRAM) gates
+	python3 forge/join/check_equiv.py $(PROGRAM) sky130
 
 ## toggles — gate VCD -> per-cycle toggle events (join 3)
 toggles: $(P)/gates/toggles.json
@@ -72,7 +88,7 @@ $(P)/gates/toggles.json: $(P)/gates/bus.log forge/join/vcd_toggles.py
 
 ## descent — the join pass: every layer -> artifacts/<program>/descent.json
 descent: artifacts/$(PROGRAM)/descent.json
-artifacts/$(PROGRAM)/descent.json: $(P)/sim/retire.log $(P)/gates/toggles.json forge/join/descent.py forge/join/probe_joins.py
+artifacts/$(PROGRAM)/descent.json: $(P)/sim/retire.log $(P)/gates/toggles.json $(P)/sky130/toggles.json forge/join/descent.py forge/join/probe_joins.py
 	python3 forge/join/descent.py $(PROGRAM)
 
 ## probe — join totality, from build outputs (the verifier's ancestor)

@@ -64,6 +64,7 @@ synth -flatten
 # forge takes from outside the repo; PERMISSIONS.md names the PDK.
 dfflibmap -liberty /Users/chiragpatnaik/.ciel/ciel/sky130/versions/1689ac3f2dc763876eaf967227c7dfe831b031ae/sky130A/libs.ref/sky130_fd_sc_hd/lib/sky130_fd_sc_hd__tt_025C_1v80.lib
 abc -liberty /Users/chiragpatnaik/.ciel/ciel/sky130/versions/1689ac3f2dc763876eaf967227c7dfe831b031ae/sky130A/libs.ref/sky130_fd_sc_hd/lib/sky130_fd_sc_hd__tt_025C_1v80.lib
+techmap -map forge/synth/latch_sky130.v
 opt_clean -purge
 rename -top ibex_top_sky130
 stat -liberty /Users/chiragpatnaik/.ciel/ciel/sky130/versions/1689ac3f2dc763876eaf967227c7dfe831b031ae/sky130A/libs.ref/sky130_fd_sc_hd/lib/sky130_fd_sc_hd__tt_025C_1v80.lib

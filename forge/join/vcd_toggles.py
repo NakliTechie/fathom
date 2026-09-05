@@ -42,12 +42,13 @@ def parse_clock(cycle_log):
 
 def main():
     prog = sys.argv[1] if len(sys.argv) > 1 else "uart_puts"
+    net = sys.argv[2] if len(sys.argv) > 2 else "gates"      # gates | sky130
     P = ROOT / "build" / prog
-    vcd = P / "gates/gates.vcd"
-    clog = P / "gates/cycle.log"
+    vcd = P / net / "gates.vcd"
+    clog = P / net / "cycle.log"
     for p in (vcd, clog):
         if not p.exists():
-            print(f"TOOLCHAIN: missing {p.relative_to(ROOT)}\n  remedy: make gates PROGRAM={prog}")
+            print(f"TOOLCHAIN: missing {p.relative_to(ROOT)}\n  remedy: make {net} PROGRAM={prog}")
             sys.exit(2)
     t0, tclk, halt = parse_clock(clog)
     ncycles = halt + 1
@@ -118,7 +119,7 @@ def main():
         "nets": names, "dropped_pre_t0": dropped_pre, "dropped_post_end": dropped_post,
         "toggles": toggles,
     }
-    (P / "gates/toggles.json").write_text(json.dumps(out, separators=(",", ":")))
+    (P / net / "toggles.json").write_text(json.dumps(out, separators=(",", ":")))
 
     print(f"vcd timescale   : {m.group(1)} {m.group(2)}")
     print(f"t0 / t_clk      : {t0} ps / {tclk} ps")

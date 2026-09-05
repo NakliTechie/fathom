@@ -1,0 +1,19 @@
+{
+  "DESIGN_NAME": "ibex_top",
+  "VERILOG_FILES": "dir::src/*.v",
+  "CLOCK_PORT": "clk_i",
+  "CLOCK_PERIOD": 10.0,
+  "SYNTH_PARAMETERS": [
+    "BaseIsa=0", "RV32M=0", "RV32B=0", "RV32ZC=0", "WritebackStage=1",
+    "BranchTargetALU=0", "ICache=0", "BranchPredictor=0", "SecureIbex=0",
+    "PMPEnable=0", "RegFile=0", "DbgTriggerEn=0"
+  ],
+  "FP_CORE_UTIL": 40,
+  "PL_TARGET_DENSITY_PCT": 50,
+  "FP_PDN_MULTILAYER": true,
+  "RUN_KLAYOUT_XOR": false,
+  "RUN_MAGIC_DRC": false,
+  "RUN_KLAYOUT_DRC": false,
+  "QUIT_ON_SYNTH_CHECKS": false,
+  "QUIT_ON_UNMAPPED_CELLS": false
+}

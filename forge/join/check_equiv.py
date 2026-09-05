@@ -19,9 +19,10 @@ def rows(path):
 
 def main():
     prog = sys.argv[1] if len(sys.argv) > 1 else "uart_puts"
+    net = sys.argv[2] if len(sys.argv) > 2 else "gates"      # gates | sky130
     P = ROOT / "build" / prog
     rtl = P / "sim/bus.log"
-    gates = P / "gates/bus.log"
+    gates = P / net / "bus.log"
     for p in (rtl, gates):
         if not p.exists():
             print(f"TOOLCHAIN: missing {p.relative_to(ROOT)}\n  remedy: make gates PROGRAM={prog}")
@@ -65,12 +66,12 @@ def main():
         sys.exit(1)
     # the UART bytes too — the bottom of the descent must land on the same cycles
     ua = (P / "sim/uart.log").read_text().split()
-    ub = (P / "gates/uart.log").read_text().split()
+    ub = (P / net / "uart.log").read_text().split()
     print(f"uart         : rtl {ua}  gates {ub}")
     if ua != ub:
         print("MISMATCH (uart)")
         sys.exit(1)
-    print("OK")
+    print(f"OK  rtl == {net}")
 
 
 if __name__ == "__main__":
