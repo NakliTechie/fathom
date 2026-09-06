@@ -651,7 +651,7 @@ the clock tree is real switching activity.
 
 ## 9. C2 — the shell and the upper layers, 2026-09-05
 
-`fathom.html` — one file, 300 lines, no build step. Dense direction; JetBrains Mono at
+`index.html` — one file, 300 lines, no build step. Dense direction; JetBrains Mono at
 400/700, four sizes, true neutrals only, eight layer accents. Loads
 `artifacts/<program>/descent.json` through the schema validator as the single ingress
 (SPEC §0.8): a failing artifact renders nothing and reports the verdict.
@@ -769,7 +769,7 @@ C5's guide capture also uses satisfies FATHOM.md's "no second harness". Pending 
 
 ## 13. The forward pass, 2026-09-05
 
-Run in fresh context by a subagent over `fathom.html`, `forge/`, `Makefile`, `SPEC.md`,
+Run in fresh context by a subagent over `index.html`, `forge/`, `Makefile`, `SPEC.md`,
 `FATHOM.md`; no file edited, no build run; twelve findings, all acted on the same day.
 
 | # | finding | fix |
@@ -800,3 +800,24 @@ After: `make verify` 4 × 9/9; Playwright 8/8; design checks 4/4.
 | tokens | 31 on `:root`, 0 stray literals, 9 neutrals with spread < 8 | `forge/design/check.py` 4/4 |
 | states | clickable rows had no hover; no focus ring | hover lift on every click target, `:focus-visible` ring, asserted by computed style in Playwright |
 | motion | none, on purpose: an instrument operated for hours should not animate | asserted: zero elements with a transition or animation |
+
+
+---
+
+## 15. Deploy, 2026-09-06
+
+`fathom.naklitechie.com` — an assets-only Cloudflare Worker, `account_id` pinned in
+`wrangler.jsonc` (this machine has more than one Cloudflare account).
+
+**The product file is `index.html`, not `fathom.html`.** The handoff (§3) names
+`fathom.html`; served from a static origin that leaves the root 404 and redirects
+`/fathom.html` → `/fathom` (307, `auto-trailing-slash`). A tool whose home page is not its
+root is a defect, so the file is `index.html` and the root serves the instrument. FATHOM.md
+is left as written; this note is the reconciliation.
+
+`.assetsignore` also excludes `.wrangler` — wrangler writes `.wrangler/tmp/` inside the
+assets directory during a deploy, and the first deploy served
+`/.wrangler/tmp/.../no-op-worker.js.map` with a 200.
+
+Headers ship from `_headers`: the same-origin CSP (`wasm-unsafe-eval` for DuckDB),
+`nosniff`, `no-referrer`.

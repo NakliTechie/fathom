@@ -31,7 +31,7 @@ they are neither built nor distributed.
 LLVM/clang and ld.lld (Apache-2.0 with LLVM exception), Yosys (ISC), sv2v (BSD-3),
 Icarus Verilog (GPL-2.0), Verilator (LGPL-3.0 / Artistic-2.0). All are build-time
 tools that run offline in `forge`; none is bundled into a descent artifact or into
-`fathom.html`, so their terms do not reach the shipped work.
+`index.html`, so their terms do not reach the shipped work.
 
 ## Bundled artifacts
 

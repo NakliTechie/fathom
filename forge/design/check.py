@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """forge design check -- the C2 checkpoint's four deterministic checks, static half.
 
-Runs over fathom.html with no browser:
+Runs over index.html with no browser:
   1. every colour literal in the stylesheet is a token defined on :root
      (every line traceable to a token);
   2. zero tinted neutrals: every token named as a neutral (--bg-*, --fg-*, --line)
@@ -24,7 +24,7 @@ NEUTRAL_SPREAD = 8
 
 
 def main():
-    html = (ROOT / "fathom.html").read_text()
+    html = (ROOT / "index.html").read_text()
     css = html[html.index("<style>") + 7: html.index("</style>")]
     root = re.search(r":root\s*\{(.*?)\}", css, re.S).group(1)
     tokens = dict(re.findall(r"(--[\w-]+):\s*([^;]+);", root))

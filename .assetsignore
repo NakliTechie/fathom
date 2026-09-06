@@ -19,3 +19,8 @@ wrangler.jsonc
 package.json
 package-lock.json
 guide/captures
+.wrangler
+node_modules
+_headers
+package.json
+package-lock.json

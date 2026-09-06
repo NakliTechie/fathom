@@ -7,7 +7,7 @@ for (const p of PROGRAMS) {
     const errors = [];
     page.on('pageerror', e => errors.push(String(e)));
     page.on('console', m => { if (m.type() === 'error') errors.push(m.text()); });
-    await page.goto(`/fathom.html?p=${p}`);
+    await page.goto(`/index.html?p=${p}`);
     await page.waitForFunction(() => window.fathom && window.fathom.describe().loaded);
     const r = await page.evaluate(async () => {
       const m = await import('/forge/test/descent.test.js');
@@ -22,7 +22,7 @@ for (const p of PROGRAMS) {
 }
 
 test('first frame is useful within the 5 s gate — uart_puts', async ({ page }) => {
-  await page.goto('/fathom.html?p=uart_puts');
+  await page.goto('/index.html?p=uart_puts');
   await page.waitForFunction(() => window.fathom && window.fathom.describe().loaded);
   const t = await page.evaluate(() => window.fathom.timing());
   expect(t.built_ms).toBeLessThan(5000);
@@ -31,7 +31,7 @@ test('first frame is useful within the 5 s gate — uart_puts', async ({ page })
 });
 
 test('manifest ⊇ command bus — every callable on the face is in the manifest, and vice versa', async ({ page }) => {
-  await page.goto('/fathom.html?p=uart_puts');
+  await page.goto('/index.html?p=uart_puts');
   await page.waitForFunction(() => window.fathom && window.fathom.describe().loaded);
   const r = await page.evaluate(() => {
     const f = window.fathom;
@@ -44,7 +44,7 @@ test('manifest ⊇ command bus — every callable on the face is in the manifest
 });
 
 test('export(range) is bounded and coherent — uart_puts', async ({ page }) => {
-  await page.goto('/fathom.html?p=uart_puts');
+  await page.goto('/index.html?p=uart_puts');
   await page.waitForFunction(() => window.fathom && window.fathom.describe().loaded);
   const r = await page.evaluate(async () => {
     const f = window.fathom;
@@ -58,7 +58,7 @@ test('export(range) is bounded and coherent — uart_puts', async ({ page }) => 
 });
 
 test('?p= is a name, never a path or markup', async ({ page }) => {
-  await page.goto('/fathom.html?p=%3Cimg%20src%3Dx%20onerror%3Dalert(1)%3E');
+  await page.goto('/index.html?p=%3Cimg%20src%3Dx%20onerror%3Dalert(1)%3E');
   await page.waitForFunction(() => window.fathom && window.fathom.describe().loaded);
   const d = await page.evaluate(() => window.fathom.describe());
   expect(d.program).toBe('uart_puts');
@@ -66,7 +66,7 @@ test('?p= is a name, never a path or markup', async ({ page }) => {
 });
 
 test('interaction states by computed style — hover lifts, focus rings, nothing moves', async ({ page }) => {
-  await page.goto('/fathom.html?p=uart_puts');
+  await page.goto('/index.html?p=uart_puts');
   await page.waitForFunction(() => window.fathom && window.fathom.describe().loaded);
   const row = page.locator('#L-asm .row[data-pc]').first();
   await row.scrollIntoViewIfNeeded();

@@ -6,7 +6,7 @@ const OUT = path.resolve(__dirname, '../../guide/captures');
 const shot = (page, name) => page.screenshot({ path: path.join(OUT, name + '.png'), fullPage: false });
 
 test('@guide captures', async ({ page }) => {
-  await page.goto('/fathom.html?p=uart_puts');
+  await page.goto('/index.html?p=uart_puts');
   await page.waitForFunction(() => window.fathom && window.fathom.describe().loaded);
   await page.evaluate(() => document.fonts.ready);
   await shot(page, '01-all-layers');                                   // the instrument as it opens
@@ -29,7 +29,7 @@ test('@guide captures', async ({ page }) => {
   await page.evaluate(() => window.fathom.help(true));
   await shot(page, '08-help');
   await page.evaluate(() => window.fathom.help(false));
-  await page.goto('/fathom.html?p=popcount');
+  await page.goto('/index.html?p=popcount');
   await page.waitForFunction(() => window.fathom && window.fathom.describe().loaded);
   await page.evaluate(async () => { await window.fathom.loadBottom(); window.fathom.seek(122); });
   await page.waitForTimeout(200);
