@@ -913,3 +913,35 @@ being that. Restored, with a test that names every promised field and then asser
 values track state.
 
 Suite: **16 passed**.
+
+
+---
+
+## 18. Scrollbars, and the responsive gap the live-check found — 2026-09-06
+
+**Scrollbars are the instrument's, not the OS's.** The defaults read as light-grey seams across
+a dark tool. Thin, `--fg-3`, brighter on hover, transparent track, in both syntaxes
+(`scrollbar-color` for Firefox, `::-webkit-scrollbar` elsewhere) — from tokens, so the
+"every colour is a token" check still passes.
+
+**Columns now have a floor.** `SPEC.md:17` shipped seven `1fr` columns verified at 1568 px only;
+the live-check named that as the residual risk and it was real — at 1280 px each column was 183 px,
+narrower than its content. Columns are `minmax(var(--colmin), 1fr)` and the strip scrolls sideways
+when the screen cannot hold seven; the focused column is scrolled into view, so a descent is never
+off-screen.
+
+`--colmin` is **in pixels, not rem**: this page sets `html`'s font-size from `--fs-1`, so `1rem`
+is 12 px here and a `15rem` floor silently meant 180 px. 260 px wide, 230 px at ≤ 1500 px,
+80 vw at ≤ 700 px — a phone gets one column at a time.
+
+Narrow screens also fixed: the **document itself scrolled sideways** (only the layer strip should),
+and the keyboard hints and header meta ate the screen on a phone. `overflow: hidden` on the page,
+`min-width: 0` through the flex chain, hints and crumbs hidden ≤ 900 px, meta ≤ 700 px. At 375 px:
+no page overflow, a 300 px column, 39 px header, 38 px footer.
+
+The tour's cell count now reads `cells.cells.length` and the die from `cells.die_um` instead of the
+literal `13,740` / `832 × 842`.
+
+`forge/test/responsive.spec.js` holds all of it: three widths asserting no column is under its
+floor and the page never scrolls sideways, a descent at 1280 px keeping the focused column on
+screen, and the tour's numbers matching the artifact. Suite: **21 passed**.

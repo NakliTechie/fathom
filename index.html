@@ -36,26 +36,50 @@
   --acc-cell:  #e07bd1;   /* cells */
 
   --sp-1: 4px; --sp-2: 8px; --sp-3: 12px; --sp-4: 16px; --sp-5: 24px;
+  /* px, not rem: this page sets html's font-size from --fs-1, so 1rem is 12px here */
+  --colmin: 260px;                 /* the narrowest a layer column may be and stay readable */
+  --colfocus: 380px;               /* and the narrowest the focused one may be */
   --r: 2px;
 }
-html, body { margin: 0; height: 100%; background: var(--bg-0); color: var(--fg-0);
+/* Scrollbars are part of the instrument, not the OS: the default light-grey ones
+   read as a bright seam across a dark tool. Thin, neutral, brighter on hover.
+   Both syntaxes: the standard properties (Firefox) and the WebKit pseudo-elements. */
+* { scrollbar-width: thin; scrollbar-color: var(--fg-3) transparent; }
+::-webkit-scrollbar { width: 10px; height: 10px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--fg-3); border-radius: 6px;
+  border: 3px solid var(--bg-0); }               /* the border insets the thumb, so it reads thin */
+::-webkit-scrollbar-thumb:hover { background: var(--fg-2); }
+::-webkit-scrollbar-corner { background: transparent; }
+/* a layer's own scrollers sit on the layer's ground, not the page's */
+.layer > .body::-webkit-scrollbar-thumb, .stepin::-webkit-scrollbar-thumb,
+.strip::-webkit-scrollbar-thumb, #L-cells .side::-webkit-scrollbar-thumb { border-color: var(--bg-0); }
+
+html, body { margin: 0; height: 100%; overflow: hidden; background: var(--bg-0); color: var(--fg-0);
   font: var(--w-regular) var(--fs-1)/var(--lh) var(--font); -webkit-font-smoothing: antialiased; }
 * { box-sizing: border-box; }
 
 /* ---- shell ------------------------------------------------------------------ */
-#app { display: grid; grid-template-rows: auto 1fr auto; height: 100%; }
-header { display: flex; gap: var(--sp-4); align-items: baseline; padding: var(--sp-2) var(--sp-4);
+#app { display: grid; grid-template-rows: auto 1fr auto; height: 100%; min-width: 0; overflow-x: hidden; }
+header { display: flex; gap: var(--sp-4); align-items: baseline; min-width: 0; padding: var(--sp-2) var(--sp-4);
   border-bottom: 1px solid var(--line); background: var(--bg-1); }
 header h1 { font-size: var(--fs-3); font-weight: var(--w-bold); margin: 0; letter-spacing: .02em; }
-header .meta { color: var(--fg-2); font-size: var(--fs-0); }
+header .meta { color: var(--fg-2); font-size: var(--fs-0); min-width: 0; overflow: hidden;
+  text-overflow: ellipsis; white-space: nowrap; }
 header .meta b { color: var(--fg-1); font-weight: var(--w-regular); }
 main { display: grid; grid-template-columns: 1fr; overflow: hidden; min-height: 0; }
 
 /* Seven layers, seven full-height columns, left to right in the machine's order.
    Descending widens one column and narrows the rest; a column narrower than its
    header turns the header sideways so the layer is still named. */
-#layers { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); overflow: hidden; min-height: 0; }
+/* A column narrower than its content is useless, so columns have a floor and the
+   strip scrolls sideways when the screen cannot hold seven of them. The focused
+   column is scrolled into view, so a descent is never off-screen. */
+#layers { display: grid; grid-template-columns: repeat(7, minmax(var(--colmin), 1fr));
+  overflow-x: auto; overflow-y: hidden; min-height: 0; }
 #layers[data-focus] { grid-template-columns: var(--cols); }
+@media (max-width: 1500px) { :root { --colmin: 230px; --colfocus: 340px; } }
+@media (max-width: 700px)  { :root { --colmin: 80vw;  --colfocus: 88vw; } }   /* phone: one column at a time */
 .layer { display: grid; grid-template-rows: auto minmax(0, 1fr); min-width: 0; min-height: 0;
   border-right: 1px solid var(--line); }
 .layer:last-child { border-right: 0; }
@@ -81,8 +105,13 @@ main { display: grid; grid-template-columns: 1fr; overflow: hidden; min-height: 
 .row.hot .n { color: var(--acc-now); }
 .row.now { background: color-mix(in srgb, var(--acc-now) 18%, var(--bg-0)); }
 .row[data-count]::after { content: attr(data-count); color: var(--fg-3); font-size: var(--fs-0); }
-footer { display: flex; gap: var(--sp-4); align-items: center; padding: var(--sp-2) var(--sp-4);
+footer { display: flex; gap: var(--sp-3); align-items: center; min-width: 0; padding: var(--sp-2) var(--sp-4);
   border-top: 1px solid var(--line); background: var(--bg-1); font-size: var(--fs-0); color: var(--fg-2); }
+footer .keys { white-space: nowrap; overflow: hidden; }
+/* On a narrow screen the keyboard hints are neither usable nor affordable: the
+   scrub bar and the tour are what a touch reader needs. */
+@media (max-width: 900px) { footer .keys { display: none; } #crumbs { display: none; } }
+@media (max-width: 700px) { header .meta { display: none; } }
 footer input[type=range] { flex: 1; accent-color: var(--acc-now); font: inherit; }  /* UA default is a non-token size */
 footer .cyc { color: var(--fg-0); font-weight: var(--w-bold); min-width: 12ch; }
 kbd { color: var(--fg-1); border: 1px solid var(--line); border-radius: var(--r); padding: 0 var(--sp-1); font-size: var(--fs-0); }
@@ -234,7 +263,7 @@ kbd { color: var(--fg-1); border: 1px solid var(--line); border-radius: var(--r)
     <span id="crumbs"></span>
     <input type="range" id="scrub" min="0" max="0" value="0" step="1" aria-label="cycle">
     <button id="tour-btn">Tour</button>
-    <span><kbd>←</kbd><kbd>→</kbd> cycle · <kbd>⇧←</kbd><kbd>⇧→</kbd> ×10 · <kbd>↓</kbd> descend · <kbd>↑</kbd> ascend · <kbd>Esc</kbd> all layers · <kbd>?</kbd> help</span>
+    <span class="keys"><kbd>←</kbd><kbd>→</kbd> cycle · <kbd>⇧←</kbd><kbd>⇧→</kbd> ×10 · <kbd>↓</kbd> descend · <kbd>↑</kbd> ascend · <kbd>Esc</kbd> all layers · <kbd>?</kbd> help</span>
   </footer>
 </div>
 
@@ -586,7 +615,9 @@ function setFocus(layer) {
     // become a labelled rail, so every layer stays visible and named (progressive disclosure)
     const track = ORDER.map((_, j) => {
       const d = Math.abs(j - i);
-      return d === 0 ? 'minmax(0, 4fr)' : d === 1 ? 'minmax(0, 2fr)' : '2.4rem';
+      return d === 0 ? 'minmax(var(--colfocus), 4fr)'
+           : d === 1 ? 'minmax(var(--colmin), 2fr)'
+           : '2.4rem';
     });
     L.style.setProperty('--cols', track.join(' '));
     for (const el of L.children) {
@@ -596,6 +627,8 @@ function setFocus(layer) {
       el.classList.toggle('thin', d > 1);
     }
   }
+  const fx = layer && document.getElementById('L-' + layer);
+  if (fx) fx.scrollIntoView({ block: 'nearest', inline: 'nearest' });
   $('crumbs').innerHTML = S.trail.length ? 'descent: ' + S.trail.map(t => `<b>${t.layer}</b>@${t.cycle}`).join(' → ') : '';
 }
 function descend(layer, selector, door = 'ui') {
@@ -764,7 +797,8 @@ const TOUR = [
     text: 'The bottom two layers are 18 MB of WebAssembly and a few million switching events, so they load only when you ask. Loading them now.',
     act: () => descend('gates', undefined, 'tour') },
   { sel: '#L-cells', title: 'The actual silicon plan', needs: 'bottom',
-    text: 'Every one of 13,740 placed cells on an 832 × 842 µm die. The lit ones are switching in this exact cycle. This is the bottom of the descent — the same event, as transistor-level geometry.',
+    text: () => { const c = S.art.cells, [x0, y0, x1, y1] = c.die_um;
+      return `Every one of ${c.cells.length.toLocaleString()} placed cells on a ${Math.round(x1 - x0)} × ${Math.round(y1 - y0)} µm die. The lit ones are switching in this exact cycle. This is the bottom of the descent — the same event, as transistor-level geometry.`; },
     act: () => descend('cells', undefined, 'tour') },
   { sel: '#tour-btn', title: 'That is the whole instrument',
     text: 'Esc opens every layer again. ? lists every key. Four programs are loaded — a call frame, a branchy loop, a pointer chase, and a call across two files — switch with ?p=popcount, chase or sum.',
@@ -799,7 +833,8 @@ async function tourGo(i) {
   const spot = t.querySelector('.spot');
   Object.assign(spot.style, { left: `${r.left - 2}px`, top: `${r.top - 2}px`, width: `${r.width + 4}px`, height: `${r.height + 4}px` });
   const card = t.querySelector('.card');
-  card.innerHTML = `<h3>${esc(step.title)}</h3><p>${esc(step.text)}</p>`
+  const body = typeof step.text === 'function' ? step.text() : step.text;
+  card.innerHTML = `<h3>${esc(step.title)}</h3><p>${esc(body)}</p>`
     + `<div class="nav"><span class="step">${i + 1} of ${TOUR.length}</span>`
     + `${i > 0 ? '<button id="t-back">Back</button>' : ''}`
     + `<button id="t-skip">Close</button>`
