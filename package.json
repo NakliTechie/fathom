@@ -8,5 +8,7 @@
     "deploy": "wrangler deploy",
     "test": "cd forge/test && npx playwright test"
   },
-  "devDependencies": { "wrangler": "^4" }
+  "devDependencies": {
+    "wrangler": "^4"
+  }
 }
