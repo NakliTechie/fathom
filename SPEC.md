@@ -821,3 +821,15 @@ assets directory during a deploy, and the first deploy served
 
 Headers ship from `_headers`: the same-origin CSP (`wasm-unsafe-eval` for DuckDB),
 `nosniff`, `no-referrer`.
+
+**Deploys are git-connected.** Cloudflare Workers Builds watches `NakliTechie/fathom`,
+branch `main`: build command **none** (there is no build step — the dialog pre-fills
+`pnpm run build` and it must be cleared), deploy command `npx wrangler deploy`, root `/`.
+A push to `main` ships. `npm run deploy` from a working copy still works and is the
+fallback.
+
+Two things cost a round each. The Cloudflare GitHub App is installed five times on this
+machine's account list (`ranesoftwarelabs`, `IndianNationalCongress`, `atrium-solutions`,
+`stances-net`, `NakliTechie`); the dialog defaults to the first, whose repository list does
+not contain this repo. **Pick the `NakliTechie` account first** — the repository then
+resolves on its own. Before that, the app's repository access had to include this repo.
