@@ -846,3 +846,24 @@ machine's account list (`ranesoftwarelabs`, `IndianNationalCongress`, `atrium-so
 `stances-net`, `NakliTechie`); the dialog defaults to the first, whose repository list does
 not contain this repo. **Pick the `NakliTechie` account first** — the repository then
 resolves on its own. Before that, the app's repository access had to include this repo.
+
+
+---
+
+## 16. The 5 s cold frame, measured live — 2026-09-06
+
+`forge/test/live-timing.js`, a fresh browser context per run against
+`https://fathom.naklitechie.com` (nothing cached — a first visit over the real network):
+
+| run | first useful frame | response | DOMContentLoaded | transferred | console errors |
+|---|---|---|---|---|---|
+| `uart_puts` | **834 ms** | 398 ms | 438 ms | 246 KB | 0 |
+| `popcount` | **803 ms** | 343 ms | 356 ms | 249 KB | 0 |
+
+Hard rule ② is met with room: under 1 s against a 5 s budget, and only ~250 KB crosses the
+wire for a first frame because the artifact's own JSON is gzipped by the edge and the two
+Parquet tables are not fetched at all until a bottom layer is opened.
+
+Opening the bottom layers cold costs **3.2 s** (gates 2.7 s including the 18 MB wasm,
+cells 0.45 s) — off the first-frame path by construction, which is why it is allowed to
+cost that.
