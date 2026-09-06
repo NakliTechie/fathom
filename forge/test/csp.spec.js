@@ -2,7 +2,7 @@
 // _headers, so the suite ran without a CSP and the first deploy shipped a policy
 // that blocked index.html's own inline scripts -- a dead shell, live, for an hour.
 // These tests apply the real header to the local page.
-const { test, expect } = require('@playwright/test');
+const { test, expect } = require('./fixtures');
 const fs = require('fs');
 const path = require('path');
 

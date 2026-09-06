@@ -49,20 +49,33 @@ header { display: flex; gap: var(--sp-4); align-items: baseline; padding: var(--
 header h1 { font-size: var(--fs-3); font-weight: var(--w-bold); margin: 0; letter-spacing: .02em; }
 header .meta { color: var(--fg-2); font-size: var(--fs-0); }
 header .meta b { color: var(--fg-1); font-weight: var(--w-regular); }
-main { display: grid; grid-template-columns: 1fr; overflow: hidden; }
-#layers { display: grid; grid-template-rows: repeat(4, minmax(0, 1fr)) auto auto auto; overflow: hidden; }
-#layers[data-focus] { grid-template-rows: none; grid-auto-rows: max-content; }
-#layers[data-focus] .layer.focus { grid-row: auto; min-height: 0; height: 100%; }
-#layers[data-focus] { grid-template-rows: repeat(7, max-content); }
-#layers[data-focus] .layer:not(.focus):not(.near) { grid-template-rows: auto; }
-#layers[data-focus] .layer:not(.focus):not(.near) > .body { display: none; }
-.layer { display: grid; grid-template-rows: auto 1fr; min-height: 0; border-bottom: 1px solid var(--line); }
-.layer > .head { display: flex; gap: var(--sp-3); align-items: baseline; padding: var(--sp-1) var(--sp-4);
-  background: var(--bg-1); color: var(--fg-1); font-size: var(--fs-0); text-transform: uppercase; letter-spacing: .08em; }
-.layer > .head .dot { width: 8px; height: 8px; border-radius: 50%; background: var(--acc); display: inline-block; }
-.layer > .head .note { color: var(--fg-2); text-transform: none; letter-spacing: 0; margin-left: auto; }
-.layer > .body { overflow: auto; padding: var(--sp-2) 0; min-height: 0; }
-.row { display: grid; grid-template-columns: 5ch 1fr; gap: var(--sp-3); padding: 0 var(--sp-4); white-space: pre; }
+main { display: grid; grid-template-columns: 1fr; overflow: hidden; min-height: 0; }
+
+/* Seven layers, seven full-height columns, left to right in the machine's order.
+   Descending widens one column and narrows the rest; a column narrower than its
+   header turns the header sideways so the layer is still named. */
+#layers { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); overflow: hidden; min-height: 0; }
+#layers[data-focus] { grid-template-columns: var(--cols); }
+.layer { display: grid; grid-template-rows: auto minmax(0, 1fr); min-width: 0; min-height: 0;
+  border-right: 1px solid var(--line); }
+.layer:last-child { border-right: 0; }
+.layer > .head { display: flex; gap: var(--sp-2); align-items: baseline; padding: var(--sp-2) var(--sp-3);
+  background: var(--bg-1); color: var(--fg-1); font-size: var(--fs-0); text-transform: uppercase;
+  letter-spacing: .08em; white-space: nowrap; overflow: hidden; border-bottom: 1px solid var(--line); }
+.layer > .head .dot { width: 8px; height: 8px; border-radius: 50%; background: var(--acc);
+  display: inline-block; flex: none; }
+.layer > .head .name { overflow: hidden; text-overflow: ellipsis; }
+.layer > .head .note { display: none; }                      /* the note needs room: shown when focused */
+.layer.focus > .head .note, .layer.near > .head .note { display: block; color: var(--fg-2);
+  text-transform: none; letter-spacing: 0; margin-left: auto; overflow: hidden; text-overflow: ellipsis; }
+.layer > .body { overflow: auto; padding: var(--sp-2) 0; min-height: 0; min-width: 0; }
+.layer.thin > .head { writing-mode: vertical-rl; padding: var(--sp-3) var(--sp-1); align-items: center;
+  justify-content: flex-start; gap: var(--sp-2); }
+.layer.thin > .body { display: none; }
+.layer.thin { grid-template-rows: 1fr; }
+
+.row { display: grid; grid-template-columns: 4ch 1fr; gap: var(--sp-2); padding: 0 var(--sp-3);
+  white-space: pre; }
 .row .n { color: var(--fg-3); text-align: right; }
 .row.hot { background: var(--bg-3); }
 .row.hot .n { color: var(--acc-now); }
@@ -75,9 +88,11 @@ footer .cyc { color: var(--fg-0); font-weight: var(--w-bold); min-width: 12ch; }
 kbd { color: var(--fg-1); border: 1px solid var(--line); border-radius: var(--r); padding: 0 var(--sp-1); font-size: var(--fs-0); }
 
 /* ---- pipeline layer: one column per cycle, one row per stage ------------------- */
-#L-pipe .body { overflow-x: auto; overflow-y: hidden; padding: var(--sp-2) var(--sp-4); }
-.pipe { display: grid; grid-auto-flow: column; grid-auto-columns: 14px; gap: 1px; align-items: start; }
-.pipe .col { display: grid; grid-template-rows: repeat(3, 12px) 6px; gap: 1px; cursor: pointer; }
+
+.pipe { display: grid; grid-auto-flow: row; grid-auto-rows: 12px; gap: 1px; align-content: start; }
+.pipe .col { display: grid; grid-template-columns: 3ch repeat(3, 1fr) 8px; gap: 1px; cursor: pointer;
+  align-items: stretch; }
+.pipe .col > .c { color: var(--fg-3); font-size: var(--fs-0); text-align: right; line-height: 12px; }
 .pipe .col > i { display: block; background: var(--bg-2); border-radius: 1px; }
 .pipe .col > i.occ { background: var(--fg-3); }
 .pipe .col > i.anchor { background: var(--acc-pipe); }
@@ -87,15 +102,18 @@ kbd { color: var(--fg-1); border: 1px solid var(--line); border-radius: var(--r)
 .pipe .col.now > i { outline: 1px solid var(--acc-now); }
 .pipe-legend { display: flex; gap: var(--sp-4); color: var(--fg-2); font-size: var(--fs-0); margin-top: var(--sp-2); }
 .pipe-legend i { display: inline-block; width: 10px; height: 10px; vertical-align: -1px; margin-right: var(--sp-1); border-radius: 1px; }
-.pipe-rows { display: grid; grid-template-rows: repeat(3, 12px) 6px; gap: 1px; color: var(--fg-3); font-size: var(--fs-0); margin-right: var(--sp-2); line-height: 12px; }
-#L-pipe .body > div { display: flex; }
+.pipe-rows { display: grid; grid-template-columns: 3ch repeat(3, 1fr) 8px; gap: 1px; color: var(--fg-3);
+  font-size: var(--fs-0); padding: 0 var(--sp-3) var(--sp-1); text-align: center; }
+.pipe-legend { display: grid; gap: var(--sp-1); padding: var(--sp-2) var(--sp-3) 0; }
+#L-pipe .body { padding: var(--sp-2) 0; }
+#L-pipe .pipe { padding: 0 var(--sp-3); }
 
 /* ---- gate layer: activity per cycle, step-in to one cycle ------------------------ */
-#L-gates .body { display: grid; grid-template-columns: 1fr 44ch; gap: var(--sp-4); padding: var(--sp-2) var(--sp-4); overflow: hidden; }
-.strip { display: grid; grid-auto-flow: column; grid-auto-columns: 14px; gap: 1px; align-items: end; height: 64px; overflow-x: auto; overflow-y: hidden; }
-.strip .bar { background: var(--fg-3); min-height: 1px; cursor: pointer; }
+#L-gates .body { display: grid; grid-template-rows: minmax(0, 1fr) auto; gap: var(--sp-2); padding: var(--sp-2) 0; overflow: hidden; }
+.strip { display: grid; grid-auto-rows: 6px; gap: 1px; align-content: start; padding: 0 var(--sp-3); overflow-y: auto; }
+.strip .bar { background: var(--fg-3); min-width: 1px; cursor: pointer; justify-self: start; }
 .strip .bar.now { background: var(--acc-gate); outline: 1px solid var(--acc-now); }
-.stepin { overflow: auto; font-size: var(--fs-0); }
+.stepin { overflow: auto; font-size: var(--fs-0); border-top: 1px solid var(--line); padding-top: var(--sp-2); max-height: 45%; }
 .stepin .row { grid-template-columns: 6ch 1fr; }
 .stepin .row .n { color: var(--acc-gate); }
 .lazy { color: var(--fg-2); }
@@ -103,19 +121,13 @@ kbd { color: var(--fg-1); border: 1px solid var(--line); border-radius: var(--r)
 .lazy button:hover { background: var(--bg-2); }
 
 /* ---- cells layer: the floorplan ------------------------------------------------- */
-#L-cells .body { display: grid; grid-template-columns: auto 1fr; gap: var(--sp-4); padding: var(--sp-2) var(--sp-4); overflow: hidden; }
+#L-cells .body { display: grid; grid-template-rows: auto minmax(0, 1fr); gap: var(--sp-2); padding: var(--sp-2) var(--sp-3); overflow: hidden; justify-items: center; }
 #L-cells canvas { background: var(--bg-1); border: 1px solid var(--line); image-rendering: pixelated; }
-#L-cells .side { overflow: auto; font-size: var(--fs-0); color: var(--fg-1); }
+#L-cells .side { overflow: auto; font-size: var(--fs-0); color: var(--fg-1); width: 100%; }
 #L-cells .side .row { grid-template-columns: 7ch 1fr; }
 #L-cells .side .row .n { color: var(--acc-cell); }
 
 /* ---- descent: one layer in focus, its neighbours as context, the rest folded ---------- */
-#layers[data-focus] .layer { grid-template-rows: auto 0; }
-#layers[data-focus] .layer > .body { overflow: hidden; }
-#layers[data-focus] .layer.focus { grid-template-rows: auto 1fr; }
-#layers[data-focus] .layer.focus > .body { overflow: auto; }
-#layers[data-focus] .layer.near { grid-template-rows: auto minmax(0, 8lh); }
-#layers[data-focus] .layer.near > .body { overflow: auto; }
 #layers[data-focus] .layer:not(.focus):not(.near) > .head { color: var(--fg-3); }
 .layer > .head { cursor: pointer; }
 .layer.focus > .head { color: var(--fg-0); }
@@ -123,6 +135,38 @@ kbd { color: var(--fg-1); border: 1px solid var(--line); border-radius: var(--r)
 .row.picked { outline: 1px solid var(--acc-now); outline-offset: -1px; }
 #crumbs { color: var(--fg-2); font-size: var(--fs-0); }
 #crumbs b { color: var(--fg-0); font-weight: var(--w-regular); }
+
+/* ---- the tour: a spotlight, a caption, and the instrument actually moving ------------ */
+#tour[hidden] { display: none; }
+#tour { position: fixed; inset: 0; z-index: 20; pointer-events: none; }
+#tour .veil { position: absolute; inset: 0; background: color-mix(in srgb, var(--bg-0) 72%, transparent);
+  pointer-events: auto; }
+#tour .spot { position: absolute; border: 1px solid var(--acc-now); border-radius: var(--r);
+  box-shadow: 0 0 0 9999px color-mix(in srgb, var(--bg-0) 72%, transparent); pointer-events: none; }
+#tour .card { position: absolute; pointer-events: auto; background: var(--bg-1);
+  border: 1px solid var(--line); border-radius: var(--r); padding: var(--sp-4); width: 44ch; max-width: 90vw; }
+#tour .card h3 { margin: 0 0 var(--sp-2); font-size: var(--fs-3); font-weight: var(--w-bold); color: var(--acc-now); }
+#tour .card p { margin: 0 0 var(--sp-3); color: var(--fg-1); }
+#tour .card .nav { display: flex; gap: var(--sp-2); align-items: center; }
+#tour .card .nav .step { color: var(--fg-3); font-size: var(--fs-0); margin-right: auto; }
+#tour button, #welcome button { font: inherit; color: var(--fg-0); background: var(--bg-3);
+  border: 1px solid var(--line); border-radius: var(--r); padding: var(--sp-1) var(--sp-3); cursor: pointer; }
+#tour button:hover, #welcome button:hover { background: var(--bg-2); }
+#tour button.primary, #welcome button.primary { background: var(--acc-now); color: var(--bg-0);
+  border-color: var(--acc-now); font-weight: var(--w-bold); }
+
+/* ---- the welcome: what this is, and the one thing to do next --------------------------- */
+#welcome[hidden] { display: none; }
+#welcome { position: fixed; inset: 0; z-index: 21; display: grid; place-items: center;
+  background: color-mix(in srgb, var(--bg-0) 88%, transparent); }
+#welcome .card { background: var(--bg-1); border: 1px solid var(--line); border-radius: var(--r);
+  padding: var(--sp-5); max-width: 70ch; }
+#welcome h2 { margin: 0 0 var(--sp-2); font-size: var(--fs-3); font-weight: var(--w-bold); }
+#welcome .lede { color: var(--fg-0); margin: 0 0 var(--sp-3); }
+#welcome p { color: var(--fg-1); margin: 0 0 var(--sp-3); }
+#welcome .chain { display: flex; flex-wrap: wrap; gap: var(--sp-2); margin: 0 0 var(--sp-4); color: var(--fg-2); font-size: var(--fs-0); }
+#welcome .chain b { color: var(--fg-0); font-weight: var(--w-regular); }
+#welcome .nav { display: flex; gap: var(--sp-2); align-items: center; }
 
 /* ---- help: an in-app overlay, never a native dialog ------------------------------ */
 #help { position: fixed; inset: 0; background: color-mix(in srgb, var(--bg-0) 82%, transparent); display: grid; place-items: center; z-index: 10; }
@@ -149,6 +193,19 @@ kbd { color: var(--fg-1); border: 1px solid var(--line); border-radius: var(--r)
 </style>
 </head>
 <body>
+<div id="tour" hidden aria-live="polite"><div class="veil"></div><div class="spot"></div><div class="card"></div></div>
+<div id="welcome" hidden role="dialog" aria-modal="true" aria-labelledby="welcome-h">
+  <div class="card">
+    <h2 id="welcome-h">One event, all the way down.</h2>
+    <p class="lede">Pick a moment in a running program and follow it through every layer of the machine at once — on one clock.</p>
+    <div class="chain"><b>source</b>→<b>IR</b>→<b>assembly</b>→<b>registers</b>→<b>pipeline</b>→<b>gates</b>→<b>cells</b></div>
+    <p>The machine is a three-stage RV32I core, synthesised to gates, mapped to Sky130 standard cells, placed and routed. Not the computer in front of you — a real small one we can show completely.</p>
+    <div class="nav">
+      <button class="primary" id="w-tour">Take the tour</button>
+      <button id="w-skip">Explore on my own</button>
+    </div>
+  </div>
+</div>
 <div id="help" hidden role="dialog" aria-modal="true" aria-labelledby="help-h">
   <div class="card">
     <h2 id="help-h">Fathom</h2>
@@ -176,6 +233,7 @@ kbd { color: var(--fg-1); border: 1px solid var(--line); border-radius: var(--r)
     <span class="cyc" id="cyc">cycle —</span>
     <span id="crumbs"></span>
     <input type="range" id="scrub" min="0" max="0" value="0" step="1" aria-label="cycle">
+    <button id="tour-btn">Tour</button>
     <span><kbd>←</kbd><kbd>→</kbd> cycle · <kbd>⇧←</kbd><kbd>⇧→</kbd> ×10 · <kbd>↓</kbd> descend · <kbd>↑</kbd> ascend · <kbd>Esc</kbd> all layers · <kbd>?</kbd> help</span>
   </footer>
 </div>
@@ -225,7 +283,7 @@ const hex = (n) => '0x' + (n >>> 0).toString(16).padStart(8, '0');
 function layerEl(id, title, acc, note) {
   const el = document.createElement('section');
   el.className = 'layer'; el.id = 'L-' + id; el.style.setProperty('--acc', acc);
-  el.innerHTML = `<div class="head"><span class="dot"></span><span>${esc(title)}</span><span class="note">${esc(note)}</span></div><div class="body"></div>`;
+  el.innerHTML = `<div class="head"><span class="dot"></span><span class="name">${esc(title)}</span><span class="note">${esc(note)}</span></div><div class="body"></div>`;
   return el;
 }
 function anchorOf(cycle) {
@@ -309,12 +367,13 @@ function build() {
     const cl = (v, extra) => `<i class="${v === null ? '' : 'occ'}${extra || ''}" title="${v === null ? '' : hex(v)}"></i>`;
     const idcls = p.anchor === null ? (p.stall ? ' stall' : '') : (p.held ? ' held' : ' anchor');
     return `<div class="col" data-cycle="${p.cycle}" title="cycle ${p.cycle}${p.stall ? ' · ' + p.stall : ''}${p.held ? ' · held: ' + p.held : ''}">`
+      + `<span class="c">${p.cycle}</span>`
       + cl(p.stages.IF) + cl(p.stages.ID_EX, idcls) + cl(p.stages.WB)
       + `<i class="${retireAt.has(p.cycle) ? 'ret' : ''}"></i></div>`;
   }).join('');
   pipe.querySelector('.body').innerHTML =
-    `<div><div class="pipe-rows"><span>IF</span><span>ID/EX</span><span>WB</span><span></span></div><div class="pipe">${cols}</div></div>`
-    + `<div class="pipe-legend"><span><i style="background:var(--acc-pipe)"></i>anchor</span><span><i style="background:color-mix(in srgb, var(--acc-pipe) 45%, var(--bg-2))"></i>held</span><span><i style="background:var(--acc-gate)"></i>stall</span><span><i style="background:var(--fg-3)"></i>occupied</span><span><i style="background:var(--acc-arch)"></i>retire</span></div>`;
+    `<div class="pipe-rows"><span></span><span>IF</span><span>EX</span><span>WB</span><span></span></div><div class="pipe">${cols}</div>`
+    + `<div class="pipe-legend"><span><i style="background:var(--acc-pipe)"></i>anchor</span><span><i style="background:color-mix(in srgb, var(--acc-pipe) 45%, var(--bg-2))"></i>held</span><span><i style="background:var(--acc-gate)"></i>stall</span><span><i style="background:var(--acc-arch)"></i>retire</span></div>`;
   pipe.querySelector('.pipe').addEventListener('click', ev => { const col = ev.target.closest('.col'); if (col) seek(+col.dataset.cycle); });
   // L5 gates: lazy. The Parquet table is read by DuckDB-wasm (vendored, 18 MB), which
   // never sits on the first-frame path: the band offers to load, and loads on demand.
@@ -390,7 +449,7 @@ async function loadBottomOnce() {
   // DuckDB does the ordered scan; the browser keeps two typed columns per layer.
   const rows = await q(`SELECT cycle::INT AS cycle, net::INT AS net, count::INT AS count FROM 'gates.parquet' ORDER BY cycle, count DESC, net`);
   const idx = indexByCycle(rows, a.cycles);
-  body.innerHTML = `<div class="strip">${[...Array(a.cycles).keys()].map(c => { const r = byCycle.get(c); const h = r ? Math.max(1, Math.round(64 * r.toggles / max)) : 1; return `<div class="bar" data-cycle="${c}" style="height:${h}px" title="cycle ${c}: ${r ? r.toggles + ' toggles on ' + r.nets + ' nets' : 'silent'}"></div>`; }).join('')}</div><div class="stepin"></div>`;
+  body.innerHTML = `<div class="strip">${[...Array(a.cycles).keys()].map(c => { const r = byCycle.get(c); const w = r ? Math.max(2, Math.round(100 * r.toggles / max)) : 1; return `<div class="bar" data-cycle="${c}" style="width:${w}%" title="cycle ${c}: ${r ? r.toggles + ' toggles on ' + r.nets + ' nets' : 'silent'}"></div>`; }).join('')}</div><div class="stepin"></div>`;
   body.querySelector('.strip').addEventListener('click', ev => { const b = ev.target.closest('.bar'); if (b) seek(+b.dataset.cycle); });
   S.gates = { byCycle, max, idx, summary: { bytes, cycles: per.length, missing: missing.length, max_toggles: max, ms: Math.round(performance.now() - t0) } };
   $('L-gates').querySelector('.note').textContent = `${a.gates.nets.length} nets · ${a.gates.toggles.rows} events · ${missing.length === 0 ? 'every cycle joined' : missing.length + ' silent cycles'} · ${S.gates.summary.ms} ms to load`;
@@ -517,14 +576,24 @@ function resolveSelector(layer, sel) {
 function setFocus(layer) {
   S.focus = layer;
   const L = $('layers');
-  if (!layer) { L.removeAttribute('data-focus'); for (const el of L.children) el.classList.remove('focus', 'near'); }
-  else {
+  if (!layer) {
+    L.removeAttribute('data-focus'); L.style.removeProperty('--cols');
+    for (const el of L.children) el.classList.remove('focus', 'near', 'thin');
+  } else {
     L.dataset.focus = layer;
     const i = ORDER.indexOf(layer);
+    // the focused column takes the room; its neighbours keep enough to read; the rest
+    // become a labelled rail, so every layer stays visible and named (progressive disclosure)
+    const track = ORDER.map((_, j) => {
+      const d = Math.abs(j - i);
+      return d === 0 ? 'minmax(0, 4fr)' : d === 1 ? 'minmax(0, 2fr)' : '2.4rem';
+    });
+    L.style.setProperty('--cols', track.join(' '));
     for (const el of L.children) {
-      const id = el.id.replace(/^L-/, ''), j = ORDER.indexOf(id);
-      el.classList.toggle('focus', j === i);
-      el.classList.toggle('near', Math.abs(j - i) === 1);
+      const id = el.id.replace(/^L-/, ''), j = ORDER.indexOf(id), d = Math.abs(j - i);
+      el.classList.toggle('focus', d === 0);
+      el.classList.toggle('near', d === 1);
+      el.classList.toggle('thin', d > 1);
     }
   }
   $('crumbs').innerHTML = S.trail.length ? 'descent: ' + S.trail.map(t => `<b>${t.layer}</b>@${t.cycle}`).join(' → ') : '';
@@ -571,7 +640,10 @@ window.fathom = {
     if (!S.art) return { loaded: false };
     const a = S.art;
     return { loaded: true, program: a.program.name, artifact_id: a.artifact_id, cycles: a.cycles,
-      cycle: S.cycle, layers: ['source', 'ir', 'asm', 'arch', 'pipe', 'gates', 'cells'],
+      cycle: S.cycle, focus: S.focus, depth: S.trail.length,
+      layers: ['source', 'ir', 'asm', 'arch', 'pipe', 'gates', 'cells'],
+      loaded_layers: ['source', 'ir', 'asm', 'arch', 'pipe',
+                      ...(S.gates ? ['gates'] : []), ...(S.cells ? ['cells'] : [])],
       core: { name: a.core.name, shape: a.core.shape, stages: a.core.stages, anchor_stage: a.core.anchor_stage },
       version: this.version };
   },
@@ -610,6 +682,7 @@ window.fathom = {
   },
   history() { return S.hist.slice(); },
   help(show) { rec('agent', 'help', [show]); toggleHelp(show); return !$('help').hidden; },
+  tour(step = 0) { rec('agent', 'tour', [step]); return tourGo(step); },
   export(range) {
     // a bounded slice of the descent: [from, to] cycles inclusive; refuses an unbounded one
     rec('agent', 'export', [range]);
@@ -652,6 +725,7 @@ window.fathom.manifest = [
   { name: 'export', args: ['{from,to}'], mutates: false, doc: 'a bounded slice of the descent' },
   { name: 'loadBottom', args: [], mutates: false, doc: 'load the gate and cell layers (lazy)' },
   { name: 'help', args: ['show?'], mutates: false, doc: 'the in-app help' },
+  { name: 'tour', args: ['step?'], mutates: false, doc: 'the guided tour; -1 closes it' },
   { name: 'history', args: [], mutates: false, doc: 'every call, with its door' },
   { name: 'trail', args: [], mutates: false, doc: 'the descent so far' },
   { name: 'focus', args: [], mutates: false, doc: 'the layer in focus, or null' },
@@ -664,6 +738,88 @@ if (navigator.modelContext && typeof navigator.modelContext.registerTool === 'fu
   }
 }
 
+// ---- the tour ---------------------------------------------------------------------------
+// Nine stops. Each one MOVES the instrument -- seeks, descends, loads -- so the reader
+// watches the thing work rather than reading about it. The tour drives the agent face,
+// so anything it can show, an agent can do (FATHOM.md hard rule 6).
+const TOUR = [
+  { sel: 'header', title: 'The machine, named',
+    text: 'A three-stage RV32I core (lowRISC Ibex), synthesised to gates and placed on a real Sky130 die. The header names the program, its cycle count, and the artifact this all comes from.' },
+  { sel: '#L-source', title: 'Seven layers, one clock',
+    text: 'Every column is one layer of the same machine, left to right: your C source, the compiler\'s IR, the assembly, the registers, the pipeline, the gates, the cells. They always show the same instant.',
+    act: () => seek(0, 'tour') },
+  { sel: 'footer', title: 'Move through time',
+    text: 'Drag the scrub bar, or press ← and →. Everything moves together. Watch the columns as this jumps to cycle 43 — the moment the first character reaches the output port.',
+    act: () => seek(43, 'tour') },
+  { sel: '#L-source', title: 'Start from a line you wrote',
+    text: 'Click any source line to descend from it. Fathom jumps to the first cycle that line actually ran — here, the line that writes a byte to the UART.',
+    act: () => { try { descend('source', srcLineForTour(), 'tour'); } catch { seek(43, 'tour'); } } },
+  { sel: '#L-asm', title: 'Down to the instruction',
+    text: 'Press ↓ to descend a layer, ↑ to come back. The focused column widens; its neighbours stay open as context; the rest stay named on the rail. Nothing is ever hidden from you.',
+    act: () => descend('asm', undefined, 'tour') },
+  { sel: '#L-pipe', title: 'The pipeline, cycle by cycle',
+    text: 'One row per cycle: IF, EX, WB. Yellow is the instruction being followed, dim yellow an instruction held in place — a taken branch or a load-use stall — and red a bubble with a named cause.',
+    act: () => descend('pipe', undefined, 'tour') },
+  { sel: '#L-gates', title: 'The gates, on demand', needs: 'bottom',
+    text: 'The bottom two layers are 18 MB of WebAssembly and a few million switching events, so they load only when you ask. Loading them now.',
+    act: () => descend('gates', undefined, 'tour') },
+  { sel: '#L-cells', title: 'The actual silicon plan', needs: 'bottom',
+    text: 'Every one of 13,740 placed cells on an 832 × 842 µm die. The lit ones are switching in this exact cycle. This is the bottom of the descent — the same event, as transistor-level geometry.',
+    act: () => descend('cells', undefined, 'tour') },
+  { sel: '#tour-btn', title: 'That is the whole instrument',
+    text: 'Esc opens every layer again. ? lists every key. Four programs are loaded — a call frame, a branchy loop, a pointer chase, and a call across two files — switch with ?p=popcount, chase or sum.',
+    act: () => { S.trail.length = 0; setFocus(null); } },
+];
+function srcLineForTour() {
+  // the source line of the busiest executed instruction: the one worth landing on
+  const a = S.art, count = new Map();
+  for (const e of a.exec) {
+    const c = S.codeByPc.get(e.pc); if (!c) continue;
+    for (const r of c.lines) {
+      const k = r.slice(0, r.lastIndexOf(':', r.lastIndexOf(':') - 1)) + ':' + r.split(':').at(-2);
+      if (k.endsWith('crt0.S:' + k.split(':').at(-1)) && a.program.source_files.length > 1) continue;
+      count.set(k, (count.get(k) || 0) + 1);
+    }
+  }
+  return [...count.entries()].sort((x, y) => y[1] - x[1])[0][0];
+}
+let tourAt = -1;
+async function tourGo(i) {
+  const t = $('tour');
+  if (i < 0 || i >= TOUR.length) { t.hidden = true; tourAt = -1; try { localStorage.setItem('fathom.tour', 'done'); } catch {} return null; }
+  tourAt = i;
+  t.hidden = false;
+  const step = TOUR[i];
+  // Every stop stands alone: jumping straight to a late one (fathom.tour(7)) must
+  // satisfy what it needs, not depend on the stops before it having run.
+  if (step.needs === 'bottom' && !S.gates) { try { await loadBottom('tour'); } catch (e) { /* the stop still renders */ } }
+  if (step.act) { try { await step.act(); } catch (e) { /* a stop that cannot run is not a dead end */ } }
+  const el = document.querySelector(step.sel) || document.body;
+  const r = el.getBoundingClientRect();
+  const spot = t.querySelector('.spot');
+  Object.assign(spot.style, { left: `${r.left - 2}px`, top: `${r.top - 2}px`, width: `${r.width + 4}px`, height: `${r.height + 4}px` });
+  const card = t.querySelector('.card');
+  card.innerHTML = `<h3>${esc(step.title)}</h3><p>${esc(step.text)}</p>`
+    + `<div class="nav"><span class="step">${i + 1} of ${TOUR.length}</span>`
+    + `${i > 0 ? '<button id="t-back">Back</button>' : ''}`
+    + `<button id="t-skip">Close</button>`
+    + `<button class="primary" id="t-next">${i === TOUR.length - 1 ? 'Done' : 'Next'}</button></div>`;
+  // place the card clear of the spotlight
+  const below = r.bottom + 12, above = r.top - 12;
+  const w = Math.min(card.offsetWidth || 420, innerWidth - 24);
+  const left = Math.max(12, Math.min(innerWidth - w - 12, r.left + r.width / 2 - w / 2));
+  const fitsBelow = below + (card.offsetHeight || 180) + 12 < innerHeight;
+  Object.assign(card.style, { left: `${left}px`, top: fitsBelow ? `${below}px` : `${Math.max(12, above - (card.offsetHeight || 180))}px` });
+  card.querySelector('#t-next').onclick = () => tourGo(i + 1);
+  card.querySelector('#t-skip').onclick = () => tourGo(-1);
+  const back = card.querySelector('#t-back'); if (back) back.onclick = () => tourGo(i - 1);
+  return { step: i + 1, of: TOUR.length, title: step.title };
+}
+$('tour').querySelector('.veil').addEventListener('click', () => tourGo(-1));
+$('tour-btn').addEventListener('click', () => tourGo(0));
+$('w-tour').addEventListener('click', () => { $('welcome').hidden = true; tourGo(0); });
+$('w-skip').addEventListener('click', () => { $('welcome').hidden = true; try { localStorage.setItem('fathom.tour', 'skipped'); } catch {} });
+
 // ---- keyboard: keyboard-first (FATHOM.md §7 C4) ---------------------------------
 function toggleHelp(force) {
   const h = $('help'); h.hidden = force === undefined ? !h.hidden : !force;
@@ -672,6 +828,12 @@ function toggleHelp(force) {
 $('help').addEventListener('click', ev => { if (ev.target === $('help')) toggleHelp(false); });
 document.addEventListener('keydown', (ev) => {
   if (ev.key === '?') { toggleHelp(); ev.preventDefault(); return; }
+  if (!$('tour').hidden) {
+    if (ev.key === 'Escape') { tourGo(-1); ev.preventDefault(); }
+    else if (ev.key === 'ArrowRight' || ev.key === 'Enter') { tourGo(tourAt + 1); ev.preventDefault(); }
+    else if (ev.key === 'ArrowLeft') { tourGo(tourAt - 1); ev.preventDefault(); }
+    return;
+  }
   if (!$('help').hidden) { if (ev.key === 'Escape') { toggleHelp(false); ev.preventDefault(); } return; }
   if (!S.art) return;
   const step = ev.shiftKey ? 10 : 1;
@@ -689,7 +851,11 @@ $('scrub').addEventListener('input', (ev) => seek(+ev.target.value));
 (async () => {
   let prog = new URLSearchParams(location.search).get('p') || 'uart_puts';
   if (!/^[a-z0-9_]{1,40}$/.test(prog)) prog = 'uart_puts';           // a program name, never a path
-  try { await window.fathom.loadDescent(`artifacts/${prog}/descent.json`); }
+  try {
+    await window.fathom.loadDescent(`artifacts/${prog}/descent.json`);
+    let seen = null; try { seen = localStorage.getItem('fathom.tour'); } catch {}
+    if (!seen) $('welcome').hidden = false;                 // first visit only
+  }
   catch (e) { const s = $('status') || $('layers'); s.className = 'err'; s.innerHTML = `Could not load <code>${esc(`artifacts/${prog}/descent.json`)}</code>: ${esc(String(e.message))}`; $('meta').innerHTML = '<b>failed</b>'; }
 })();
 </script>

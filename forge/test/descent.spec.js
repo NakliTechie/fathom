@@ -1,5 +1,5 @@
 // The C4 checkpoint, headless: forge/test/descent.test.js on every program.
-const { test, expect } = require('@playwright/test');
+const { test, expect } = require('./fixtures');
 const PROGRAMS = ['uart_puts', 'popcount', 'chase', 'sum'];
 
 for (const p of PROGRAMS) {
@@ -80,4 +80,28 @@ test('interaction states by computed style — hover lifts, focus rings, nothing
   expect(ring.outline).not.toBe('none');
   const animated = await page.evaluate(() => [...document.querySelectorAll('body *')].filter(el => { const cs = getComputedStyle(el); return cs.transitionDuration !== '0s' || cs.animationName !== 'none'; }).length);
   expect(animated).toBe(0);
+});
+
+test('describe() renders the whole situation in one read — the perception act (SPEC §0.2)', async ({ page }) => {
+  await page.goto('/?p=uart_puts');
+  await page.waitForFunction(() => window.fathom && window.fathom.describe().loaded);
+  const before = await page.evaluate(() => window.fathom.describe());
+  // every field the contract promises, present and typed
+  for (const k of ['loaded', 'program', 'artifact_id', 'cycles', 'cycle', 'focus', 'depth',
+                   'layers', 'loaded_layers', 'core', 'version']) {
+    expect(before, `describe() is missing ${k}`).toHaveProperty(k);
+  }
+  expect(before.layers).toHaveLength(7);
+  expect(before.loaded_layers).toEqual(['source', 'ir', 'asm', 'arch', 'pipe']);
+  expect(before.focus).toBeNull();
+  expect(before.depth).toBe(0);
+  // and it tracks state, rather than reporting a constant
+  const after = await page.evaluate(async () => {
+    await window.fathom.loadBottom();
+    window.fathom.descend('pipe');
+    return window.fathom.describe();
+  });
+  expect(after.loaded_layers).toContain('cells');
+  expect(after.focus).toBe('pipe');
+  expect(after.depth).toBe(1);
 });

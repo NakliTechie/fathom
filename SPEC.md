@@ -867,3 +867,49 @@ Parquet tables are not fetched at all until a bottom layer is opened.
 Opening the bottom layers cold costs **3.2 s** (gates 2.7 s including the 18 MB wasm,
 cells 0.45 s) — off the first-frame path by construction, which is why it is allowed to
 cost that.
+
+
+---
+
+## 17. Columns and the tour — 2026-09-06
+
+Two pieces of first-contact feedback: the layout was *stacked* and should be *vertical*,
+and a reader could not tell what to do at first glance.
+
+### 17.1 Seven columns
+
+The seven layers are now full-height columns, left to right in the machine's order, so
+each gets the screen's height instead of a ~40 px sliver and a wide display is used.
+Descending sets a column track — the focused layer `4fr`, its neighbours `2fr`, the rest a
+2.4 rem rail whose header turns sideways so **every layer stays visible and named**.
+
+Two views had to turn with the layout: the pipeline is now one **row** per cycle
+(cycle number, IF, EX, WB, retire) and the gate strip one row per cycle with the bar's
+**width** carrying activity. Both read better this way — a trace is long and a column is
+tall.
+
+### 17.2 The tour
+
+Nine stops, and **each one moves the instrument** rather than describing it: seeking to
+the cycle the first character reaches the output port, descending from the busiest source
+line, loading the bottom layers, landing on the floorplan. It drives the agent face, so
+everything the tour shows, an agent can do. A first visit is met by a welcome that names
+the machine and offers the tour or an unguided start; the choice is remembered in
+`localStorage` (a UI preference — the artifact stays read-only). `fathom.tour(step)` is on
+the face and in the manifest; the `Tour` button replays it.
+
+**Every stop stands alone.** The first cut let a stop depend on the ones before it, so
+`fathom.tour(7)` landed on the cells stop with the bottom layers unloaded and the
+spotlight on a 33 px rail. Stops now declare what they need and the runner satisfies it;
+a test enters the last stop directly and asserts the cells column is the wide one.
+
+### 17.3 A silent patch failure, caught by the new tests
+
+`describe()` was missing `focus`, `depth` and `loaded_layers`: two earlier edits reported
+success but had not matched, and nothing asserted the **shape** of the perception act —
+the manifest lint checks that commands exist, not what they return. SPEC §0.2 calls
+`describe()` the one bounded read of the whole situation, and it had silently stopped
+being that. Restored, with a test that names every promised field and then asserts the
+values track state.
+
+Suite: **16 passed**.
