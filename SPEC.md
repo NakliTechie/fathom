@@ -945,3 +945,33 @@ literal `13,740` / `832 × 842`.
 `forge/test/responsive.spec.js` holds all of it: three widths asserting no column is under its
 floor and the page never scrolls sideways, a descent at 1280 px keeping the focused column on
 screen, and the tour's numbers matching the artifact. Suite: **21 passed**.
+
+
+---
+
+## 19. Running the program, and the launch checks — 2026-09-06
+
+**Run.** A scrub bar is a passive control and never says *this is a machine that runs*.
+Run/Pause (`Space`), speed 2–120 Hz, loop (`L`); dragging the scrub bar pauses, because the
+reader has taken the wheel. Driven by `requestAnimationFrame`, so a hidden tab stops instead
+of burning CPU, and a gap longer than 0.5 s on return is dropped rather than fast-forwarding
+the machine.
+
+This is the machine's own motion, not ornament: §14's ban on motion still holds and its test
+still passes — no CSS transition or animation is used anywhere.
+
+It also cannot be verified in the preview pane, because rAF never fires in a hidden tab.
+`forge/test/run.spec.js` samples the register file while running and asserts `a0` and the gate
+activity actually change, that pause holds the cycle, that loop wraps and that no-loop stops
+on the last cycle.
+
+**Cross-browser, on production.** The critical path — seven columns, the run control, and the
+bottom layers (18 MB wasm, a worker, two Parquet tables) — verified in **Chromium, Firefox and
+WebKit** against the live origin. Identical results in all three (2,076 cells switching and
+1,135 gate toggles at cycle 43), zero page errors. First frame 645 ms (Firefox), 1,122 ms
+(Chromium), 1,278 ms (WebKit); bottom layers 2.1 s / 2.1 s / 3.7 s.
+`forge/test/crossbrowser.js` is the script.
+
+**Public.** AGPL-3.0 text added (the repo went public with GitHub reporting no licence against
+an AGPL claim), plus a README, a repo description and topics, and link-preview metadata with
+`running.png`.
