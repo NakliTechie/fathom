@@ -819,8 +819,21 @@ is left as written; this note is the reconciliation.
 assets directory during a deploy, and the first deploy served
 `/.wrangler/tmp/.../no-op-worker.js.map` with a 200.
 
-Headers ship from `_headers`: the same-origin CSP (`wasm-unsafe-eval` for DuckDB),
-`nosniff`, `no-referrer`.
+Headers ship from `_headers`, **generated** by `forge/deploy/headers.py` (`make headers`).
+
+**The first CSP shipped a dead site.** `script-src 'self'` blocks inline scripts, and
+Fathom is a single file whose two scripts — the import map and the app — are inline by
+design. The page rendered its static shell and `window.fathom` never existed; the whole
+local suite passed throughout, because the local static server does not send `_headers`.
+It was live and broken for about an hour.
+
+The fix names the two scripts by **SHA-256 hash** in `script-src` (a static origin cannot
+mint a nonce, and `'unsafe-inline'` would forfeit the policy on the one page that renders
+artifact-derived strings). Hashes go stale whenever the page's scripts change, so:
+`headers.py --check` fails on a stale `_headers`, and `forge/test/csp.spec.js` applies the
+production CSP to the local document by route interception and asserts the app boots,
+the bottom layers load — wasm, worker and dynamic import all under the policy — and no
+violation is logged. Two tests that would have caught it.
 
 **Deploys are git-connected.** Cloudflare Workers Builds watches `NakliTechie/fathom`,
 branch `main`: build command **none** (there is no build step — the dialog pre-fills

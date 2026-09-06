@@ -102,6 +102,10 @@ probe: $(P)/gates/toggles.json
 verify:
 	@for p in $(PROGRAMS); do ./.venv/bin/python forge/verify.py artifacts/$$p/descent.json || exit 1; done
 
+## headers — regenerate _headers (the CSP names index.html's inline scripts by hash)
+headers:
+	python3 forge/deploy/headers.py
+
 ## test — the C4 checkpoint headless (the one Playwright harness)
 test:
 	cd forge/test && npx playwright test --grep-invert @guide
