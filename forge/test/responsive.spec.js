@@ -53,7 +53,11 @@ test('the tour reads its numbers from the artifact, not from a literal', async (
   await page.goto('/?p=uart_puts');
   await page.waitForFunction(() => window.fathom && window.fathom.describe().loaded);
   const text = await page.evaluate(async () => {
-    await window.fathom.tour(7);
+    for (let i = 0; i < 20; i++) {
+      const r = await window.fathom.tour(i);
+      if (!r) break;
+      if (/silicon plan/i.test(r.title)) break;
+    }
     return document.querySelector('#tour .card p').textContent;
   });
   const cells = await page.evaluate(() => fetch('/artifacts/uart_puts/descent.json').then(r => r.json()).then(a => a.cells.cells.length));

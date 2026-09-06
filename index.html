@@ -114,6 +114,13 @@ footer .keys { white-space: nowrap; overflow: hidden; }
 @media (max-width: 700px) { header .meta { display: none; } }
 footer input[type=range] { flex: 1; accent-color: var(--acc-now); font: inherit; }  /* UA default is a non-token size */
 footer .cyc { color: var(--fg-0); font-weight: var(--w-bold); min-width: 12ch; }
+footer button, footer select { font: inherit; color: var(--fg-0); background: var(--bg-3);
+  border: 1px solid var(--line); border-radius: var(--r); padding: var(--sp-1) var(--sp-3); cursor: pointer; }
+footer button:hover, footer select:hover { background: var(--bg-2); }
+#run { min-width: 9ch; font-weight: var(--w-bold); }
+#run[data-on="1"] { background: var(--acc-now); color: var(--bg-0); border-color: var(--acc-now); }
+footer label { display: flex; align-items: center; gap: var(--sp-1); cursor: pointer; white-space: nowrap; }
+footer input[type=checkbox] { accent-color: var(--acc-now); }
 kbd { color: var(--fg-1); border: 1px solid var(--line); border-radius: var(--r); padding: 0 var(--sp-1); font-size: var(--fs-0); }
 
 /* ---- pipeline layer: one column per cycle, one row per stage ------------------- */
@@ -259,11 +266,19 @@ kbd { color: var(--fg-1); border: 1px solid var(--line); border-radius: var(--r)
   </header>
   <main><div id="layers"><div id="status">Loading artifact…</div></div></main>
   <footer>
+    <button id="run" data-on="0" title="Run the program (Space)">▶ Run</button>
+    <select id="speed" title="cycles per second" aria-label="speed">
+      <option value="2">2 Hz</option>
+      <option value="8" selected>8 Hz</option>
+      <option value="30">30 Hz</option>
+      <option value="120">120 Hz</option>
+    </select>
+    <label title="Start again at the end (L)"><input type="checkbox" id="loop" checked>loop</label>
     <span class="cyc" id="cyc">cycle —</span>
     <span id="crumbs"></span>
     <input type="range" id="scrub" min="0" max="0" value="0" step="1" aria-label="cycle">
     <button id="tour-btn">Tour</button>
-    <span class="keys"><kbd>←</kbd><kbd>→</kbd> cycle · <kbd>⇧←</kbd><kbd>⇧→</kbd> ×10 · <kbd>↓</kbd> descend · <kbd>↑</kbd> ascend · <kbd>Esc</kbd> all layers · <kbd>?</kbd> help</span>
+    <span class="keys"><kbd>←</kbd><kbd>→</kbd> cycle · <kbd>Space</kbd> run · <kbd>⇧←</kbd><kbd>⇧→</kbd> ×10 · <kbd>↓</kbd> descend · <kbd>↑</kbd> ascend · <kbd>Esc</kbd> all layers · <kbd>?</kbd> help</span>
   </footer>
 </div>
 
@@ -716,6 +731,13 @@ window.fathom = {
   history() { return S.hist.slice(); },
   help(show) { rec('agent', 'help', [show]); toggleHelp(show); return !$('help').hidden; },
   tour(step = 0) { rec('agent', 'tour', [step]); return tourGo(step); },
+  play(opts = {}) {
+    if (opts.cps) { S.run.cps = +opts.cps; $('speed').value = String(S.run.cps); }
+    if (opts.loop !== undefined) { S.run.loop = !!opts.loop; $('loop').checked = S.run.loop; }
+    return runSet(true, 'agent');
+  },
+  pause() { return runSet(false, 'agent'); },
+  playing() { return { on: S.run.on, cps: S.run.cps, loop: S.run.loop, cycle: S.cycle }; },
   export(range) {
     // a bounded slice of the descent: [from, to] cycles inclusive; refuses an unbounded one
     rec('agent', 'export', [range]);
@@ -759,6 +781,9 @@ window.fathom.manifest = [
   { name: 'loadBottom', args: [], mutates: false, doc: 'load the gate and cell layers (lazy)' },
   { name: 'help', args: ['show?'], mutates: false, doc: 'the in-app help' },
   { name: 'tour', args: ['step?'], mutates: false, doc: 'the guided tour; -1 closes it' },
+  { name: 'play', args: ['{cps?,loop?}'], mutates: false, doc: 'run the program in real time' },
+  { name: 'pause', args: [], mutates: false, doc: 'stop the run, holding the cycle' },
+  { name: 'playing', args: [], mutates: false, doc: 'whether it is running, and how fast' },
   { name: 'history', args: [], mutates: false, doc: 'every call, with its door' },
   { name: 'trail', args: [], mutates: false, doc: 'the descent so far' },
   { name: 'focus', args: [], mutates: false, doc: 'the layer in focus, or null' },
@@ -771,6 +796,55 @@ if (navigator.modelContext && typeof navigator.modelContext.registerTool === 'fu
   }
 }
 
+// ---- running the program ----------------------------------------------------------------
+// A scrub bar is a passive control: it never says "this is a machine that runs". Playback
+// walks the trace in real time so the register file flickers, the pipeline advances and the
+// gates light. This is the machine's own motion, not ornament -- the rubric's ban on motion
+// (SPEC §14) is about decoration, and still holds: no CSS transition or animation is used.
+S.run = { on: false, cps: 8, loop: true, raf: 0, acc: 0, last: 0 };
+function runTick(t) {
+  if (!S.run.on) return;
+  // A hidden tab stops rAF; on return the gap would be seconds wide. Treat a long
+  // gap as a resume and drop it, rather than fast-forwarding the machine.
+  let dt = S.run.last ? (t - S.run.last) / 1000 : 0;
+  if (dt > 0.5) dt = 0;
+  S.run.last = t;
+  S.run.acc += dt * S.run.cps;
+  let step = Math.floor(S.run.acc);
+  if (step > 0) {
+    S.run.acc -= step;
+    step = Math.min(step, 240);                       // a backgrounded tab must not fast-forward
+    let next = S.cycle + step;
+    if (next >= S.art.cycles) {
+      if (S.run.loop) next = next % S.art.cycles;
+      else { seek(S.art.cycles - 1, 'run'); return runSet(false, 'run'); }
+    }
+    seek(next, 'run');
+  }
+  S.run.raf = requestAnimationFrame(runTick);
+}
+function runSet(on, door = 'ui') {
+  if (!S.art) throw new Error('no descent loaded');
+  on = !!on;
+  if (on === S.run.on) return S.run.on;
+  S.run.on = on;
+  rec(door, on ? 'play' : 'pause', [S.run.cps]);
+  const b = $('run');
+  b.dataset.on = on ? '1' : '0';
+  b.textContent = on ? '⏸ Pause' : '▶ Run';
+  if (on) {
+    if (S.cycle >= S.art.cycles - 1) seek(0, door);    // pressing Run at the end starts over
+    S.run.last = 0; S.run.acc = 0;
+    S.run.raf = requestAnimationFrame(runTick);
+  } else {
+    cancelAnimationFrame(S.run.raf); S.run.raf = 0;
+  }
+  return S.run.on;
+}
+$('run').addEventListener('click', () => runSet(!S.run.on));
+$('speed').addEventListener('change', ev => { S.run.cps = +ev.target.value; rec('ui', 'speed', [S.run.cps]); });
+$('loop').addEventListener('change', ev => { S.run.loop = ev.target.checked; rec('ui', 'loop', [S.run.loop]); });
+
 // ---- the tour ---------------------------------------------------------------------------
 // Nine stops. Each one MOVES the instrument -- seeks, descends, loads -- so the reader
 // watches the thing work rather than reading about it. The tour drives the agent face,
@@ -781,9 +855,12 @@ const TOUR = [
   { sel: '#L-source', title: 'Seven layers, one clock',
     text: 'Every column is one layer of the same machine, left to right: your C source, the compiler\'s IR, the assembly, the registers, the pipeline, the gates, the cells. They always show the same instant.',
     act: () => seek(0, 'tour') },
-  { sel: 'footer', title: 'Move through time',
-    text: 'Drag the scrub bar, or press ← and →. Everything moves together. Watch the columns as this jumps to cycle 43 — the moment the first character reaches the output port.',
-    act: () => seek(43, 'tour') },
+  { sel: 'footer', title: 'Run it',
+    text: 'Press Run — or the space bar — and the program executes in front of you: the register file flickers, the pipeline advances, the gates light. Change the speed, or loop it. Every layer moves on the same clock.',
+    act: () => { seek(0, 'tour'); runSet(true, 'tour'); } },
+  { sel: 'footer', title: 'Or stop and pick a moment',
+    text: 'Pause and the whole machine holds still at one cycle. Drag the scrub bar or press ← and →. This is cycle 43 — the moment the first character reaches the output port.',
+    act: () => { runSet(false, 'tour'); seek(43, 'tour'); } },
   { sel: '#L-source', title: 'Start from a line you wrote',
     text: 'Click any source line to descend from it. Fathom jumps to the first cycle that line actually ran — here, the line that writes a byte to the UART.',
     act: () => { try { descend('source', srcLineForTour(), 'tour'); } catch { seek(43, 'tour'); } } },
@@ -877,10 +954,12 @@ document.addEventListener('keydown', (ev) => {
   else if (ev.key === 'ArrowDown') { try { descend(); } catch (e) { $('crumbs').textContent = e.message; } ev.preventDefault(); }
   else if (ev.key === 'ArrowUp') { ascend(); ev.preventDefault(); }
   else if (ev.key === 'Escape') { S.trail.length = 0; setFocus(null); rec('ui', 'ascend', ['all']); ev.preventDefault(); }
+  else if (ev.key === ' ') { runSet(!S.run.on); ev.preventDefault(); }
+  else if (ev.key === 'l' || ev.key === 'L') { const c = $('loop'); c.checked = !c.checked; c.dispatchEvent(new Event('change')); ev.preventDefault(); }
   else if (ev.key === 'Home') { seek(0); ev.preventDefault(); }
   else if (ev.key === 'End') { seek(S.art.cycles - 1); ev.preventDefault(); }
 });
-$('scrub').addEventListener('input', (ev) => seek(+ev.target.value));
+$('scrub').addEventListener('input', (ev) => { if (S.run.on) runSet(false); seek(+ev.target.value); });
 
 // ---- boot: the artifact named in the URL, else the first program ----------------
 (async () => {

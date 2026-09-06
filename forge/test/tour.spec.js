@@ -24,6 +24,8 @@ test('the tour walks nine stops and moves the instrument at each one', async ({ 
   await page.locator('#w-tour').click();
   await expect(page.locator('#tour')).toBeVisible();
 
+  const total = await page.evaluate(() => +document.querySelector('#tour .card .step').textContent.split(' of ')[1]);
+  expect(total).toBeGreaterThan(5);
   const seen = [];
   for (let i = 0; ; i++) {
     const card = page.locator('#tour .card');
@@ -37,13 +39,13 @@ test('the tour walks nine stops and moves the instrument at each one', async ({ 
     }));
     seen.push(step);
     expect(step.spot, `stop ${i + 1} spotlights nothing`).toBeGreaterThan(0);
-    const last = step.label.startsWith(`${9} of`);
+    const last = step.label === `${total} of ${total}`;
     await page.locator('#tour #t-next').click();
     await page.waitForTimeout(250);
     if (last) break;
-    expect(i).toBeLessThan(12);
+    expect(i).toBeLessThan(total + 2);
   }
-  expect(seen).toHaveLength(9);
+  expect(seen).toHaveLength(total);
   await expect(page.locator('#tour')).toBeHidden();
   // it drove the instrument: the cycle moved, layers were focused, the bottom loaded
   expect(new Set(seen.map(s => s.cycle)).size).toBeGreaterThan(1);
@@ -61,7 +63,7 @@ test('the tour is on the agent face and closes cleanly', async ({ page }) => {
   await page.waitForFunction(() => window.fathom && window.fathom.describe().loaded);
   const at = await page.evaluate(() => window.fathom.tour(2));
   expect(at.step).toBe(3);
-  expect(at.of).toBe(9);
+  expect(at.of).toBeGreaterThan(5);
   const closed = await page.evaluate(() => window.fathom.tour(-1));
   expect(closed).toBeNull();
   await expect(page.locator('#tour')).toBeHidden();
@@ -71,9 +73,17 @@ test('any stop can be entered directly — a late one satisfies what it needs', 
   await page.addInitScript(() => { try { localStorage.setItem('fathom.tour', 'done'); } catch {} });
   await page.goto('/?p=uart_puts');
   await page.waitForFunction(() => window.fathom && window.fathom.describe().loaded);
-  // straight to the cells stop, with nothing before it having run
-  const at = await page.evaluate(() => window.fathom.tour(7));
-  expect(at.step).toBe(8);
+  // straight to the cells stop, found by name, with nothing before it having run
+  const at = await page.evaluate(async () => {
+    for (let i = 0; i < 20; i++) {
+      const r = await window.fathom.tour(i);
+      if (!r) break;
+      if (/silicon plan/i.test(r.title)) return r;
+      if (r.step === r.of) break;
+    }
+    return null;
+  });
+  expect(at, 'no stop named "the actual silicon plan"').not.toBeNull();
   await page.waitForFunction(() => window.fathom.focus() === 'cells', { timeout: 30000 });
   const st = await page.evaluate(() => ({
     focus: window.fathom.focus(),
